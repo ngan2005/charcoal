@@ -12,15 +12,24 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $table = 'users';
+    protected $primaryKey = 'UserID';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'FullName',
+        'Email',
+        'Password',
+        'Phone',
+        'Address',
+        'Avatar',
+        'RoleID',
+        'IsActive',
+        'LastLogin'
     ];
 
     /**
@@ -29,7 +38,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
+        'Password',
         'remember_token',
     ];
 
@@ -39,7 +48,19 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'Password' => 'hashed',
+        'LastLogin' => 'datetime',
+        'CreatedAt' => 'datetime',
     ];
+
+    // Override to support custom Password column
+    public function getAuthPassword()
+    {
+        return $this->Password;
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'RoleID', 'RoleID');
+    }
 }

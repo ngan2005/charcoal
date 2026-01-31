@@ -12,13 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->bigIncrements('UserID'); // Explicitly Unsigned Big Integer
+            $table->string('FullName', 100);
+            $table->string('Email', 100)->unique();
+            $table->string('Password', 255);
+            $table->string('Phone', 15)->nullable();
+            $table->string('Address', 255)->nullable();
+            $table->string('Avatar', 255)->nullable();
+            $table->integer('RoleID');
+            $table->boolean('IsActive')->default(1);
+            $table->dateTime('LastLogin')->nullable();
+            $table->dateTime('CreatedAt')->useCurrent();
+            // Laravel defaults
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamps(); // Adds created_at and updated_at, kept for Laravel compatibility, though UpdatedAt wasn't explicitly asked, it's good practice. User asked for CreatedAt specifically.
+
+            $table->foreign('RoleID')->references('RoleID')->on('roles');
         });
     }
 
