@@ -26,6 +26,10 @@
                 <span class="material-symbols-outlined flex-shrink-0 group-hover:scale-110 transition-transform">calendar_month</span>
                 <span class="font-semibold sidebar-text">Lịch hẹn</span>
             </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary rounded-xl transition-all group overflow-hidden whitespace-nowrap cursor-pointer" href="{{ route('pets.index') }}">
+                <span class="material-symbols-outlined flex-shrink-0 group-hover:scale-110 transition-transform">pets</span>
+                <span class="font-semibold sidebar-text">Thú cưng</span>
+            </a>
             <a class="flex items-center gap-4 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary rounded-xl transition-all group overflow-hidden whitespace-nowrap" href="#">
                 <span class="material-symbols-outlined flex-shrink-0 group-hover:scale-110 transition-transform">article</span>
                 <span class="font-semibold sidebar-text">Blog</span>

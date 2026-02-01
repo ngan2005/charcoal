@@ -63,4 +63,20 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'RoleID', 'RoleID');
     }
+
+    /**
+     * Get the pets owned by this user
+     */
+    public function pets()
+    {
+        return $this->hasMany(Pet::class, 'OwnerID', 'UserID');
+    }
+
+    /**
+     * Get the staff profile for this user (if staff)
+     */
+    public function staffProfile()
+    {
+        return $this->hasOne(StaffProfile::class, 'UserID', 'UserID');
+    }
 }

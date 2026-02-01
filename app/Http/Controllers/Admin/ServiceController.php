@@ -8,7 +8,6 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
 
 class ServiceController extends Controller
 {
@@ -43,29 +42,30 @@ class ServiceController extends Controller
         ]);
 
         $rawFiles = $request->file('Images');
-        $files = $this->extractValidFiles($rawFiles ?? []);
-        if ($rawFiles && empty($files)) {
-            return back()->withErrors(['Images' => 'Ảnh tải lên không hợp lệ hoặc không thể lưu.']);
-        }
 
         $data = $request->except('Images');
 
-        DB::transaction(function () use ($data, $files) {
+        DB::transaction(function () use ($data, $rawFiles) {
             $service = Service::create($data);
 
-            foreach ($files as $file) {
-                try {
-                    $path = $file->store('services', 'public');
-                } catch (\Throwable $e) {
-                    continue;
+            // Xử lý ảnh ngay cả khi không có file cũng không sao
+            if ($rawFiles && is_array($rawFiles)) {
+                foreach ($rawFiles as $file) {
+                    if (!$file || !$file->isValid()) {
+                        continue;
+                    }
+
+                    try {
+                        $path = $file->store('services', 'public');
+                        ServiceImage::create([
+                            'ServiceID' => $service->ServiceID,
+                            'ImageUrl' => Storage::disk('public')->url($path),
+                        ]);
+                    } catch (\Throwable $e) {
+                        // Log lỗi nhưng không dừng transaction
+                        report($e);
+                    }
                 }
-                if (!is_string($path) || $path === '') {
-                    continue;
-                }
-                ServiceImage::create([
-                    'ServiceID' => $service->ServiceID,
-                    'ImageUrl' => Storage::disk('public')->url($path),
-                ]);
             }
         });
 
@@ -86,29 +86,29 @@ class ServiceController extends Controller
         ]);
 
         $rawFiles = $request->file('Images');
-        $files = $this->extractValidFiles($rawFiles ?? []);
-        if ($rawFiles && empty($files)) {
-            return back()->withErrors(['Images' => 'Ảnh tải lên không hợp lệ hoặc không thể lưu.']);
-        }
-
         $data = $request->except('Images');
 
-        DB::transaction(function () use ($service, $data, $files) {
+        DB::transaction(function () use ($service, $data, $rawFiles) {
             $service->update($data);
 
-            foreach ($files as $file) {
-                try {
-                    $path = $file->store('services', 'public');
-                } catch (\Throwable $e) {
-                    continue;
+            // Xử lý ảnh ngay cả khi không có file cũng không sao
+            if ($rawFiles && is_array($rawFiles)) {
+                foreach ($rawFiles as $file) {
+                    if (!$file || !$file->isValid()) {
+                        continue;
+                    }
+
+                    try {
+                        $path = $file->store('services', 'public');
+                        ServiceImage::create([
+                            'ServiceID' => $service->ServiceID,
+                            'ImageUrl' => Storage::disk('public')->url($path),
+                        ]);
+                    } catch (\Throwable $e) {
+                        // Log lỗi nhưng không dừng transaction
+                        report($e);
+                    }
                 }
-                if (!is_string($path) || $path === '') {
-                    continue;
-                }
-                ServiceImage::create([
-                    'ServiceID' => $service->ServiceID,
-                    'ImageUrl' => Storage::disk('public')->url($path),
-                ]);
             }
         });
 
@@ -124,32 +124,5 @@ class ServiceController extends Controller
         return redirect()
             ->route('admin.services.index')
             ->with('success', 'Xóa dịch vụ thành công.');
-    }
-
-    private function extractValidFiles($files): array
-    {
-        if (!is_array($files)) {
-            $files = [$files];
-        }
-
-        $valid = [];
-        foreach ($files as $file) {
-            if (!$file instanceof UploadedFile || !$file->isValid()) {
-                continue;
-            }
-            if ($file->getError() !== UPLOAD_ERR_OK) {
-                continue;
-            }
-            if ($file->getSize() <= 0) {
-                continue;
-            }
-            $tmpPath = $file->getPathname();
-            if (!is_string($tmpPath) || $tmpPath === '' || !is_file($tmpPath)) {
-                continue;
-            }
-            $valid[] = $file;
-        }
-
-        return $valid;
     }
 }

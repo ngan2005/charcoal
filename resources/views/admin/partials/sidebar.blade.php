@@ -17,7 +17,7 @@
                 <span class="material-symbols-outlined shrink-0">dashboard</span>
                 <p class="text-sm font-semibold nav-text whitespace-nowrap">Dashboard</p>
             </a>
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300 nav-item" href="#">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.orders.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.orders.index') }}">
                 <span class="material-symbols-outlined shrink-0">shopping_bag</span>
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý đơn hàng</p>
             </a>
@@ -28,6 +28,18 @@
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.services.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.services.index') }}">
                 <span class="material-symbols-outlined shrink-0">content_cut</span>
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý dịch vụ</p>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.appointments.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.appointments.index') }}">
+                <span class="material-symbols-outlined shrink-0">event</span>
+                <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý lịch hẹn</p>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.inventory.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.inventory.index') }}">
+                <span class="material-symbols-outlined shrink-0">inventory</span>
+                <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý kho</p>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.reviews.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.reviews.index') }}">
+                <span class="material-symbols-outlined shrink-0">rate_review</span>
+                <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý đánh giá</p>
             </a>
             @php($isUserMenuOpen = request()->routeIs('admin.users.*'))
             <details class="group" {{ $isUserMenuOpen ? 'open' : '' }}>
@@ -44,6 +56,10 @@
                     <a class="flex items-center gap-2 px-3 py-2 rounded-lg nav-item {{ request()->routeIs('admin.users.staff') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.users.staff') }}">
                         <span class="material-symbols-outlined text-base shrink-0">badge</span>
                         <p class="text-sm font-medium nav-text whitespace-nowrap">Nhân viên</p>
+                    </a>
+                    <a class="flex items-center gap-2 px-3 py-2 rounded-lg nav-item {{ request()->routeIs('admin.shifts.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.shifts.index') }}">
+                        <span class="material-symbols-outlined text-base shrink-0">schedule</span>
+                        <p class="text-sm font-medium nav-text whitespace-nowrap">Phân công ca</p>
                     </a>
                 </div>
             </details>

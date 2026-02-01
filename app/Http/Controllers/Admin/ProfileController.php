@@ -47,8 +47,12 @@ class ProfileController extends Controller
         }
 
         if ($request->hasFile('AvatarFile')) {
-            $path = $request->file('AvatarFile')->store('avatars', 'public');
-            $validated['Avatar'] = Storage::disk('public')->url($path);
+            $file = $request->file('AvatarFile');
+            // Kiểm tra file hợp lệ trước khi lưu
+            if ($file && $file->isValid() && $file->getPathname()) {
+                $path = $file->store('avatars', 'public');
+                $validated['Avatar'] = Storage::disk('public')->url($path);
+            }
         }
 
         $user->update($validated);

@@ -26,4 +26,14 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(Product::class, 'ProductID', 'ProductID');
     }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'ServiceID', 'ServiceID');
+    }
+
+    public function pet()
+    {
+        return $this->belongsTo(Pet::class, 'PetID', 'PetID');
+    }
 }

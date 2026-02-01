@@ -9,7 +9,13 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ShiftAssignmentController;
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
+use App\Http\Controllers\PetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +75,16 @@ Route::middleware('auth')->group(function () {
 
         return view('dashboard');
     })->name('dashboard');
+
+    // Pet management routes (for all authenticated users)
+    Route::prefix('pets')->name('pets.')->group(function () {
+        Route::get('/', [PetController::class, 'index'])->name('index');
+        Route::get('/create', [PetController::class, 'create'])->name('create');
+        Route::post('/store', [PetController::class, 'store'])->name('store');
+        Route::get('/{pet}/edit', [PetController::class, 'edit'])->name('edit');
+        Route::put('/{pet}', [PetController::class, 'update'])->name('update');
+        Route::delete('/{pet}', [PetController::class, 'destroy'])->name('destroy');
+    });
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -90,13 +106,51 @@ Route::middleware('auth')->group(function () {
         Route::resource('services', ServiceController::class)->except(['show', 'create', 'edit']);
 
         Route::get('users/customers', [UserManagementController::class, 'customers'])->name('users.customers');
+        Route::get('users/customer/{id}/details', [UserManagementController::class, 'getCustomerDetails'])->name('users.customer.details');
         Route::get('users/staff', [UserManagementController::class, 'staff'])->name('users.staff');
+        Route::get('users/staff/{id}/details', [UserManagementController::class, 'getStaffDetails'])->name('users.staff.details');
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::delete('users', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
         Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+        // Shift Assignment Routes
+        Route::get('shifts', [ShiftAssignmentController::class, 'index'])->name('shifts.index');
+        Route::post('shifts', [ShiftAssignmentController::class, 'store'])->name('shifts.store');
+        Route::put('shifts/{shift}', [ShiftAssignmentController::class, 'update'])->name('shifts.update');
+        Route::delete('shifts/{shift}', [ShiftAssignmentController::class, 'destroy'])->name('shifts.destroy');
+        Route::get('shifts/staff/{staffId}/suggestions', [ShiftAssignmentController::class, 'getStaffSuggestions'])->name('shifts.staff.suggestions');
+        Route::get('shifts/export', [ShiftAssignmentController::class, 'export'])->name('shifts.export');
+
+        // Order Routes
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+        Route::put('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::put('orders/{id}/payment', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment');
+
+        // Appointment Routes
+        Route::get('appointments', [AdminAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('appointments/{id}', [AdminAppointmentController::class, 'show'])->name('appointments.show');
+        Route::put('appointments/{id}/status', [AdminAppointmentController::class, 'updateStatus'])->name('appointments.update-status');
+        Route::post('appointments/{id}/assign-staff', [AdminAppointmentController::class, 'assignStaff'])->name('appointments.assign-staff');
+        Route::post('appointments/{id}/add-service', [AdminAppointmentController::class, 'addService'])->name('appointments.add-service');
+        Route::delete('appointments/{appointmentId}/services/{serviceId}', [AdminAppointmentController::class, 'removeService'])->name('appointments.remove-service');
+        Route::get('appointments/{id}/staff-suggestions', [AdminAppointmentController::class, 'getStaffSuggestions'])->name('appointments.staff-suggestions');
+
+        // Inventory Routes
+        Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::put('inventory/{id}/stock', [InventoryController::class, 'updateStock'])->name('inventory.update-stock');
+        Route::get('inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+        Route::get('inventory/statistics', [InventoryController::class, 'statistics'])->name('inventory.statistics');
+
+        // Review Routes
+        Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::get('reviews/{id}', [ReviewController::class, 'show'])->name('reviews.show');
+        Route::get('reviews/{id}/hide', [ReviewController::class, 'hide'])->name('reviews.hide');
+        Route::post('reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
+        Route::get('reviews/statistics', [ReviewController::class, 'statistics'])->name('reviews.statistics');
 
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
