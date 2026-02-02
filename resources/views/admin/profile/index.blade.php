@@ -61,10 +61,12 @@
                             alt="{{ $user->FullName }}"
                             width="80" height="80"
                             style="background: white;">
+                        {{-- Tạm đóng để sửa lỗi sau
                         <label for="avatar-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 28px; height: 28px; cursor: pointer;">
                             <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
                         </label>
                         <input type="file" id="avatar-input" name="AvatarFile" class="d-none" accept="image/*" onchange="this.form.submit()">
+                        --}}
                     </div>
                     <div>
                         <h2 class="fw-bold fs-4 text-gray-900 mb-1">{{ $user->FullName }}</h2>

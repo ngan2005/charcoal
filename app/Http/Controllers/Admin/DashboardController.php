@@ -54,4 +54,62 @@ class DashboardController extends Controller
             'recentProducts' => $recentProducts,
         ]);
     }
+
+    /**
+     * Xuất báo cáo doanh thu ra file CSV (Excel)
+     */
+    public function export()
+    {
+        // Lấy danh sách 100 đơn hàng gần nhất (hoặc tất cả nếu cần)
+        $orders = Order::with('user')
+            ->orderByDesc('CreatedAt')
+            ->get();
+
+        $filename = 'bao-cao-doanh-thu-' . date('Y-m-d-His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function() use ($orders) {
+            $file = fopen('php://output', 'w');
+
+            // BOM cho Excel có thể đọc UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Tiêu đề báo cáo
+            fputcsv($file, ['BÁO CÁO DOANH THU']);
+            fputcsv($file, ['Ngày xuất:', date('d/m/Y H:i:s')]);
+            fputcsv($file, []);
+
+            // Header bảng
+            fputcsv($file, ['STT', 'Mã đơn hàng', 'Khách hàng', 'Tổng tiền', 'Trạng thái', 'Ngày tạo']);
+
+            $index = 1;
+            $totalAll = 0;
+            foreach ($orders as $order) {
+                fputcsv($file, [
+                    $index++,
+                    '#' . $order->OrderID,
+                    $order->user?->FullName ?? 'Khách vãng lai',
+                    number_format($order->TotalAmount, 0, ',', '.') . ' đ',
+                    $order->Status,
+                    $order->CreatedAt->format('d/m/Y H:i'),
+                ]);
+                $totalAll += $order->TotalAmount;
+            }
+
+            // Chân trang báo cáo
+            fputcsv($file, []);
+            fputcsv($file, ['', '', 'TỔNG CỘNG:', number_format($totalAll, 0, ',', '.') . ' đ']);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

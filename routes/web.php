@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ShiftAssignmentController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\PetController;
 
@@ -88,6 +89,7 @@ Route::middleware('auth')->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
         Route::get('staff-requests', [AdminController::class, 'staffRequests'])->name('staff-requests');
         Route::get('staff-request/{id}', [AdminController::class, 'showRequest'])->name('staff-request.show');
         Route::post('staff-request/{id}/approve', [AdminController::class, 'approveRequest'])->name('staff-request.approve');
@@ -151,6 +153,16 @@ Route::middleware('auth')->group(function () {
         Route::get('reviews/{id}/hide', [ReviewController::class, 'hide'])->name('reviews.hide');
         Route::post('reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
         Route::get('reviews/statistics', [ReviewController::class, 'statistics'])->name('reviews.statistics');
+
+        // Voucher Routes
+        Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+        Route::get('vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
+        Route::post('vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
+        Route::get('vouchers/{id}', [VoucherController::class, 'show'])->name('vouchers.show');
+        Route::get('vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
+        Route::put('vouchers/{id}', [VoucherController::class, 'update'])->name('vouchers.update');
+        Route::delete('vouchers/{id}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
+        Route::patch('vouchers/{id}/toggle', [VoucherController::class, 'toggleStatus'])->name('vouchers.toggle');
 
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -62,7 +62,13 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Doanh thu 7 ngày gần nhất</h3>
-                <span class="text-xs text-gray-400">Đơn vị: VND</span>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('admin.dashboard.export') }}" class="btn btn-sm btn-success d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">download</span>
+                        Xuất Excel
+                    </a>
+                    <span class="text-xs text-gray-400">Đơn vị: VND</span>
+                </div>
             </div>
             <canvas id="revenueChart" height="120"></canvas>
         </div>

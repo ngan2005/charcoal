@@ -37,7 +37,7 @@ class ProfileController extends Controller
             'Password' => ['nullable', 'string', 'min:6', 'confirmed'],
             'Phone' => ['nullable', 'string', 'max:15'],
             'Address' => ['nullable', 'string', 'max:255'],
-            'AvatarFile' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            // 'AvatarFile' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // Tạm đóng do lỗi PHP 8.4
         ]);
 
         if (!empty($validated['Password'])) {
@@ -46,14 +46,15 @@ class ProfileController extends Controller
             unset($validated['Password']);
         }
 
+        /* Tạm đóng logic upload ảnh do lỗi ValueError trên PHP 8.4
         if ($request->hasFile('AvatarFile')) {
             $file = $request->file('AvatarFile');
-            // Kiểm tra file hợp lệ trước khi lưu
             if ($file && $file->isValid() && $file->getPathname()) {
                 $path = $file->store('avatars', 'public');
                 $validated['Avatar'] = Storage::disk('public')->url($path);
             }
         }
+        */
 
         $user->update($validated);
 

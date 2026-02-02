@@ -61,6 +61,24 @@
         .theme-blue { background-color: #eef2ff !important; }#theme-modal-toggle:checked ~ #theme-modal {
             display: flex;
         }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #dbdfe6;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #616f89;
+        }
     </style>
     @stack('styles')
 </head>
