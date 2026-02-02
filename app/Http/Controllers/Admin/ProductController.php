@@ -53,9 +53,8 @@ class ProductController extends Controller
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
             'Description' => ['nullable', 'string', 'max:255'],
-            'MainImage' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'GalleryImages' => ['nullable', 'array'],
-            'GalleryImages.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            // 'MainImage' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'], // Xử lý thủ công cho PHP 8.4
+            // 'GalleryImages' => ['nullable', 'array'],
         ]);
 
         $data = $request->except(['MainImage', 'GalleryImages']);
@@ -64,22 +63,47 @@ class ProductController extends Controller
             $product = Product::create($data);
 
             if ($request->hasFile('MainImage')) {
-                $path = $request->file('MainImage')->store('products', 'public');
-                ProductImage::create([
-                    'ProductID' => $product->ProductID,
-                    'ImageUrl' => Storage::disk('public')->url($path),
-                    'IsMain' => 1,
-                ]);
+                $file = $request->file('MainImage');
+                if ($file->isValid() && $file->getSize() > 0) {
+                    $filename = time() . '_main_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+                    $destinationPath = storage_path('app/public/products');
+                    
+                    // Đảm bảo thư mục tồn tại
+                    if (!file_exists($destinationPath)) {
+                        mkdir($destinationPath, 0755, true);
+                    }
+                    
+                    $file->move($destinationPath, $filename);
+                    
+                    ProductImage::create([
+                        'ProductID' => $product->ProductID,
+                        'ImageUrl' => asset('storage/products/' . $filename),
+                        'IsMain' => 1,
+                    ]);
+                }
             }
 
             if ($request->hasFile('GalleryImages')) {
                 foreach ($request->file('GalleryImages') as $file) {
-                    $path = $file->store('products', 'public');
-                    ProductImage::create([
-                        'ProductID' => $product->ProductID,
-                        'ImageUrl' => Storage::disk('public')->url($path),
-                        'IsMain' => 0,
-                    ]);
+                    if ($file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_gallery_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+                        $destinationPath = storage_path('app/public/products');
+                        
+                        // Đảm bảo thư mục tồn tại
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+                        
+                        $file->move($destinationPath, $filename);
+
+                        ProductImage::create([
+                            'ProductID' => $product->ProductID,
+                            'ImageUrl' => asset('storage/products/' . $filename),
+                            'IsMain' => 0,
+                        ]);
+                    }
                 }
             }
         });
@@ -106,9 +130,6 @@ class ProductController extends Controller
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
             'Description' => ['nullable', 'string', 'max:255'],
-            'MainImage' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'GalleryImages' => ['nullable', 'array'],
-            'GalleryImages.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
         $data = $request->except(['MainImage', 'GalleryImages']);
@@ -117,26 +138,51 @@ class ProductController extends Controller
             $product->update($data);
 
             if ($request->hasFile('MainImage')) {
-                ProductImage::where('ProductID', $product->ProductID)
-                    ->where('IsMain', 1)
-                    ->update(['IsMain' => 0]);
+                $file = $request->file('MainImage');
+                if ($file->isValid() && $file->getSize() > 0) {
+                    ProductImage::where('ProductID', $product->ProductID)
+                        ->where('IsMain', 1)
+                        ->update(['IsMain' => 0]);
 
-                $path = $request->file('MainImage')->store('products', 'public');
-                ProductImage::create([
-                    'ProductID' => $product->ProductID,
-                    'ImageUrl' => Storage::disk('public')->url($path),
-                    'IsMain' => 1,
-                ]);
+                    $filename = time() . '_main_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+                    $destinationPath = storage_path('app/public/products');
+                    
+                    // Đảm bảo thư mục tồn tại
+                    if (!file_exists($destinationPath)) {
+                        mkdir($destinationPath, 0755, true);
+                    }
+                    
+                    $file->move($destinationPath, $filename);
+
+                    ProductImage::create([
+                        'ProductID' => $product->ProductID,
+                        'ImageUrl' => asset('storage/products/' . $filename),
+                        'IsMain' => 1,
+                    ]);
+                }
             }
 
             if ($request->hasFile('GalleryImages')) {
                 foreach ($request->file('GalleryImages') as $file) {
-                    $path = $file->store('products', 'public');
-                    ProductImage::create([
-                        'ProductID' => $product->ProductID,
-                        'ImageUrl' => Storage::disk('public')->url($path),
-                        'IsMain' => 0,
-                    ]);
+                    if ($file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_gallery_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+                        $destinationPath = storage_path('app/public/products');
+                        
+                        // Đảm bảo thư mục tồn tại
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+                        
+                        $file->move($destinationPath, $filename);
+
+                        ProductImage::create([
+                            'ProductID' => $product->ProductID,
+                            'ImageUrl' => asset('storage/products/' . $filename),
+                            'IsMain' => 0,
+                        ]);
+                    }
                 }
             }
         });

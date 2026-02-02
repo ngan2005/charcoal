@@ -55,6 +55,7 @@
                 <thead class="bg-gray-50 text-gray-600">
                     <tr>
                         <th class="px-4 py-3 text-left">Sản phẩm</th>
+                        <th class="px-4 py-3 text-left">Ảnh</th>
                         <th class="px-4 py-3 text-left">Danh mục</th>
                         <th class="px-4 py-3 text-left">Giá</th>
                         <th class="px-4 py-3 text-left">Tồn kho</th>
@@ -68,6 +69,26 @@
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900">{{ $product->ProductName }}</div>
                                 <div class="text-xs text-gray-500">Mã: {{ $product->ProductCode ?? 'N/A' }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                @php($images = $product->images ?? collect())
+                                <div class="flex items-center gap-2">
+                                    @foreach ($images->take(3) as $image)
+                                        <img
+                                            src="{{ $image->ImageUrl }}"
+                                            alt="{{ $product->ProductName }}"
+                                            class="h-10 w-10 rounded border border-gray-200 object-cover cursor-pointer hover:scale-110 transition-transform img-preview-trigger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#imagePreviewModal"
+                                            data-src="{{ $image->ImageUrl }}">
+                                    @endforeach
+                                    @if ($images->count() > 3)
+                                        <span class="text-xs text-gray-500">+{{ $images->count() - 3 }}</span>
+                                    @endif
+                                    @if ($images->isEmpty())
+                                        <span class="text-xs text-gray-400">Chưa có</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $product->category?->CategoryName ?? 'N/A' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ number_format((float) ($product->Price ?? 0), 0, ',', '.') }} đ</td>
@@ -117,13 +138,12 @@
 
     <div class="modal fade" id="createProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
+            <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" class="modal-content">
+                @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm sản phẩm</h5>
+                    <h5 class="modal-title">Thêm sản phẩm mới</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
-                    @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -182,25 +202,23 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-success">Lưu</button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold">Xác nhận thêm sản phẩm</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
+            <form id="edit-product-form" method="POST" enctype="multipart/form-data" class="modal-content">
+                @csrf
+                @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title">Cập nhật sản phẩm</h5>
+                    <h5 class="modal-title">Cập nhật thông tin sản phẩm</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="edit-product-form" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -257,11 +275,24 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    </div>
-                </form>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Xác nhận cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-header border-0 p-0 mb-2">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center">
+                    <img src="" id="preview-image-element" class="img-fluid rounded shadow-lg mx-auto" style="max-height: 85vh;">
+                </div>
             </div>
         </div>
     </div>
@@ -298,15 +329,23 @@
                 button.addEventListener('click', () => {
                     const form = document.getElementById('edit-product-form');
                     form.action = button.dataset.action;
-                    document.getElementById('edit-product-name').value = button.dataset.name || '';
-                    document.getElementById('edit-product-code').value = button.dataset.code || '';
-                    document.getElementById('edit-product-category').value = button.dataset.category || '';
-                    document.getElementById('edit-product-status').value = button.dataset.status || '';
-                    document.getElementById('edit-product-price').value = button.dataset.price || '';
-                    document.getElementById('edit-product-weight').value = button.dataset.weight || '';
-                    document.getElementById('edit-product-size').value = button.dataset.size || '';
-                    document.getElementById('edit-product-stock').value = button.dataset.stock || '';
-                    document.getElementById('edit-product-description').value = button.dataset.description || '';
+                    document.querySelector('#editProductModal [name="ProductName"]').value = button.dataset.name || '';
+                    document.querySelector('#editProductModal [name="ProductCode"]').value = button.dataset.code || '';
+                    document.querySelector('#editProductModal [name="CategoryID"]').value = button.dataset.category || '';
+                    document.querySelector('#editProductModal [name="StatusID"]').value = button.dataset.status || '';
+                    document.querySelector('#editProductModal [name="Price"]').value = button.dataset.price || '';
+                    document.querySelector('#editProductModal [name="Weight"]').value = button.dataset.weight || '';
+                    document.querySelector('#editProductModal [name="Size"]').value = button.dataset.size || '';
+                    document.querySelector('#editProductModal [name="Stock"]').value = button.dataset.stock || '';
+                    document.querySelector('#editProductModal [name="Description"]').value = button.dataset.description || '';
+                });
+            });
+
+            // Image Preview Modal Logic
+            document.querySelectorAll('.img-preview-trigger').forEach(img => {
+                img.addEventListener('click', function() {
+                    const fullSrc = this.getAttribute('data-src');
+                    document.getElementById('preview-image-element').src = fullSrc;
                 });
             });
         });

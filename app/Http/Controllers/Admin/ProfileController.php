@@ -46,15 +46,20 @@ class ProfileController extends Controller
             unset($validated['Password']);
         }
 
-        /* Tạm đóng logic upload ảnh do lỗi ValueError trên PHP 8.4
         if ($request->hasFile('AvatarFile')) {
             $file = $request->file('AvatarFile');
-            if ($file && $file->isValid() && $file->getPathname()) {
-                $path = $file->store('avatars', 'public');
-                $validated['Avatar'] = Storage::disk('public')->url($path);
+            if ($file && $file->isValid() && $file->getSize() > 0) {
+                $filename = time() . '_avatar_' . auth()->id() . '.' . $file->getClientOriginalExtension();
+                $destinationPath = storage_path('app/public/avatars');
+                
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                
+                $file->move($destinationPath, $filename);
+                $validated['Avatar'] = asset('storage/avatars/' . $filename);
             }
         }
-        */
 
         $user->update($validated);
 

@@ -7,7 +7,6 @@ use App\Models\ServiceImage;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
@@ -51,15 +50,24 @@ class ServiceController extends Controller
             // Xử lý ảnh ngay cả khi không có file cũng không sao
             if ($rawFiles && is_array($rawFiles)) {
                 foreach ($rawFiles as $file) {
-                    if (!$file || !$file->isValid()) {
+                    if (!$file || !$file->isValid() || $file->getSize() <= 0) {
                         continue;
                     }
 
                     try {
-                        $path = $file->store('services', 'public');
+                        $filename = time() . '_service_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $destinationPath = storage_path('app/public/services');
+                        
+                        // Đảm bảo thư mục tồn tại
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+                        
+                        $file->move($destinationPath, $filename);
+                        
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
-                            'ImageUrl' => Storage::disk('public')->url($path),
+                            'ImageUrl' => asset('storage/services/' . $filename),
                         ]);
                     } catch (\Throwable $e) {
                         // Log lỗi nhưng không dừng transaction
@@ -94,15 +102,24 @@ class ServiceController extends Controller
             // Xử lý ảnh ngay cả khi không có file cũng không sao
             if ($rawFiles && is_array($rawFiles)) {
                 foreach ($rawFiles as $file) {
-                    if (!$file || !$file->isValid()) {
+                    if (!$file || !$file->isValid() || $file->getSize() <= 0) {
                         continue;
                     }
 
                     try {
-                        $path = $file->store('services', 'public');
+                        $filename = time() . '_service_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $destinationPath = storage_path('app/public/services');
+                        
+                        // Đảm bảo thư mục tồn tại
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+                        
+                        $file->move($destinationPath, $filename);
+                        
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
-                            'ImageUrl' => Storage::disk('public')->url($path),
+                            'ImageUrl' => asset('storage/services/' . $filename),
                         ]);
                     } catch (\Throwable $e) {
                         // Log lỗi nhưng không dừng transaction

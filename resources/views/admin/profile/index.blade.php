@@ -38,57 +38,80 @@
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <!-- Profile Header with Avatar -->
             <div class="bg-primary bg-opacity-10 p-6">
-                <div class="d-flex align-items-center gap-4">
-                    @php
-                        $avatarPath = str_replace('\\', '/', (string) $user->Avatar);
-                        if ($avatarPath) {
-                            if (preg_match('/^https?:\/\//', $avatarPath)) {
-                                $avatarUrl = $avatarPath;
-                            } elseif (str_starts_with($avatarPath, '/storage') || str_starts_with($avatarPath, 'storage/')) {
-                                $avatarUrl = asset($avatarPath);
+                @php
+                    // Xử lý avatar URL - chuyển đổi URL về dạng chuẩn
+                    $avatarPath = $user->Avatar;
+                    if ($avatarPath) {
+                        // Nếu là URL đầy đủ (http/https)
+                        if (preg_match('/^https?:\/\//', $avatarPath)) {
+                            // Chuyển đổi URL về dạng asset() nếu cần thiết
+                            $parsedUrl = parse_url($avatarPath);
+                            $path = $parsedUrl['path'] ?? '';
+                            
+                            // Nếu path bắt đầu bằng /storage/ hoặc storage/
+                            if (str_contains($path, '/storage/')) {
+                                $relativePath = ltrim(str_replace('/storage/', 'storage/', $path), '/');
+                                $avatarUrl = asset($relativePath);
                             } else {
-                                $avatarUrl = asset('storage/' . ltrim($avatarPath, '/'));
+                                // Sử dụng URL gốc nếu không phải storage path
+                                $avatarUrl = $avatarPath;
                             }
-                        } else {
-                            $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->FullName) . '&background=E2E8F0&color=1F2937';
+                        } 
+                        // Nếu bắt đầu bằng /storage hoặc storage/
+                        elseif (str_starts_with($avatarPath, '/storage') || str_starts_with($avatarPath, 'storage/')) {
+                            $avatarUrl = asset(ltrim($avatarPath, '/'));
                         }
-                    @endphp
-                    <div class="position-relative">
-                        <img
-                            class="rounded-circle object-fit-cover border border-white border-4 shadow"
-                            src="{{ $avatarUrl }}"
-                            onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->FullName) }}&background=E2E8F0&color=1F2937&size=128'"
-                            alt="{{ $user->FullName }}"
-                            width="80" height="80"
-                            style="background: white;">
-                        {{-- Tạm đóng để sửa lỗi sau
-                        <label for="avatar-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 28px; height: 28px; cursor: pointer;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
-                        </label>
-                        <input type="file" id="avatar-input" name="AvatarFile" class="d-none" accept="image/*" onchange="this.form.submit()">
-                        --}}
-                    </div>
-                    <div>
-                        <h2 class="fw-bold fs-4 text-gray-900 mb-1">{{ $user->FullName }}</h2>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary">
-                                <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">person</span>
-                                {{ $user->role?->RoleName ?? 'N/A' }}
-                            </span>
-                            @if ($user->IsActive)
-                                <span class="badge bg-success">
-                                    <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">check_circle</span>
-                                    Hoạt động
+                        // Các trường hợp khác
+                        else {
+                            $avatarUrl = asset('storage/' . ltrim($avatarPath, '/'));
+                        }
+                    } else {
+                        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->FullName) . '&background=E2E8F0&color=1F2937&size=128';
+                    }
+                @endphp
+                
+                <!-- Form cho upload avatar -->
+                <form id="avatar-form" method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="FullName" value="{{ $user->FullName }}">
+                    <input type="hidden" name="Email" value="{{ $user->Email }}">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="position-relative">
+                            <img
+                                class="rounded-circle object-fit-cover border border-white border-4 shadow"
+                                src="{{ $avatarUrl }}"
+                                onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->FullName) }}&background=E2E8F0&color=1F2937&size=128'"
+                                alt="{{ $user->FullName }}"
+                                width="80" height="80"
+                                style="background: white;">
+                            <label for="avatar-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow cursor-pointer" style="width: 28px; height: 28px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
+                            </label>
+                            <input type="file" id="avatar-input" name="AvatarFile" class="d-none" accept="image/*" onchange="document.getElementById('avatar-form').submit()">
+                        </div>
+                        <div>
+                            <h2 class="fw-bold fs-4 text-gray-900 mb-1">{{ $user->FullName }}</h2>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary">
+                                    <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">person</span>
+                                    {{ $user->role?->RoleName ?? 'N/A' }}
                                 </span>
-                            @else
-                                <span class="badge bg-danger">
-                                    <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">cancel</span>
-                                    Bị khóa
-                                </span>
-                            @endif
+                                @if ($user->IsActive)
+                                    <span class="badge bg-success">
+                                        <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">check_circle</span>
+                                        Hoạt động
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger">
+                                        <span class="material-symbols-outlined me-1 align-middle" style="font-size: 14px;">cancel</span>
+                                        Bị khóa
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
 
             <!-- Form -->

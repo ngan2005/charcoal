@@ -75,7 +75,10 @@
                                         <img
                                             src="{{ $image->ImageUrl }}"
                                             alt="{{ $service->ServiceName }}"
-                                            class="h-8 w-8 rounded border border-gray-200 object-cover">
+                                            class="h-8 w-8 rounded border border-gray-200 object-cover cursor-pointer hover:scale-110 transition-transform img-preview-trigger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#imagePreviewModal"
+                                            data-src="{{ $image->ImageUrl }}">
                                     @endforeach
                                     @if ($images->count() > 3)
                                         <span class="text-xs text-gray-500">+{{ $images->count() - 3 }}</span>
@@ -209,6 +212,21 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-header border-0 p-0 mb-2">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center">
+                    <img src="" id="preview-image-element" class="img-fluid rounded shadow-lg mx-auto" style="max-height: 85vh;">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -246,6 +264,14 @@
                     document.getElementById('edit-service-price').value = button.dataset.price || '';
                     document.getElementById('edit-service-duration').value = button.dataset.duration || '';
                     document.getElementById('edit-service-description').value = button.dataset.description || '';
+                });
+            });
+
+            // Image Preview Modal Logic
+            document.querySelectorAll('.img-preview-trigger').forEach(img => {
+                img.addEventListener('click', function() {
+                    const fullSrc = this.getAttribute('data-src');
+                    document.getElementById('preview-image-element').src = fullSrc;
                 });
             });
         });
