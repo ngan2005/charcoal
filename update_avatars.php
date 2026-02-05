@@ -31,3 +31,6 @@ foreach ($users as $u) {
     echo "User {$u->UserID}: {$u->FullName} - Avatar: " . ($u->Avatar ?? 'NULL') . "\n";
 }
 
+
+
+

@@ -13,5 +13,5 @@ class ServiceImage extends Model
     protected $primaryKey = 'ImageID';
     public $timestamps = false;
 
-    protected $fillable = ['ServiceID', 'ImageUrl'];
+    protected $fillable = ['ServiceID', 'ImageUrl', 'IsMain'];
 }

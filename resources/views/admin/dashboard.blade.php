@@ -7,7 +7,7 @@
 @section('content')
     <div class="space-y-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Bảng điều khiển Nhân viên</h1>
             <p class="text-sm text-gray-500">Tổng quan nhanh về hoạt động hệ thống</p>
         </div>
 

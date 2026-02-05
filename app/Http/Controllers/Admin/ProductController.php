@@ -53,55 +53,34 @@ class ProductController extends Controller
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
             'Description' => ['nullable', 'string', 'max:255'],
-            // 'MainImage' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'], // Xử lý thủ công cho PHP 8.4
-            // 'GalleryImages' => ['nullable', 'array'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $data = $request->except(['MainImage', 'GalleryImages']);
+        $data = $request->except(['images']);
 
         DB::transaction(function () use ($data, $request) {
             $product = Product::create($data);
 
-            if ($request->hasFile('MainImage')) {
-                $file = $request->file('MainImage');
-                if ($file->isValid() && $file->getSize() > 0) {
-                    $filename = time() . '_main_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
-                    $destinationPath = storage_path('app/public/products');
-                    
-                    // Đảm bảo thư mục tồn tại
-                    if (!file_exists($destinationPath)) {
-                        mkdir($destinationPath, 0755, true);
-                    }
-                    
-                    $file->move($destinationPath, $filename);
-                    
-                    ProductImage::create([
-                        'ProductID' => $product->ProductID,
-                        'ImageUrl' => asset('storage/products/' . $filename),
-                        'IsMain' => 1,
-                    ]);
-                }
-            }
-
-            if ($request->hasFile('GalleryImages')) {
-                foreach ($request->file('GalleryImages') as $file) {
-                    if ($file->isValid() && $file->getSize() > 0) {
-                        $filename = time() . '_gallery_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                        // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+            // Xử lý ảnh - ảnh đầu tiên là ảnh chính
+            $files = $request->file('images', []);
+            
+            if (!empty($files) && is_array($files)) {
+                foreach ($files as $index => $file) {
+                    if ($file && $file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_' . uniqid() . '_' . ($index + 1) . '.' . $file->getClientOriginalExtension();
                         $destinationPath = storage_path('app/public/products');
                         
-                        // Đảm bảo thư mục tồn tại
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
                         
                         $file->move($destinationPath, $filename);
-
+                        
                         ProductImage::create([
                             'ProductID' => $product->ProductID,
                             'ImageUrl' => asset('storage/products/' . $filename),
-                            'IsMain' => 0,
+                            'IsMain' => $index === 0 ? 1 : 0,
                         ]);
                     }
                 }
@@ -130,53 +109,59 @@ class ProductController extends Controller
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
             'Description' => ['nullable', 'string', 'max:255'],
+            'DeleteImageIDs' => ['nullable', 'string'],
+            'MainImageID' => ['nullable', 'integer'],
+            'new_images' => ['nullable', 'array'],
+            'new_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $data = $request->except(['MainImage', 'GalleryImages']);
+        $data = $request->except(['DeleteImageIDs', 'MainImageID', 'new_images']);
 
         DB::transaction(function () use ($product, $data, $request) {
             $product->update($data);
 
-            if ($request->hasFile('MainImage')) {
-                $file = $request->file('MainImage');
-                if ($file->isValid() && $file->getSize() > 0) {
-                    ProductImage::where('ProductID', $product->ProductID)
-                        ->where('IsMain', 1)
-                        ->update(['IsMain' => 0]);
-
-                    $filename = time() . '_main_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
-                    $destinationPath = storage_path('app/public/products');
+            // Xóa ảnh được chọn
+            $deleteIds = $request->input('DeleteImageIDs');
+            if (!empty($deleteIds)) {
+                $ids = array_map('intval', explode(',', $deleteIds));
+                $imagesToDelete = ProductImage::whereIn('ImageID', $ids)->get();
+                
+                foreach ($imagesToDelete as $img) {
+                    // Trích xuất tên file từ URL (ví dụ: http://.../storage/products/filename.jpg -> products/filename.jpg)
+                    $url = $img->ImageUrl;
+                    $path = str_replace(asset('storage/'), '', $url);
                     
-                    // Đảm bảo thư mục tồn tại
-                    if (!file_exists($destinationPath)) {
-                        mkdir($destinationPath, 0755, true);
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
                     }
                     
-                    $file->move($destinationPath, $filename);
-
-                    ProductImage::create([
-                        'ProductID' => $product->ProductID,
-                        'ImageUrl' => asset('storage/products/' . $filename),
-                        'IsMain' => 1,
-                    ]);
+                    $img->delete();
                 }
             }
 
-            if ($request->hasFile('GalleryImages')) {
-                foreach ($request->file('GalleryImages') as $file) {
-                    if ($file->isValid() && $file->getSize() > 0) {
-                        $filename = time() . '_gallery_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                        // Sử dụng move thay vì storeAs để tránh lỗi PHP 8.4
+            // Đặt ảnh chính
+            $mainImageId = $request->input('MainImageID');
+            if (!empty($mainImageId)) {
+                // Reset tất cả ảnh về không phải chính
+                ProductImage::where('ProductID', $product->ProductID)->update(['IsMain' => 0]);
+                // Đặt ảnh được chọn làm chính
+                ProductImage::where('ImageID', $mainImageId)->update(['IsMain' => 1]);
+            }
+
+            // Thêm ảnh mới
+            $newFiles = $request->file('new_images', []);
+            if (!empty($newFiles) && is_array($newFiles)) {
+                foreach ($newFiles as $index => $file) {
+                    if ($file && $file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_new_' . uniqid() . '_' . ($index + 1) . '.' . $file->getClientOriginalExtension();
                         $destinationPath = storage_path('app/public/products');
                         
-                        // Đảm bảo thư mục tồn tại
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
                         
                         $file->move($destinationPath, $filename);
-
+                        
                         ProductImage::create([
                             'ProductID' => $product->ProductID,
                             'ImageUrl' => asset('storage/products/' . $filename),
@@ -200,4 +185,13 @@ class ProductController extends Controller
             ->route('admin.products.index')
             ->with('success', 'Xóa sản phẩm thành công.');
     }
+
+    // API: Lấy danh sách ảnh của sản phẩm
+    public function getImages(Product $product)
+    {
+        $images = $product->images()->select(['ImageID', 'ImageUrl', 'IsMain'])->get();
+        return response()->json(['images' => $images]);
+    }
 }
+
+

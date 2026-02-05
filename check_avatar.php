@@ -27,3 +27,6 @@ if ($avatarPath) {
     echo "File exists in public: " . (file_exists($publicPath) ? 'YES' : 'NO') . "\n";
 }
 
+
+
+

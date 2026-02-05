@@ -2,8 +2,8 @@
     <!-- Fixed Branding Area -->
     <div class="px-4 pt-4 pb-6 border-b border-transparent">
         <a class="flex items-center gap-3 px-2 branding-container" href="{{ route('shop') }}">
-            <div class="rounded-lg overflow-hidden shrink-0 w-11 h-11 border border-gray-200 bg-white">
-                <img src="{{ asset('images/pink-charcoal.jpg') }}" alt="Pink Charcoal" class="w-full h-full object-cover">
+            <div class="rounded-lg overflow-hidden shrink-0 w-12 h-12 border border-gray-100 bg-white p-1">
+                <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="w-full h-full object-contain">
             </div>
             <div class="flex flex-col branding-text overflow-hidden">
                 <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight whitespace-nowrap">Pink Charcoal</h1>
@@ -16,7 +16,7 @@
         <nav class="flex flex-col gap-1 pb-4">
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.dashboard') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.dashboard') }}">
                 <span class="material-symbols-outlined shrink-0">dashboard</span>
-                <p class="text-sm font-semibold nav-text whitespace-nowrap">Dashboard</p>
+                <p class="text-sm font-semibold nav-text whitespace-nowrap">Bảng điều khiển</p>
             </a>
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item {{ request()->routeIs('admin.orders.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.orders.index') }}">
                 <span class="material-symbols-outlined shrink-0">shopping_bag</span>

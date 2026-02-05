@@ -47,18 +47,12 @@ class ServiceController extends Controller
         DB::transaction(function () use ($data, $rawFiles) {
             $service = Service::create($data);
 
-            // Xử lý ảnh ngay cả khi không có file cũng không sao
             if ($rawFiles && is_array($rawFiles)) {
-                foreach ($rawFiles as $file) {
-                    if (!$file || !$file->isValid() || $file->getSize() <= 0) {
-                        continue;
-                    }
-
-                    try {
-                        $filename = time() . '_service_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                foreach ($rawFiles as $index => $file) {
+                    if ($file && $file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_service_' . uniqid() . '_' . ($index + 1) . '.' . $file->getClientOriginalExtension();
                         $destinationPath = storage_path('app/public/services');
                         
-                        // Đảm bảo thư mục tồn tại
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
@@ -68,10 +62,8 @@ class ServiceController extends Controller
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
                             'ImageUrl' => asset('storage/services/' . $filename),
+                            'IsMain' => $index === 0 ? 1 : 0,
                         ]);
-                    } catch (\Throwable $e) {
-                        // Log lỗi nhưng không dừng transaction
-                        report($e);
                     }
                 }
             }
@@ -89,28 +81,50 @@ class ServiceController extends Controller
             'BasePrice' => ['required', 'numeric', 'min:0'],
             'Duration' => ['required', 'integer', 'min:0'],
             'Description' => ['nullable', 'string', 'max:255'],
-            'Images' => ['nullable', 'array'],
-            'Images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'DeleteImageIDs' => ['nullable', 'string'],
+            'MainImageID' => ['nullable', 'integer'],
+            'new_images' => ['nullable', 'array'],
+            'new_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $rawFiles = $request->file('Images');
-        $data = $request->except('Images');
+        $data = $request->except(['DeleteImageIDs', 'MainImageID', 'new_images', 'Images']);
 
-        DB::transaction(function () use ($service, $data, $rawFiles) {
+        DB::transaction(function () use ($service, $data, $request) {
             $service->update($data);
 
-            // Xử lý ảnh ngay cả khi không có file cũng không sao
-            if ($rawFiles && is_array($rawFiles)) {
-                foreach ($rawFiles as $file) {
-                    if (!$file || !$file->isValid() || $file->getSize() <= 0) {
-                        continue;
+            // Xóa ảnh được chọn
+            $deleteIds = $request->input('DeleteImageIDs');
+            if (!empty($deleteIds)) {
+                $ids = array_map('intval', explode(',', $deleteIds));
+                $imagesToDelete = ServiceImage::whereIn('ImageID', $ids)->get();
+                
+                foreach ($imagesToDelete as $img) {
+                    $url = $img->ImageUrl;
+                    $path = str_replace(asset('storage/'), '', $url);
+                    
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
                     }
+                    
+                    $img->delete();
+                }
+            }
 
-                    try {
-                        $filename = time() . '_service_update_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // Đặt ảnh chính
+            $mainImageId = $request->input('MainImageID');
+            if (!empty($mainImageId)) {
+                ServiceImage::where('ServiceID', $service->ServiceID)->update(['IsMain' => 0]);
+                ServiceImage::where('ImageID', $mainImageId)->update(['IsMain' => 1]);
+            }
+
+            // Thêm ảnh mới
+            $newFiles = $request->file('new_images', []);
+            if (!empty($newFiles) && is_array($newFiles)) {
+                foreach ($newFiles as $index => $file) {
+                    if ($file && $file->isValid() && $file->getSize() > 0) {
+                        $filename = time() . '_service_new_' . uniqid() . '_' . ($index + 1) . '.' . $file->getClientOriginalExtension();
                         $destinationPath = storage_path('app/public/services');
                         
-                        // Đảm bảo thư mục tồn tại
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
@@ -120,10 +134,8 @@ class ServiceController extends Controller
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
                             'ImageUrl' => asset('storage/services/' . $filename),
+                            'IsMain' => 0,
                         ]);
-                    } catch (\Throwable $e) {
-                        // Log lỗi nhưng không dừng transaction
-                        report($e);
                     }
                 }
             }
@@ -136,10 +148,25 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
+        // Xóa ảnh vật lý khi xóa dịch vụ
+        foreach ($service->images as $img) {
+            $path = str_replace(asset('storage/'), '', $img->ImageUrl);
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+            }
+        }
+        
         $service->delete();
 
         return redirect()
             ->route('admin.services.index')
             ->with('success', 'Xóa dịch vụ thành công.');
+    }
+
+    // API: Lấy danh sách ảnh của dịch vụ
+    public function getImages(Service $service)
+    {
+        $images = $service->images()->select(['ImageID', 'ImageUrl', 'IsMain'])->get();
+        return response()->json(['images' => $images]);
     }
 }

@@ -102,9 +102,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('products', [ProductController::class, 'index'])->name('products.index');
         Route::post('products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('products/{product}/images', [ProductController::class, 'getImages'])->name('products.images');
         Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+        Route::get('services/{service}/images', [ServiceController::class, 'getImages'])->name('services.images');
         Route::resource('services', ServiceController::class)->except(['show', 'create', 'edit']);
 
         Route::get('users/customers', [UserManagementController::class, 'customers'])->name('users.customers');
