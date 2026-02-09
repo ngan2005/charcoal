@@ -145,6 +145,16 @@ class AuthController extends Controller
         // Login user
         Auth::login($user, $request->boolean('remember'));
 
+        // Auto set 'is_working' status for staff
+        if ($user->RoleID == 2) {
+            session(['is_working' => true]);
+            
+            // Update WorkStatus in DB if staff profile exists (1 = Sẵn sàng)
+            if ($user->staffProfile) {
+                $user->staffProfile->update(['WorkStatusID' => 1]);
+            }
+        }
+
         return redirect()->intended(route('dashboard'))->with('success', 'Đăng nhập thành công!');
     }
 

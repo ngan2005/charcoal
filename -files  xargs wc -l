@@ -1,0 +1,48 @@
+[33mcommit 72b326ef96774b1d15848cb2c1756ddee29c3b21[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: ngan2005@ <luu.kimngan205@gmail.com>
+Date:   Fri Feb 6 00:04:14 2026 +0700
+
+     fix ảnh sp, dv mà còn lỗi tí ghi nhớ sửa sau
+
+ app/Http/Controllers/Admin/InventoryController.php |   3 [32m+[m
+ app/Http/Controllers/Admin/OrderController.php     |   3 [32m+[m
+ app/Http/Controllers/Admin/ProductController.php   | 116 [32m++[m[31m-[m
+ app/Http/Controllers/Admin/ReviewController.php    |   3 [32m+[m
+ app/Http/Controllers/Admin/ServiceController.php   |  83 [32m+[m[31m-[m
+ app/Http/Controllers/PetController.php             |   3 [32m+[m
+ app/Models/Payment.php                             |   3 [32m+[m
+ app/Models/PaymentStatus.php                       |   3 [32m+[m
+ app/Models/Review.php                              |   3 [32m+[m
+ app/Models/ServiceImage.php                        |   2 [32m+[m[31m-[m
+ app/Models/ShiftStatus.php                         |   3 [32m+[m
+ app/Models/StaffProfile.php                        |   3 [32m+[m
+ app/Models/StaffShift.php                          |   3 [32m+[m
+ app/Models/WorkStatus.php                          |   3 [32m+[m
+ check_avatar.php                                   |   3 [32m+[m
+ check_users_avatars.php                            |   3 [32m+[m
+ composer.json                                      |   3 [32m+[m[31m-[m
+ composer.lock                                      |  77 [32m+[m[31m-[m
+ ..._02_02_000001_add_columns_to_vouchers_table.php |   3 [32m+[m
+ ..._000002_add_is_main_to_service_images_table.php |  28 [32m+[m
+ public/images/logo-pink-charcoal.png               | Bin [31m0[m -> [32m323747[m bytes
+ resources/views/admin/appointments/show.blade.php  |   3 [32m+[m
+ resources/views/admin/dashboard.blade.php          |   2 [32m+[m[31m-[m
+ resources/views/admin/inventory/index.blade.php    |   3 [32m+[m
+ resources/views/admin/inventory/show.blade.php     |   3 [32m+[m
+ .../views/admin/inventory/statistics.blade.php     |   3 [32m+[m
+ resources/views/admin/orders/index.blade.php       |   3 [32m+[m
+ resources/views/admin/orders/show.blade.php        |   3 [32m+[m
+ resources/views/admin/partials/sidebar.blade.php   |   6 [32m+[m[31m-[m
+ resources/views/admin/products/index.blade.php     | 960 [32m+++++++++++++++++[m[31m----[m
+ resources/views/admin/reviews/index.blade.php      |   3 [32m+[m
+ resources/views/admin/reviews/show.blade.php       |   3 [32m+[m
+ resources/views/admin/reviews/statistics.blade.php |   3 [32m+[m
+ resources/views/admin/services/index.blade.php     | 538 [32m+++++++++++[m[31m-[m
+ resources/views/layouts/admin.blade.php            |   3 [32m+[m[31m-[m
+ resources/views/layouts/app.blade.php              |   3 [32m+[m[31m-[m
+ resources/views/pets/create.blade.php              |   3 [32m+[m
+ resources/views/pets/edit.blade.php                |   3 [32m+[m
+ resources/views/pets/index.blade.php               |   3 [32m+[m
+ routes/web.php                                     |   2 [32m+[m
+ update_avatars.php                                 |   3 [32m+[m
+ 41 files changed, 1613 insertions(+), 291 deletions(-)

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\PetController;
+use App\Http\Controllers\Staff\StaffController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,16 +67,40 @@ Route::middleware('guest')->group(function () {
 // Email Verification
 Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify-email');
 
-// Authenticated routes
-Route::middleware('auth')->group(function () {
-    Route::post('auth/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('dashboard', function() {
-        if (auth()->user()->RoleID == 1) {
-            return redirect()->route('admin.dashboard');
-        }
+    // Authenticated routes
+    Route::middleware('auth')->group(function () {
+        Route::post('auth/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('dashboard', function() {
+            if (auth()->user()->RoleID == 1) {
+                return redirect()->route('admin.dashboard');
+            } elseif (auth()->user()->RoleID == 2) {
+                // Staff members go to the new staff dashboard
+                return redirect()->route('staff.dashboard');
+            }
+            // Customers see the old dashboard (could be replaced with customer dashboard later)
+            return view('dashboard');
+        })->name('dashboard');
 
-        return view('dashboard');
-    })->name('dashboard');
+    // Staff routes (for authenticated staff members)
+    Route::prefix('staff')->name('staff.')->group(function () {
+        Route::get('/dashboard', [StaffController::class, 'dashboard'])->name('dashboard');
+        Route::get('/shifts', [StaffController::class, 'shifts'])->name('shifts');
+        Route::get('/pets', [StaffController::class, 'pets'])->name('pets');
+        Route::get('/journal', [StaffController::class, 'journal'])->name('journal');
+        Route::post('/journal', [StaffController::class, 'storeJournal'])->name('journal.store');
+        Route::get('/timekeeping', [StaffController::class, 'timekeeping'])->name('timekeeping');
+
+        Route::get('/leaves', [StaffController::class, 'leaves'])->name('leaves');
+        Route::get('/profile', [StaffController::class, 'profile'])->name('profile');
+        Route::get('/profile/edit', [StaffController::class, 'editProfile'])->name('profile.edit');
+        Route::put('/profile/update', [StaffController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/status/toggle', [StaffController::class, 'toggleStatus'])->name('status.toggle');
+        
+        // Staff appointments
+        Route::get('/appointments/create', [StaffController::class, 'createAppointment'])->name('appointments.create');
+        Route::post('/appointments', [StaffController::class, 'storeAppointment'])->name('appointments.store');
+
+    });
 
     // Pet management routes (for all authenticated users)
     Route::prefix('pets')->name('pets.')->group(function () {
@@ -169,4 +194,6 @@ Route::middleware('auth')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     });
+
+    // Employee routes removed
 });

@@ -172,5 +172,4 @@ return new class extends Migration
         Schema::dropIfExists('carts');
     }
 };
-<?php
-$recent_orders = \App\Models\Order::orderBy('CreatedAt', 'desc')
+
