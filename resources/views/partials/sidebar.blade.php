@@ -4,9 +4,9 @@
             <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500" onclick="toggleSidebar()">
                 <span class="material-symbols-outlined">menu</span>
             </button>
-            <div class="flex items-center gap-3 overflow-hidden whitespace-nowrap sidebar-logo-text">
-                <span class="material-symbols-outlined text-primary text-3xl">pets</span>
-                <h1 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">PetJoy</h1>
+            <div class="flex items-center gap-3 sidebar-logo-text min-w-0">
+                <img src="{{ asset('images/logo-pink-charcoal.png') }}" class="w-9 h-9 rounded-lg object-cover" alt="Pink Charcoal">
+                <h1 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">Pink Charcoal</h1>
             </div>
         </div>
         <nav class="p-4 space-y-2 mt-4">

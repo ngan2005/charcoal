@@ -309,6 +309,50 @@ class StaffController extends Controller
     }
 
     /**
+     * Show the staff inventory page (read-only).
+     */
+    public function inventory(Request $request)
+    {
+        $search = $request->input('search');
+        $categoryId = $request->input('category_id');
+        $stockStatus = $request->input('stock_status');
+
+        $products = \App\Models\Product::with(['category', 'status', 'images'])
+            ->when($search, function($query) use ($search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('ProductCode', 'like', "%{$search}%")
+                      ->orWhere('ProductName', 'like', "%{$search}%");
+                });
+            })
+            ->when($categoryId, function($query) use ($categoryId) {
+                return $query->where('CategoryID', $categoryId);
+            })
+            ->when($stockStatus, function($query) use ($stockStatus) {
+                if ($stockStatus === 'low') {
+                    return $query->where('Stock', '>', 0)->where('Stock', '<=', 10);
+                } elseif ($stockStatus === 'out') {
+                    return $query->where('Stock', 0);
+                } elseif ($stockStatus === 'in') {
+                    return $query->where('Stock', '>', 10);
+                }
+            })
+            ->orderBy('Stock', 'asc')
+            ->paginate(15);
+
+        $categories = \App\Models\Category::orderBy('CategoryName')->get();
+
+        // Thống kê
+        $stats = [
+            'total_products' => \App\Models\Product::count(),
+            'total_stock' => \App\Models\Product::sum('Stock'),
+            'low_stock' => \App\Models\Product::where('Stock', '>', 0)->where('Stock', '<=', 10)->count(),
+            'out_of_stock' => \App\Models\Product::where('Stock', 0)->count(),
+        ];
+
+        return view('staff.inventory.index', compact('products', 'categories', 'stats'));
+    }
+
+    /**
      * Show the staff profile.
      */
     public function profile()

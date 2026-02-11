@@ -31,16 +31,13 @@ use App\Http\Controllers\Staff\StaffController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('shop');
+})->name('shop');
 
 Route::get('/home', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/shop', function () {
-    return view('shop');
-})->name('shop');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -95,6 +92,9 @@ Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])-
         Route::get('/profile/edit', [StaffController::class, 'editProfile'])->name('profile.edit');
         Route::put('/profile/update', [StaffController::class, 'updateProfile'])->name('profile.update');
         Route::post('/status/toggle', [StaffController::class, 'toggleStatus'])->name('status.toggle');
+        
+        // Staff Inventory (read-only)
+        Route::get('/inventory', [StaffController::class, 'inventory'])->name('inventory');
         
         // Staff appointments
         Route::get('/appointments/create', [StaffController::class, 'createAppointment'])->name('appointments.create');

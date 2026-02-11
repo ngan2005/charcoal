@@ -2,7 +2,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Danh mục Dịch vụ</h2>
-            <p class="text-gray-500 dark:text-gray-400 mt-2">Trải nghiệm dịch vụ chăm sóc thú cưng đẳng cấp 5 sao tại PetJoy</p>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Trải nghiệm dịch vụ chăm sóc thú cưng đẳng cấp 5 sao tại Pink Charcoal</p>
         </div>
         <button class="px-6 py-3 bg-white dark:bg-white/10 border border-gray-200 dark:border-gray-700 rounded-xl font-bold text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/20 transition-all flex items-center gap-2">
             <span class="material-symbols-outlined">filter_list</span> Lọc

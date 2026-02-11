@@ -179,6 +179,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // Xóa các bản ghi liên quan trước để tránh lỗi foreign key
+        $product->images()->delete();
+        $product->orderDetails()->delete();
+
         $product->delete();
 
         return redirect()

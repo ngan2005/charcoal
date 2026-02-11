@@ -3,9 +3,9 @@
         <!-- Logo -->
         <div class="flex items-center gap-3 px-2 branding-container">
             <img src="{{ asset('images/logo-pink-charcoal.png') }}" class="w-10 h-10 rounded-xl shadow-lg shadow-primary/20 object-cover" alt="Pink Charcoal Logo">
-            <div class="flex flex-col branding-text overflow-hidden">
-                <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight whitespace-nowrap">Pink Charcoal</h1>
-                <p class="text-[#616f89] dark:text-gray-400 text-xs font-normal whitespace-nowrap">Staff Dashboard</p>
+            <div class="flex flex-col branding-text min-w-0">
+                <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight">Pink Charcoal</h1>
+                <p class="text-[#616f89] dark:text-gray-400 text-xs font-normal">Staff Dashboard</p>
             </div>
         </div>
 
@@ -33,14 +33,15 @@
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Nhật ký chăm sóc</p>
             </a>
             
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.timekeeping.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.timekeeping') }}">
-                <span class="material-symbols-outlined shrink-0">fingerprint</span>
-                <p class="text-sm font-medium nav-text whitespace-nowrap">Chấm công</p>
-            </a>
             
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.leaves.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.leaves') }}">
                 <span class="material-symbols-outlined shrink-0">edit_document</span>
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Đơn từ / Nghỉ phép</p>
+            </a>
+            
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.inventory') || Route::is('staff.inventory.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.inventory') }}">
+                <span class="material-symbols-outlined shrink-0">inventory_2</span>
+                <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý Kho</p>
             </a>
 
             <p class="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider mt-2">Cá nhân</p>

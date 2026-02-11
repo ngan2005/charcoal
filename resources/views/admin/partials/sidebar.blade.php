@@ -5,8 +5,8 @@
             <div class="rounded-lg overflow-hidden shrink-0 w-12 h-12 border border-gray-100 bg-white p-1">
                 <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="w-full h-full object-contain">
             </div>
-            <div class="flex flex-col branding-text overflow-hidden">
-                <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight whitespace-nowrap">Pink Charcoal</h1>
+            <div class="flex flex-col branding-text min-w-0">
+                <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight">Pink Charcoal</h1>
             </div>
         </a>
     </div>

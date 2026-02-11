@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập - PetJoy</title>
+    <title>Đăng Nhập - Pink Charcoal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-2xl shadow-lg shadow-primary/30 mb-4">
                     <span class="material-symbols-outlined text-white text-4xl">pets</span>
                 </div>
-                <h1 class="text-3xl font-extrabold text-gray-900">PetJoy</h1>
+                <h1 class="text-3xl font-extrabold text-gray-900">Pink Charcoal</h1>
                 <p class="mt-2 text-gray-500">Đăng nhập để tiếp tục</p>
             </div>
 

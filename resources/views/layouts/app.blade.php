@@ -306,7 +306,7 @@
             @yield('content')
 
             <footer class="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8 pb-4 text-center text-gray-400 text-sm">
-                <p>© 2024 PetJoy Vietnam. Modern Dashboard Layout.</p>
+                <p>© 2024 Pink Charcoal Vietnam. Modern Dashboard Layout.</p>
             </footer>
         </div>
     </main>
