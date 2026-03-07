@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\ShopController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +31,10 @@ use App\Http\Controllers\Staff\StaffController;
 |
 */
 
-Route::get('/', function () {
-    return view('shop');
-})->name('shop');
+Route::get('/', [ShopController::class, 'index'])->name('shop');
+Route::get('/services', [\App\Http\Controllers\PublicServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{id}', [\App\Http\Controllers\PublicServiceController::class, 'show'])->name('services.show');
+Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
 
 Route::get('/home', function () {
     return redirect()->route('dashboard');
@@ -77,6 +79,11 @@ Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])-
             // Customers see the old dashboard (could be replaced with customer dashboard later)
             return view('dashboard');
         })->name('dashboard');
+
+        // Customer Profile Routes
+        Route::get('/profile', [\App\Http\Controllers\CustomerProfileController::class, 'index'])->name('profile.index');
+        Route::put('/profile/update', [\App\Http\Controllers\CustomerProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [\App\Http\Controllers\CustomerProfileController::class, 'changePassword'])->name('profile.password');
 
     // Staff routes (for authenticated staff members)
     Route::prefix('staff')->name('staff.')->group(function () {

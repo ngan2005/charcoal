@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Symfony\Component\Mailer\Exception\TransportException;
 use App\Mail\VerifyEmailMail;
 use App\Mail\ResetPasswordMail;
 use App\Mail\StaffRequestConfirmationMail;
@@ -61,10 +62,14 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
-            // Send verification email
-            Mail::to($user->Email)->send(new VerifyEmailMail($user, $verificationToken));
-
-            return redirect()->route('login')->with('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
+            // Send verification email (bắt lỗi nếu cấu hình mail chưa đúng)
+            try {
+                Mail::to($user->Email)->send(new VerifyEmailMail($user, $verificationToken));
+                return redirect()->route('login')->with('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
+            } catch (TransportException $e) {
+                \Log::warning('Không gửi được email xác nhận: ' . $e->getMessage());
+                return redirect()->route('login')->with('success', 'Đăng ký thành công! Bạn có thể đăng nhập ngay. (Email xác nhận tạm thời chưa gửi được.)');
+            }
         }
 
         return redirect()->route('login')->with('success', 'Đăng ký thành công! Bạn có thể đăng nhập ngay.');
@@ -93,8 +98,12 @@ class AuthController extends Controller
             'Status' => 'pending',
         ]);
 
-        // Send confirmation email
-        Mail::to($staffRequest->Email)->send(new StaffRequestConfirmationMail($staffRequest));
+        // Send confirmation email (bắt lỗi nếu cấu hình mail chưa đúng)
+        try {
+            Mail::to($staffRequest->Email)->send(new StaffRequestConfirmationMail($staffRequest));
+        } catch (TransportException $e) {
+            \Log::warning('Không gửi được email xác nhận yêu cầu nhân sự: ' . $e->getMessage());
+        }
 
         return redirect()->route('login')->with('success', 'Yêu cầu đã được gửi! Admin sẽ xem xét và liên hệ với bạn trong thời gian sớm nhất.');
     }
@@ -188,10 +197,14 @@ class AuthController extends Controller
             ]
         );
 
-        // Send reset email
-        Mail::to($user->Email)->send(new ResetPasswordMail($user, $resetToken));
-
-        return back()->with('success', 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn.');
+        // Send reset email (bắt lỗi nếu cấu hình mail chưa đúng)
+        try {
+            Mail::to($user->Email)->send(new ResetPasswordMail($user, $resetToken));
+            return back()->with('success', 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn.');
+        } catch (TransportException $e) {
+            \Log::warning('Không gửi được email đặt lại mật khẩu: ' . $e->getMessage());
+            return back()->with('error', 'Tạm thời không gửi được email. Vui lòng kiểm tra cấu hình mail (MAIL_MAILER, MAIL_HOST) trong file .env hoặc thử lại sau.');
+        }
     }
 
     // Show reset password form
