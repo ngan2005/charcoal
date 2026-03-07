@@ -8,6 +8,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script id="tailwind-config">
     tailwind.config = {
         darkMode: "class",
@@ -34,6 +35,7 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
 </style>
 @stack('styles')
 </head>
@@ -127,10 +129,26 @@
         <div class="flex gap-2 md:gap-4 items-center">
             @php
                 $cartItemCount = 0;
+                $cartItems = [];
                 if (auth()->check()) {
                     $cart = \Illuminate\Support\Facades\DB::table('carts')->where('UserID', auth()->id())->first();
                     if ($cart) {
-                        $cartItemCount = \Illuminate\Support\Facades\DB::table('cart_items')->where('CartID', $cart->CartID)->sum('Quantity');
+                        $cartItems = \Illuminate\Support\Facades\DB::table('cart_items')
+                            ->leftJoin('products', 'cart_items.ProductID', '=', 'products.ProductID')
+                            ->where('CartID', $cart->CartID)
+                            ->select('cart_items.*', 'products.ProductName', 'products.Price')
+                            ->get();
+                        
+                        // Fetch images correctly
+                        foreach ($cartItems as $item) {
+                            $image = \Illuminate\Support\Facades\DB::table('product_images')
+                                ->where('ProductID', $item->ProductID)
+                                ->orderByDesc('IsMain')
+                                ->first();
+                            $item->Image = $image ? $image->ImageUrl : null;
+                        }
+                        
+                        $cartItemCount = $cartItems->sum('Quantity');
                     }
                 }
             @endphp
@@ -163,10 +181,71 @@
                     </form>
                 </div>
             @else
-                <a href="{{ route('login') }}"
-                   class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-9 px-5 bg-primary text-slate-900 font-bold text-sm hover:bg-primary-dark transition-colors">
-                    Đăng nhập
-                </a>
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" 
+                       class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-primary text-slate-900 font-bold text-sm hover:bg-primary-dark transition-colors shadow-sm">
+                        <span class="material-symbols-outlined text-[24px]">person</span>
+                    </button>
+
+                    <!-- Quick Login Dropdown -->
+                    <div x-show="open" 
+                         x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] shadow-2xl z-[70] overflow-hidden">
+                        
+                        {{-- Dropdown Arrow --}}
+                        <div class="absolute -top-2 right-4 w-4 h-4 bg-white dark:bg-slate-900 rotate-45 border-l border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <div class="p-8">
+                            <div class="text-center mb-6">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-wider">ĐĂNG NHẬP TÀI KHOẢN</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Nhập email và mật khẩu của bạn:</p>
+                            </div>
+
+                            <form action="{{ route('login') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <div>
+                                    <input type="email" name="Email" required
+                                           class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm placeholder:text-slate-400"
+                                           placeholder="Email">
+                                </div>
+                                <div>
+                                    <input type="password" name="Password" required
+                                           class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 text-sm placeholder:text-slate-400"
+                                           placeholder="Mật khẩu">
+                                </div>
+
+                                {{-- reCAPTCHA placeholder/text if needed --}}
+                                <p class="text-[10px] text-slate-400 leading-tight">
+                                    This site is protected by reCAPTCHA and the Google 
+                                    <a href="#" class="text-blue-500 hover:underline">Privacy Policy</a> and 
+                                    <a href="#" class="text-blue-500 hover:underline">Terms of Service</a> apply.
+                                </p>
+
+                                <button type="submit" 
+                                        class="w-full py-3.5 bg-[#d4d4d4] hover:bg-primary hover:text-white text-slate-700 font-bold rounded-xl transition-all uppercase tracking-widest text-sm shadow-md">
+                                    ĐĂNG NHẬP
+                                </button>
+                            </form>
+
+                            <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
+                                <p class="text-sm text-slate-600 dark:text-slate-400">
+                                    Khách hàng mới? 
+                                    <a href="{{ route('register-customer') }}" class="text-rose-400 hover:underline font-medium">Tạo tài khoản</a>
+                                </p>
+                                <p class="text-sm text-slate-600 dark:text-slate-400">
+                                    Quên mật khẩu? 
+                                    <a href="{{ route('forgot-password') }}" class="text-rose-400 hover:underline font-medium">Khôi phục mật khẩu</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endauth
         </div>
     </div>

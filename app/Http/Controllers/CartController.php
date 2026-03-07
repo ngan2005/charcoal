@@ -66,4 +66,58 @@ class CartController extends Controller
 
         return view('cart.index', compact('cartItems', 'subtotal'));
     }
+
+    public function store(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để mua hàng.');
+        }
+
+        $userId = auth()->id();
+        $productId = $request->input('ProductID');
+        $quantity = $request->input('Quantity', 1);
+
+        // Find or create cart
+        $cart = DB::table('carts')->where('UserID', $userId)->first();
+        if (!$cart) {
+            $maxCartId = DB::table('carts')->max('CartID');
+            $newCartId = $maxCartId ? $maxCartId + 1 : 1;
+            DB::table('carts')->insert([
+                'CartID' => $newCartId,
+                'UserID' => $userId,
+                'CreatedAt' => now()
+            ]);
+            $cart = DB::table('carts')->where('UserID', $userId)->first();
+        }
+
+        if ($quantity <= 0) {
+            DB::table('cart_items')
+                ->where('CartID', $cart->CartID)
+                ->where('ProductID', $productId)
+                ->delete();
+            return redirect()->back()->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng.');
+        }
+
+        $item = DB::table('cart_items')
+            ->where('CartID', $cart->CartID)
+            ->where('ProductID', $productId)
+            ->first();
+
+        if ($item) {
+            DB::table('cart_items')
+                ->where('CartItemID', $item->CartItemID)
+                ->update(['Quantity' => $item->Quantity + $quantity]);
+        } else {
+            $maxId = DB::table('cart_items')->max('CartItemID');
+            DB::table('cart_items')->insert([
+                'CartItemID' => $maxId ? $maxId + 1 : 1,
+                'CartID' => $cart->CartID,
+                'ProductID' => $productId,
+                'Quantity' => $quantity,
+                'AddedAt' => now()
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Đã thêm vào giỏ hàng!');
+    }
 }

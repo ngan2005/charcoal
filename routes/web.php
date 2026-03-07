@@ -35,6 +35,7 @@ Route::get('/', [ShopController::class, 'index'])->name('shop');
 Route::get('/services', [\App\Http\Controllers\PublicServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{id}', [\App\Http\Controllers\PublicServiceController::class, 'show'])->name('services.show');
 Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+Route::post('/cart', [\App\Http\Controllers\CartController::class, 'store'])->name('cart.store');
 
 Route::get('/home', function () {
     return redirect()->route('dashboard');
