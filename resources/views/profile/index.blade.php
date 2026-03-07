@@ -8,8 +8,14 @@
     {{-- Page Header --}}
     <div class="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div class="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-full flex items-center justify-center shrink-0 border-4 border-white dark:border-slate-800 shadow-sm overflow-hidden text-primary">
-            @if($user->Avatar)
-                <img src="{{ asset('storage/' . $user->Avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+            @php
+                $headerAvatarUrl = null;
+                if ($user->Avatar) {
+                    $headerAvatarUrl = str_starts_with($user->Avatar, 'http') ? $user->Avatar : asset('storage/' . $user->Avatar);
+                }
+            @endphp
+            @if($headerAvatarUrl)
+                <img src="{{ $headerAvatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
             @else
                 <span class="material-symbols-outlined text-4xl drop-shadow-sm">face_3</span>
             @endif
@@ -68,10 +74,16 @@
                     @method('PUT')
                     
                     {{-- Avatar Upload Section --}}
+                    @php
+                        $formAvatarUrl = null;
+                        if ($user->Avatar) {
+                            $formAvatarUrl = str_starts_with($user->Avatar, 'http') ? $user->Avatar : asset('storage/' . $user->Avatar);
+                        }
+                    @endphp
                     <div class="flex items-center gap-6 mb-2">
                         <div class="relative w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-sm overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 group">
-                            @if($user->Avatar)
-                                <img id="avatarPreview" src="{{ asset('storage/' . $user->Avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                            @if($formAvatarUrl)
+                                <img id="avatarPreview" src="{{ $formAvatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
                             @else
                                 <div id="avatarPreviewHolder" class="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
                                     <span class="material-symbols-outlined text-4xl">person</span>

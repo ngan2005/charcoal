@@ -32,6 +32,7 @@ use App\Http\Controllers\ShopController;
 */
 
 Route::get('/', [ShopController::class, 'index'])->name('shop');
+Route::get('/about', function() { return view('about'); })->name('about');
 Route::get('/services', [\App\Http\Controllers\PublicServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{id}', [\App\Http\Controllers\PublicServiceController::class, 'show'])->name('services.show');
 Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');

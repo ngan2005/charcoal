@@ -57,7 +57,7 @@ class ProfileController extends Controller
                 }
                 
                 $file->move($destinationPath, $filename);
-                $validated['Avatar'] = asset('storage/avatars/' . $filename);
+                $validated['Avatar'] = 'avatars/' . $filename;
             }
         }
 

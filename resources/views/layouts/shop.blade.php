@@ -39,7 +39,7 @@
 </style>
 @stack('styles')
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col">
+<body x-data="{ showSearch: false }" class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col">
 
 {{-- Header --}}
 <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-10 py-3 bg-white dark:bg-slate-900 sticky top-0 z-50">
@@ -48,27 +48,6 @@
         <a href="{{ route('shop') }}" class="flex items-center gap-3">
             <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="h-8 w-auto">
         </a>
-
-        {{-- Search --}}
-        <form action="{{ route('shop') }}" method="GET" class="flex items-center min-w-40 h-10 max-w-64 w-full">
-            @if(request('category'))
-                <input type="hidden" name="category" value="{{ request('category') }}">
-            @endif
-            @if(request('sort'))
-                <input type="hidden" name="sort" value="{{ request('sort') }}">
-            @endif
-            <div class="flex w-full flex-1 items-stretch rounded-full h-full bg-slate-100 dark:bg-slate-800">
-                <div class="text-slate-500 dark:text-slate-400 flex items-center justify-center pl-4 rounded-l-full">
-                    <span class="material-symbols-outlined text-xl">search</span>
-                </div>
-                <input
-                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-full text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-transparent focus:border-none h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-sm font-normal leading-normal"
-                    placeholder="Tìm kiếm sản phẩm..."
-                    name="search"
-                    value="{{ request('search') }}"
-                />
-            </div>
-        </form>
     </div>
 
     <div class="flex flex-1 justify-end gap-8">
@@ -116,7 +95,7 @@
                 </div>
             </div>
 
-            <button onclick="document.getElementById('aboutModal').classList.remove('hidden')" class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal">Giới thiệu</button>
+            <a class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('about') }}">Giới thiệu</a>
             @auth
                 <a class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
                    href="{{ auth()->user()->RoleID == 1 ? route('admin.dashboard') : (auth()->user()->RoleID == 2 ? route('staff.dashboard') : route('dashboard')) }}">
@@ -161,16 +140,33 @@
                 @endif
             </a>
 
+            {{-- Nút Tìm Kiếm --}}
+            <button type="button" @click="showSearch = true" class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors group">
+                <span class="material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform">search</span>
+            </button>
+
             @auth
                 <div class="flex items-center gap-3">
                     <a href="{{ route('profile.index') }}" class="hidden md:block text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-primary transition-colors cursor-pointer">
                         {{ auth()->user()->FullName }}
                     </a>
-                    <a href="{{ route('profile.index') }}" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm border-2 border-transparent hover:border-primary/30">
-                        @if(auth()->user()->Avatar)
-                            <img src="{{ asset('storage/' . auth()->user()->Avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                    <a href="{{ route('profile.index') }}" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-primary/10 text-slate-700 dark:text-slate-300 hover:bg-primary/20 transition-colors shadow-sm border-2 border-primary/30">
+                        @php
+                            $avatarUrl = null;
+                            if (auth()->user()->Avatar) {
+                                $avatar = auth()->user()->Avatar;
+                                if (str_starts_with($avatar, 'http://') || str_starts_with($avatar, 'https://')) {
+                                    $avatarUrl = $avatar;
+                                } else {
+                                    $avatarUrl = asset('storage/' . $avatar);
+                                }
+                            }
+                        @endphp
+                        @if($avatarUrl)
+                            <img src="{{ $avatarUrl }}" alt="Avatar" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <span class="material-symbols-outlined text-xl text-primary hidden items-center justify-center">person</span>
                         @else
-                            <span class="material-symbols-outlined text-xl text-primary">face_3</span>
+                            <span class="text-primary font-bold text-sm">{{ strtoupper(substr(auth()->user()->FullName, 0, 2)) }}</span>
                         @endif
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
@@ -330,6 +326,8 @@
             </div>
         </div>
     </div>
+</div>
+
 {{-- Lightbox Modal --}}
 <div id="lightboxModal" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pt-20 sm:pt-24" onclick="closeLightbox(event)">
     <div class="relative max-w-4xl w-full flex flex-col items-center justify-center transform scale-95 transition-transform duration-300" id="lightboxContent">
@@ -398,5 +396,56 @@
 </script>
 
 @stack('scripts')
+
+{{-- Search Overlay --}}
+<div x-show="showSearch" 
+     x-cloak
+     x-transition:enter="transition ease-out duration-300 transform"
+     x-transition:enter-start="-translate-y-full opacity-0"
+     x-transition:enter-end="translate-y-0 opacity-100"
+     x-transition:leave="transition ease-in duration-200 transform"
+     x-transition:leave-start="translate-y-0 opacity-100"
+     x-transition:leave-end="-translate-y-full opacity-0"
+     class="fixed inset-x-0 top-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-slate-200/50 dark:border-slate-700/50 py-4">
+    <div class="max-w-3xl mx-auto px-6 relative">
+        {{-- Close Button --}}
+        <button type="button" @click="showSearch = false" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-all">
+            <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+
+        <form action="{{ route('shop') }}" method="GET" class="relative group">
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                    <span class="material-symbols-outlined">search</span>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       placeholder="Tìm kiếm sản phẩm..." 
+                       autofocus
+                       class="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 focus:border-primary rounded-full px-12 py-2.5 text-sm font-medium outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-inner">
+                <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-rose-400 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors">
+                    Tìm
+                </button>
+            </div>
+        </form>
+        
+        {{-- Suggestion Keywords --}}
+        <div class="flex flex-wrap justify-center items-center gap-2 mt-3 text-xs">
+            <span class="text-slate-400 font-medium mr-1">Gợi ý:</span>
+            <a href="{{ route('shop', ['search' => 'Thức ăn']) }}" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full transition-colors">Thức ăn</a>
+            <a href="{{ route('shop', ['search' => 'Bánh thưởng']) }}" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full transition-colors">Bánh thưởng</a>
+            <a href="{{ route('shop', ['search' => 'Cát mèo']) }}" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full transition-colors">Cát mèo</a>
+            <a href="{{ route('shop', ['search' => 'Đồ chơi']) }}" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full transition-colors">Đồ chơi</a>
+            <a href="{{ route('shop', ['search' => 'Phụ kiện']) }}" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/20 hover:text-primary dark:hover:text-primary rounded-full transition-colors">Phụ kiện</a>
+        </div>
+    </div>
+</div>
+
+{{-- Backdrop for Search --}}
+<div x-show="showSearch" 
+     x-cloak
+     x-transition.opacity
+     @click="showSearch = false"
+     class="fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-sm"></div>
 </body>
 </html>
