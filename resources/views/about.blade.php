@@ -205,7 +205,7 @@
 <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-3 bg-white dark:bg-slate-900 sticky top-0 z-50">
     <div class="flex items-center gap-8">
         <a href="{{ route('shop') }}" class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="h-8 w-auto">
+            <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="h-14 w-auto">
         </a>
     </div>
 
@@ -350,11 +350,11 @@
                             <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
                                 <p class="text-sm text-slate-600 dark:text-slate-400">
                                     Khách hàng mới? 
-                                    <a href="{{ route('register-customer') }}" class="text-rose-400 hover:underline font-medium">Tạo tài khoản</a>
+                                    <a href="{{ route('register-customer') }}" class="text-primary-dark hover:underline font-medium">Tạo tài khoản</a>
                                 </p>
                                 <p class="text-sm text-slate-600 dark:text-slate-400">
                                     Quên mật khẩu? 
-                                    <a href="{{ route('forgot-password') }}" class="text-rose-400 hover:underline font-medium">Khôi phục mật khẩu</a>
+                                    <a href="{{ route('forgot-password') }}" class="text-primary-dark hover:underline font-medium">Khôi phục mật khẩu</a>
                                 </p>
                             </div>
                         </div>
@@ -376,7 +376,7 @@
                 Về chúng tôi
             </div>
             <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-                Giới thiệu <span class="text-rose-500">Shop Charcoal</span>
+                Giới thiệu <span class="text-primary-dark">Shop Charcoal</span>
             </h1>
             <p class="text-xl text-slate-600 max-w-2xl mx-auto">
                 Nơi các boss được yêu chiều từ những điều nhỏ nhất
@@ -399,7 +399,7 @@
                     <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
                         Chào mừng bạn đến với Shop Charcoal
                     </h2>
-                    <p class="text-lg text-rose-500 font-medium">
+                    <p class="text-lg text-primary-dark font-medium">
                         Ngôi nhà chung dành cho mọi "sen" và các boss cưng đáng yêu
                     </p>
                 </div>
@@ -407,7 +407,7 @@
                 {{-- Content Paragraphs --}}
                 <div class="space-y-6 text-slate-600 leading-relaxed text-lg">
                     <p data-aos="fade-up" data-aos-delay="100">
-                        Với tên gọi lấy cảm hứng từ <strong class="text-rose-500">than hoạt tính</strong> – biểu tượng của sự tinh khiết, khử mùi và chăm sóc an toàn tuyệt đối, Charcoal không chỉ là một cửa hàng thú cưng thông thường, mà còn là người bạn đồng hành đáng tin cậy trên hành trình chăm sóc sức khỏe và hạnh phúc cho <strong>chó mèo, thỏ, hamster</strong> và mọi thú cưng nhỏ xinh trong gia đình bạn.
+                        Với tên gọi lấy cảm hứng từ <strong class="text-primary-dark">than hoạt tính</strong> – biểu tượng của sự tinh khiết, khử mùi và chăm sóc an toàn tuyệt đối, Charcoal không chỉ là một cửa hàng thú cưng thông thường, mà còn là người bạn đồng hành đáng tin cậy trên hành trình chăm sóc sức khỏe và hạnh phúc cho <strong>chó mèo, thỏ, hamster</strong> và mọi thú cưng nhỏ xinh trong gia đình bạn.
                     </p>
 
                     <div class="bg-rose-50 rounded-3xl p-6 my-8" data-aos="fade-up" data-aos-delay="200">
@@ -435,7 +435,7 @@
                     </p>
 
                     <p data-aos="fade-up" data-aos-delay="400">
-                        Mọi sản phẩm đều được kiểm chứng về nguồn gốc, thành phần tự nhiên, <strong class="text-rose-500">an toàn 100%</strong> – giúp boss khỏe mạnh từ bên trong, sạch sẽ từ bên ngoài, và không còn lo mùi hôi khó chịu trong nhà.
+                        Mọi sản phẩm đều được kiểm chứng về nguồn gốc, thành phần tự nhiên, <strong class="text-primary-dark">an toàn 100%</strong> – giúp boss khỏe mạnh từ bên trong, sạch sẽ từ bên ngoài, và không còn lo mùi hôi khó chịu trong nhà.
                     </p>
 
                     <div class="bg-gradient-to-r from-rose-100 to-pink-100 rounded-3xl p-6 my-8" data-aos="fade-up" data-aos-delay="500">
@@ -453,10 +453,10 @@
                     </p>
 
                     <p data-aos="fade-up" data-aos-delay="700">
-                        <strong class="text-rose-500">Shop Charcoal</strong> – nơi than hoạt tính không chỉ khử mùi, mà còn khơi dậy tình yêu thương vô điều kiện dành cho thú cưng. Hãy ghé thăm chúng tôi để cùng nhau chăm sóc những người bạn bốn chân (hoặc ít chân hơn) của bạn nhé! Vì một ngôi nhà trọn vẹn niềm vui, bắt đầu từ việc yêu thương boss thật nhiều.
+                        <strong class="text-primary-dark">Shop Charcoal</strong> – nơi than hoạt tính không chỉ khử mùi, mà còn khơi dậy tình yêu thương vô điều kiện dành cho thú cưng. Hãy ghé thăm chúng tôi để cùng nhau chăm sóc những người bạn bốn chân (hoặc ít chân hơn) của bạn nhé! Vì một ngôi nhà trọn vẹn niềm vui, bắt đầu từ việc yêu thương boss thật nhiều.
                     </p>
 
-                    <p class="text-center text-xl font-medium text-rose-500 italic mt-10" data-aos="fade-up" data-aos-delay="800">
+                    <p class="text-center text-xl font-medium text-primary-dark italic mt-10" data-aos="fade-up" data-aos-delay="800">
                         Cảm ơn bạn đã tin tưởng và đồng hành cùng Charcoal! 
                         <span class="inline-block ml-2">🐾✨</span>
                     </p>
@@ -467,41 +467,41 @@
         {{-- Contact Info --}}
         <div class="mt-12 grid md:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="300">
             <div class="bg-white rounded-2xl p-6 shadow-lg text-center hover:shadow-xl transition-shadow">
-                <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="material-symbols-outlined text-3xl text-rose-500">call</span>
+                <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-3xl text-primary-dark">call</span>
                 </div>
                 <h3 class="font-bold text-slate-800 mb-2">Hotline / Zalo</h3>
-                <p class="text-rose-500 font-medium">0367196252</p>
+                <p class="text-primary-dark font-medium">0367196252</p>
             </div>
             
             <div class="bg-white rounded-2xl p-6 shadow-lg text-center hover:shadow-xl transition-shadow">
-                <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="material-symbols-outlined text-3xl text-rose-500">location_on</span>
+                <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-3xl text-primary-dark">location_on</span>
                 </div>
                 <h3 class="font-bold text-slate-800 mb-2">Địa chỉ</h3>
-                <p class="text-rose-500 font-medium">TP.HCM, Việt Nam</p>
+                <p class="text-primary-dark font-medium">TP.HCM, Việt Nam</p>
             </div>
             
             <div class="bg-white rounded-2xl p-6 shadow-lg text-center hover:shadow-xl transition-shadow">
                 <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="material-symbols-outlined text-3xl text-rose-500">storefront</span>
+                    <span class="material-symbols-outlined text-3xl text-primary-dark">storefront</span>
                 </div>
                 <h3 class="font-bold text-slate-800 mb-2">Fanpage / Shopee</h3>
-                <p class="text-rose-500 font-medium">Shop Charcoal Thú Cưng</p>
+                <p class="text-primary-dark font-medium">Shop Charcoal Thú Cưng</p>
             </div>
         </div>
 
         {{-- CTA Buttons --}}
         <div class="mt-12 flex flex-wrap justify-center gap-4" data-aos="fade-up" data-aos-delay="400">
-            <a href="{{ route('shop') }}" class="px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl transition-all hover:shadow-xl hover:shadow-rose-300/50 hover:-translate-y-1 flex items-center gap-2">
+            <a href="{{ route('shop') }}" class="px-8 py-4 bg-primary hover:bg-primary-dark text-slate-900 font-bold rounded-2xl transition-all hover:shadow-xl hover:shadow-primary/50 hover:-translate-y-1 flex items-center gap-2">
                 <span class="material-symbols-outlined">shopping_bag</span>
                 Khám phá shop
             </a>
-            <a href="{{ route('services.index') }}" class="px-8 py-4 bg-white hover:bg-rose-50 text-slate-700 font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2">
+            <a href="{{ route('services.index') }}" class="px-8 py-4 bg-white hover:bg-primary/10 text-slate-700 font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 border border-slate-100">
                 <span class="material-symbols-outlined">spa</span>
                 Xem dịch vụ
             </a>
-            <a href="tel:0367196252" class="px-8 py-4 bg-rose-100 hover:bg-rose-200 text-rose-600 font-bold rounded-2xl transition-all flex items-center gap-2">
+            <a href="tel:0367196252" class="px-8 py-4 bg-primary/20 hover:bg-primary/30 text-primary-dark font-bold rounded-2xl transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined">call</span>
                 Liên hệ ngay
             </a>

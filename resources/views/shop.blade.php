@@ -1,28 +1,79 @@
 @extends('layouts.shop')
 
+@push('styles')
+<style>
+    .blob-shape {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        animation: blob-morph 8s ease-in-out infinite;
+    }
+    @keyframes blob-morph {
+        0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    }
+    .animate-float-slow { animation: float 6s ease-in-out infinite; }
+    .animate-float-delayed { animation: float 6s ease-in-out 2s infinite; }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+</style>
+@endpush
+
 @section('content')
 
-{{-- Hero Banner --}}
-<section class="w-full bg-[#fce8e8] dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm relative group">
-    <div class="flex flex-col md:flex-row items-center justify-between min-h-[400px]">
-        <div class="flex-1 px-10 py-12 md:py-20 flex flex-col gap-6 justify-center z-10 pl-20">
-            <h1 class="text-slate-900 dark:text-white text-4xl md:text-5xl font-bold leading-tight tracking-tight">
-                Ưu Đãi Đặc Biệt Cho Thú Cưng
+<div class="relative z-10 space-y-12">
+{{-- New Hero Banner: Organic Blobs --}}
+<section class="container-fluid px-0 mb-12 relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#fff5f5] to-[#ffe4e8] dark:from-slate-800 dark:to-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl">
+    {{-- Background Decorative Blobs --}}
+    <div class="absolute top-[-10%] left-[-5%] w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="row g-0 items-center min-h-[450px] relative z-10">
+        {{-- Left Content --}}
+        <div class="col-md-6 px-8 py-12 md:ps-20 flex flex-col gap-6 text-center md:text-start" data-aos="fade-right">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-full w-fit mx-auto md:mx-0 border border-white/40 shadow-sm">
+                <span class="text-primary text-xl animate-bounce">✨</span>
+                <span class="text-slate-600 dark:text-slate-300 text-xs font-bold tracking-widest uppercase">Pink Charcoal Pet Store</span>
+            </div>
+            
+            <h1 class="text-slate-900 dark:text-white text-4xl md:text-6xl font-extrabold leading-[1.1] tracking-tight">
+                Ưu Đãi Đặc Biệt <br>
+                <span class="text-primary-dark">Cho Thú Cưng</span>
             </h1>
-            <p class="text-slate-700 dark:text-slate-300 text-lg md:text-xl max-w-xl leading-relaxed">
-                Chăm sóc những người bạn nhỏ của bạn với những sản phẩm chất lượng, được tuyển chọn kỹ lưỡng từ Pink Charcoal.
+            
+            <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed font-medium">
+                Nâng niu người bạn nhỏ của bạn với những sản phẩm chất lượng, được tuyển chọn kỹ lưỡng bằng cả tình yêu thương.
             </p>
-            <div>
+            
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-2">
                 <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})"
-                        class="bg-primary hover:bg-primary-dark text-slate-900 font-bold py-3 px-8 rounded-full shadow-md transition-all transform hover:scale-105">
-                    Khám Phá Ngay
+                        class="bg-primary hover:bg-primary-dark text-slate-900 font-bold py-4 px-10 rounded-2xl shadow-lg shadow-primary/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-2 group">
+                    <span>Khám Phá Ngay</span>
+                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </button>
             </div>
         </div>
-        <div class="flex-1 w-full md:w-1/2 h-full absolute md:relative right-0 bottom-0 opacity-20 md:opacity-100">
-            <img alt="Happy pets"
-                 class="w-full h-full object-cover object-center rounded-r-2xl"
-                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4StMqvJzf90V40rQ7H3vWq5wtrcKsiAE3kKU0oU8eGrmPIucbOmpesphgPQW55d4zIXQamAOx5Hqt1BI4jb18LwlD5gUbHqenXLJ4jJ2Yhj6iLC2x08GqOlbLGyoIHJtSYdBPLl55t2zbb6y4FaPQxi6moZNoEluCSRodV9fHK66mMD99H7Si8Ror0W3hyKTTpU9KERFmrmkfmpR3U_J18_rgn0nwLmM9EG4Q7-_XUY1IRHaKhKnYv2buSE4D1NBO45tqts74Cg"/>
+
+        {{-- Right Media --}}
+        <div class="col-md-6 h-full relative p-8 md:p-12 flex items-center justify-center" data-aos="zoom-in">
+            {{-- Floating Icons --}}
+            <span class="material-symbols-outlined absolute top-1/4 left-10 text-4xl text-primary/40 animate-float-slow select-none">pets</span>
+            <span class="material-symbols-outlined absolute bottom-1/4 right-10 text-5xl text-accent/30 animate-float-delayed select-none">favorite</span>
+            <span class="material-symbols-outlined absolute top-10 right-20 text-3xl text-primary-dark/20 animate-float-slow select-none">bone</span>
+
+            <div class="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
+                {{-- Organic Blob Background for Image --}}
+                <div class="absolute inset-0 bg-primary/30 blob-shape transform rotate-12 scale-110"></div>
+                <div class="absolute inset-0 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm blob-shape transform -rotate-6"></div>
+                
+                {{-- Main Image --}}
+                <div class="relative w-[90%] h-[90%] overflow-hidden blob-shape border-[8px] border-white dark:border-slate-800 shadow-2xl">
+                    <img alt="Happy pets"
+                         class="w-full h-full object-cover object-center"
+                         src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?q=80&w=1000&auto=format&fit=crop"
+                         onerror="this.src='https://placehold.co/600x600/F4C2C3/ffffff?text=Happy+Pets'"/>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -127,7 +178,7 @@
         </div>
 
         {{-- Products Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
             @forelse($products as $product)
                 @php
                     $mainImage = $product->images->where('IsMain', 1)->first();
@@ -283,4 +334,5 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
+</div> {{-- End of z-10 container --}}
 @endsection

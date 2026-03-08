@@ -52,7 +52,7 @@ class ProductController extends Controller
             'Size' => ['nullable', 'string', 'max:50'],
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
-            'Description' => ['nullable', 'string', 'max:255'],
+            'Description' => ['nullable', 'string', 'max:5000'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -108,7 +108,7 @@ class ProductController extends Controller
             'Size' => ['nullable', 'string', 'max:50'],
             'Stock' => ['nullable', 'integer', 'min:0'],
             'StatusID' => ['required', 'integer', 'exists:product_status,StatusID'],
-            'Description' => ['nullable', 'string', 'max:255'],
+            'Description' => ['nullable', 'string', 'max:5000'],
             'DeleteImageIDs' => ['nullable', 'string'],
             'MainImageID' => ['nullable', 'integer'],
             'new_images' => ['nullable', 'array'],

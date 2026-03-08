@@ -78,6 +78,26 @@
         opacity: 1 !important;
         visibility: visible !important;
     }
+
+    /* Cat Paw Chat Box Animations */
+    @keyframes paw-bounce {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        50% { transform: translateY(-10px) rotate(2deg); }
+    }
+    .animate-paw { animation: paw-bounce 3s ease-in-out infinite; }
+
+    /* Global Site Background */
+    body {
+        background-image: url('{{ asset('images/site-background.png') }}');
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    
+    /* Ensure content visibility over background */
+    .bg-background-light { background-color: rgba(255, 255, 255, 0.2) !important; backdrop-filter: none; }
+    .dark .bg-background-dark { background-color: rgba(15, 23, 42, 0.3) !important; backdrop-filter: none; }
 </style>
 @stack('styles')
 </head>
@@ -88,7 +108,7 @@
     <div class="flex items-center gap-8">
         {{-- Logo --}}
         <a href="{{ route('shop') }}" class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="h-8 w-auto">
+            <img src="{{ asset('images/logo-pink-charcoal.png') }}" alt="Pink Charcoal" class="h-14 w-auto">
         </a>
     </div>
 
@@ -449,25 +469,32 @@
      x-transition:leave="transition ease-in duration-200 transform"
      x-transition:leave-start="translate-y-0 opacity-100"
      x-transition:leave-end="-translate-y-full opacity-0"
-     class="fixed inset-x-0 top-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-slate-200/50 dark:border-slate-700/50 py-4">
+     class="fixed inset-x-0 top-0 z-[110] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl border-b-[6px] border-primary dark:border-primary/50 py-8 rounded-b-[4rem] overflow-visible">
+    {{-- Cat Paw Toes (Ngón chân mèo hướng xuống) --}}
+    <div class="absolute -bottom-8 left-0 right-0 flex items-start justify-center gap-2 sm:gap-4 pointer-events-none px-4">
+        <div class="toe w-10 h-12 sm:w-14 sm:h-16 bg-primary/90 dark:bg-primary/70 rounded-[50%] transform -rotate-[15deg] shadow-lg border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-12 h-14 sm:w-16 sm:h-20 bg-primary dark:bg-primary/80 rounded-[50%] shadow-xl border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-12 h-14 sm:w-16 sm:h-20 bg-primary dark:bg-primary/80 rounded-[50%] shadow-xl border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-10 h-12 sm:w-14 sm:h-16 bg-primary/90 dark:bg-primary/70 rounded-[50%] transform rotate-[15deg] shadow-lg border-4 border-white dark:border-slate-900"></div>
+    </div>
     <div class="max-w-3xl mx-auto px-6 relative">
         {{-- Close Button --}}
         <button type="button" @click="showSearch = false" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full transition-all">
             <span class="material-symbols-outlined text-xl">close</span>
         </button>
 
-        <form action="{{ route('shop') }}" method="GET" class="relative group">
+        <form action="{{ route('shop') }}" method="GET" class="relative group mt-2">
             <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                    <span class="material-symbols-outlined">search</span>
+                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">search</span>
                 </span>
                 <input type="text" 
                        name="search" 
-                       placeholder="Tìm kiếm sản phẩm..." 
+                       placeholder="Tìm kiếm sản phẩm cho thú cưng..." 
                        autofocus
-                       class="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 focus:border-primary rounded-full px-12 py-2.5 text-sm font-medium outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-inner">
-                <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-rose-400 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors">
-                    Tìm
+                       class="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 focus:border-primary rounded-full px-14 py-4 text-base font-medium outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-inner">
+                <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-dark text-slate-900 rounded-full px-6 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-md">
+                    TÌM KIẾM
                 </button>
             </div>
         </form>
@@ -490,40 +517,56 @@
      x-transition.opacity
      @click="showSearch = false"
      class="fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-sm"></div>
-{{-- Support Chat Box --}}
-<div id="supportChatBox" class="fixed bottom-6 right-6 z-[100] hidden flex-col w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all duration-300 translate-y-4 opacity-0">
+{{-- Support Chat Box (Cat Paw Style) --}}
+<div id="supportChatBox" class="fixed bottom-6 right-6 z-[100] hidden flex-col w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-b-[3rem] rounded-t-[4rem] shadow-2xl border-[6px] border-primary dark:border-primary/50 transform transition-all duration-300 translate-y-4 opacity-0 overflow-visible">
+    {{-- Cat Paw Toes (Ngón chân mèo) --}}
+    <div class="absolute -top-12 sm:-top-16 left-0 right-0 flex items-end justify-center gap-2 sm:gap-4 pointer-events-none px-4">
+        <div class="toe w-12 h-14 sm:w-16 sm:h-20 bg-primary/90 dark:bg-primary/70 rounded-[50%] transform -rotate-[25deg] translate-y-4 shadow-lg border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-14 h-18 sm:w-20 sm:h-24 bg-primary dark:bg-primary/80 rounded-[50%] transform -rotate-[10deg] shadow-xl border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-14 h-18 sm:w-20 sm:h-24 bg-primary dark:bg-primary/80 rounded-[50%] transform rotate-[10deg] shadow-xl border-4 border-white dark:border-slate-900"></div>
+        <div class="toe w-12 h-14 sm:w-16 sm:h-20 bg-primary/90 dark:bg-primary/70 rounded-[50%] transform rotate-[25deg] translate-y-4 shadow-lg border-4 border-white dark:border-slate-900"></div>
+    </div>
+
     {{-- Chat Header --}}
-    <div class="bg-primary px-5 py-4 flex items-center justify-between shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                <span class="material-symbols-outlined text-primary text-2xl">support_agent</span>
+    <div class="bg-primary px-5 py-6 sm:py-8 flex items-center justify-between shadow-sm rounded-t-[3.5rem] relative overflow-hidden">
+        {{-- Decorative Paw Print --}}
+        <div class="absolute -right-4 -top-4 opacity-10 transform rotate-12">
+            <span class="material-symbols-outlined text-8xl text-slate-900">pets</span>
+        </div>
+        
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-md animate-paw">
+                <span class="material-symbols-outlined text-primary text-3xl">support_agent</span>
             </div>
             <div>
-                <h4 class="text-slate-900 font-bold text-sm leading-tight">Hỗ trợ khách hàng</h4>
-                <p class="text-slate-800 text-[10px] uppercase tracking-wider font-semibold">Trực tuyến</p>
+                <h4 class="text-slate-900 font-bold text-base leading-tight">Hỗ trợ khách hàng</h4>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <p class="text-slate-800 text-[10px] uppercase tracking-wider font-bold">TRỰC TUYẾN</p>
+                </div>
             </div>
         </div>
-        <button type="button" onclick="toggleSupportChat()" class="text-slate-800 hover:text-black transition-colors">
-            <span class="material-symbols-outlined text-[20px]">close</span>
+        <button type="button" onclick="toggleSupportChat()" class="text-slate-800 hover:text-black transition-colors relative z-10 bg-white/20 p-2 rounded-full backdrop-blur-sm">
+            <span class="material-symbols-outlined text-[20px] font-bold">close</span>
         </button>
     </div>
 
     {{-- Chat Messages --}}
-    <div id="chatMessageContainer" class="flex-1 h-80 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-slate-800/30 no-scrollbar">
-        <div class="flex flex-col gap-1 max-w-[80%]">
-            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700">
-                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Chào bạn! Pink Charcoal có thể giúp gì cho bạn và thú cưng của mình không ạ? 🐾</p>
+    <div id="chatMessageContainer" class="flex-1 h-80 overflow-y-auto p-6 space-y-4 bg-slate-50/50 dark:bg-slate-800/30 no-scrollbar relative">
+        <div class="flex flex-col gap-1 max-w-[85%]">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-3xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700">
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">Chào bạn! Pink Charcoal có thể giúp gì cho bạn và thú cưng của mình không ạ? 🐾✨</p>
             </div>
-            <span class="text-[10px] text-slate-400 ml-1">Vừa xong</span>
+            <span class="text-[10px] text-slate-400 ml-2 font-medium">Vừa xong</span>
         </div>
     </div>
 
     {{-- Chat Input --}}
-    <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <form id="chatForm" class="flex items-center gap-2">
-            <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." class="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-full px-4 py-2 text-sm focus:ring-1 focus:ring-primary placeholder:text-slate-400">
-            <button type="submit" class="h-9 w-9 bg-primary hover:bg-primary-dark text-slate-900 rounded-full flex items-center justify-center shadow-sm transition-colors">
-                <span class="material-symbols-outlined text-xl">send</span>
+    <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-b-[2.5rem]">
+        <form id="chatForm" class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full ring-1 ring-slate-200 dark:ring-slate-700 focus-within:ring-primary transition-all">
+            <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." class="flex-1 bg-transparent border-none px-4 py-2 text-sm focus:ring-0 placeholder:text-slate-400 dark:text-white">
+            <button type="submit" class="h-10 w-10 bg-primary hover:bg-primary-dark text-slate-900 rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 group">
+                <span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">send</span>
             </button>
         </form>
     </div>
