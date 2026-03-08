@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script id="tailwind-config">
     tailwind.config = {
         darkMode: "class",
@@ -36,6 +38,46 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [x-cloak] { display: none !important; }
+
+    /* Override Bootstrap Blue with Pink Charcoal */
+    :root {
+        --bs-primary: #F4C2C3;
+        --bs-primary-rgb: 244, 194, 195;
+        --bs-link-color: #F4C2C3;
+        --bs-link-hover-color: #e0a9aa;
+    }
+    .btn-primary {
+        --bs-btn-bg: #F4C2C3;
+        --bs-btn-border-color: #F4C2C3;
+        --bs-btn-hover-bg: #e0a9aa;
+        --bs-btn-hover-border-color: #e0a9aa;
+        --bs-btn-active-bg: #e0a9aa;
+        --bs-btn-active-border-color: #e0a9aa;
+        color: #1e293b !important; /* slate-900 */
+    }
+    .text-primary { color: #F4C2C3 !important; }
+    .bg-primary { background-color: #F4C2C3 !important; }
+
+    /* Fix Dropdown visibility conflict */
+    .nav-item-holder { position: relative !important; }
+    .nav-item-dropdown {
+        display: none !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        z-index: 9999 !important;
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+    }
+    .nav-item-holder:hover > .nav-item-dropdown {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
 </style>
 @stack('styles')
 </head>
@@ -56,14 +98,14 @@
             <a class="text-primary text-sm font-medium leading-normal" href="{{ route('shop') }}">Cửa Hàng</a>
             
             {{-- Dropdown Sản phẩm --}}
-            <div class="relative group">
+            <div class="nav-item-holder">
                 <button class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal flex items-center gap-1 cursor-pointer">
                     Sản phẩm
-                    <span class="material-symbols-outlined text-[18px] transition-transform duration-300 group-hover:rotate-180">arrow_drop_down</span>
+                    <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
                 </button>
                 
                 {{-- Dropdown Menu --}}
-                <div class="absolute top-full left-0 mt-3 w-56 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2 flex flex-col translate-y-2 group-hover:translate-y-0">
+                <div class="nav-item-dropdown mt-2 w-56 rounded-2xl py-2 flex-col">
                     <a href="{{ route('shop') }}" class="px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary transition-colors font-medium border-b border-slate-50 dark:border-slate-800/50">
                         Tất cả sản phẩm
                     </a>
@@ -76,14 +118,14 @@
             </div>
 
             {{-- Dropdown Dịch vụ --}}
-            <div class="relative group">
+            <div class="nav-item-holder">
                 <button class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal flex items-center gap-1 cursor-pointer">
                     Dịch vụ
-                    <span class="material-symbols-outlined text-[18px] transition-transform duration-300 group-hover:rotate-180">arrow_drop_down</span>
+                    <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
                 </button>
                 
                 {{-- Dropdown Menu --}}
-                <div class="absolute top-full left-0 mt-3 w-64 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 py-2 flex flex-col translate-y-2 group-hover:translate-y-0">
+                <div class="nav-item-dropdown mt-2 w-64 rounded-2xl py-2 flex-col">
                     <a href="{{ route('services.index') }}" class="px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary transition-colors font-medium border-b border-slate-50 dark:border-slate-800/50">
                         Top Dịch vụ
                     </a>
@@ -96,6 +138,7 @@
             </div>
 
             <a class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('about') }}">Giới thiệu</a>
+            <button type="button" onclick="toggleSupportChat()" class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal">Hỗ trợ</button>
             @auth
                 <a class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
                    href="{{ auth()->user()->RoleID == 1 ? route('admin.dashboard') : (auth()->user()->RoleID == 2 ? route('staff.dashboard') : route('dashboard')) }}">
@@ -447,5 +490,133 @@
      x-transition.opacity
      @click="showSearch = false"
      class="fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-sm"></div>
+{{-- Support Chat Box --}}
+<div id="supportChatBox" class="fixed bottom-6 right-6 z-[100] hidden flex-col w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all duration-300 translate-y-4 opacity-0">
+    {{-- Chat Header --}}
+    <div class="bg-primary px-5 py-4 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-primary text-2xl">support_agent</span>
+            </div>
+            <div>
+                <h4 class="text-slate-900 font-bold text-sm leading-tight">Hỗ trợ khách hàng</h4>
+                <p class="text-slate-800 text-[10px] uppercase tracking-wider font-semibold">Trực tuyến</p>
+            </div>
+        </div>
+        <button type="button" onclick="toggleSupportChat()" class="text-slate-800 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+    </div>
+
+    {{-- Chat Messages --}}
+    <div id="chatMessageContainer" class="flex-1 h-80 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-slate-800/30 no-scrollbar">
+        <div class="flex flex-col gap-1 max-w-[80%]">
+            <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 dark:border-slate-700">
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Chào bạn! Pink Charcoal có thể giúp gì cho bạn và thú cưng của mình không ạ? 🐾</p>
+            </div>
+            <span class="text-[10px] text-slate-400 ml-1">Vừa xong</span>
+        </div>
+    </div>
+
+    {{-- Chat Input --}}
+    <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <form id="chatForm" class="flex items-center gap-2">
+            <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." class="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-full px-4 py-2 text-sm focus:ring-1 focus:ring-primary placeholder:text-slate-400">
+            <button type="submit" class="h-9 w-9 bg-primary hover:bg-primary-dark text-slate-900 rounded-full flex items-center justify-center shadow-sm transition-colors">
+                <span class="material-symbols-outlined text-xl">send</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleSupportChat() {
+        const chatBox = document.getElementById('supportChatBox');
+        if (chatBox.classList.contains('hidden')) {
+            chatBox.classList.remove('hidden');
+            // Trigger reflow
+            void chatBox.offsetWidth;
+            chatBox.classList.remove('translate-y-4', 'opacity-0');
+            chatBox.classList.add('translate-y-0', 'opacity-100');
+            
+            // Load messages
+            loadMessages();
+            
+            // Scroll to bottom
+            const container = document.getElementById('chatMessageContainer');
+            container.scrollTop = container.scrollHeight;
+        } else {
+            chatBox.classList.add('translate-y-4', 'opacity-0');
+            chatBox.classList.remove('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                chatBox.classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    async function loadMessages() {
+        try {
+            const response = await fetch('{{ route('support.messages') }}');
+            const messages = await response.json();
+            const container = document.getElementById('chatMessageContainer');
+            
+            // Clear existing except first welcome
+            const welcome = container.firstElementChild.outerHTML;
+            container.innerHTML = welcome;
+
+            messages.forEach(msg => {
+                appendMessage(msg.Message, msg.IsFromAdmin, new Date(msg.created_at));
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
+    }
+
+    // Handle chat form submission
+    document.getElementById('chatForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (message) {
+            appendMessage(message, false);
+            input.value = '';
+            
+            try {
+                const response = await fetch('{{ route('support.send') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (!response.ok) throw new Error('Failed to send');
+                
+                // Optional: load messages again or just keep the appended one
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+    });
+
+    function appendMessage(text, isFromAdmin, date = new Date()) {
+        const container = document.getElementById('chatMessageContainer');
+        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const messageHtml = `
+            <div class="flex flex-col gap-1 ${isFromAdmin ? 'max-w-[80%]' : 'max-w-[80%] items-end ml-auto'}">
+                <div class="${isFromAdmin ? 'bg-white dark:bg-slate-800 rounded-tl-none border-slate-100 dark:border-slate-700' : 'bg-primary text-slate-900 rounded-tr-none border-transparent'} p-3 rounded-2xl shadow-sm border">
+                    <p class="text-sm leading-relaxed">${text}</p>
+                </div>
+                <span class="text-[10px] text-slate-400 ${isFromAdmin ? 'ml-1' : 'mr-1'}">${time}</span>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', messageHtml);
+        container.scrollTop = container.scrollHeight;
+    }
+</script>
 </body>
 </html>

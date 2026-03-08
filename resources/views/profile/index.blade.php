@@ -54,6 +54,9 @@
             <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                 <span class="material-symbols-outlined">lock</span> Đổi mật khẩu
             </button>
+            <button onclick="switchTab('supportBtn', 'supportTab')" id="supportBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                <span class="material-symbols-outlined">support_agent</span> Hỗ trợ
+            </button>
             <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">
                 @csrf
                 <button type="submit" class="w-full text-left px-5 py-3 rounded-xl font-medium flex items-center gap-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors">
@@ -203,6 +206,34 @@
                 </form>
             </div>
 
+            {{-- Support Tab --}}
+            <div id="supportTab" class="hidden bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">support_agent</span> Hỗ trợ khách hàng
+                </h2>
+                
+                <p class="text-slate-500 text-sm">Gửi tin nhắn cho nhân viên cửa hàng. Chúng tôi sẽ phản hồi sớm nhất có thể.</p>
+                
+                {{-- Chat Container --}}
+                <div id="supportChat" class="flex flex-col gap-3 h-[400px] overflow-y-auto p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div class="text-center text-slate-400 text-sm py-8" id="noMessages">
+                        <span class="material-symbols-outlined text-4xl mb-2">chat</span>
+                        <p>Chưa có tin nhắn nào. Hãy gửi tin nhắn đầu tiên!</p>
+                    </div>
+                </div>
+
+                {{-- Send Message Form --}}
+                <form id="supportForm" class="flex gap-3">
+                    @csrf
+                    <input type="text" id="supportMessage" name="message" placeholder="Nhập tin nhắn..." 
+                        class="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        required>
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-slate-900 font-bold px-6 py-3 rounded-xl shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
@@ -220,8 +251,11 @@
         document.getElementById('passwordTab').classList.add('hidden');
         document.getElementById('passwordTab').classList.remove('flex');
 
+        document.getElementById('supportTab').classList.add('hidden');
+        document.getElementById('supportTab').classList.remove('flex');
+
         // Reset all buttons style
-        const buttons = ['profileBtn', 'ordersBtn', 'passwordBtn'];
+        const buttons = ['profileBtn', 'ordersBtn', 'passwordBtn', 'supportBtn'];
         buttons.forEach(id => {
             const btn = document.getElementById(id);
             btn.classList.remove('bg-primary', 'text-slate-900', 'shadow-sm');
@@ -248,6 +282,75 @@
         };
         reader.readAsDataURL(event.target.files[0]);
     }
+
+    // Support Chat Functions
+    function loadSupportMessages() {
+        fetch('{{ route("support.messages") }}')
+            .then(response => response.json())
+            .then(data => {
+                const chatContainer = document.getElementById('supportChat');
+                const noMessages = document.getElementById('noMessages');
+                
+                if (data.length > 0) {
+                    noMessages.classList.add('hidden');
+                    chatContainer.innerHTML = data.map(msg => `
+                        <div class="flex ${msg.IsFromAdmin ? 'justify-start' : 'justify-end'}">
+                            <div class="max-w-[80%] px-4 py-2 rounded-2xl ${msg.IsFromAdmin 
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white' 
+                                : 'bg-primary text-slate-900'}">
+                                <p class="text-sm">${msg.Message}</p>
+                                <p class="text-xs ${msg.IsFromAdmin ? 'text-slate-400' : 'text-slate-600'} mt-1">
+                                    ${new Date(msg.created_at).toLocaleString('vi-VN')}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('');
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else {
+                    chatContainer.innerHTML = '';
+                    chatContainer.appendChild(noMessages);
+                    noMessages.classList.remove('hidden');
+                }
+            });
+    }
+
+    // Send message
+    document.getElementById('supportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const messageInput = document.getElementById('supportMessage');
+        const message = messageInput.value.trim();
+        
+        if (!message) return;
+
+        fetch('{{ route("support.send") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: 'message=' + encodeURIComponent(message)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                loadSupportMessages();
+            }
+        });
+    });
+
+    // Load messages when support tab is opened
+    const originalSwitchTab = switchTab;
+    window.switchTab = function(btnId, tabId) {
+        originalSwitchTab(btnId, tabId);
+        if (tabId === 'supportTab') {
+            loadSupportMessages();
+            // Auto refresh every 10 seconds
+            if (!window.supportInterval) {
+                window.supportInterval = setInterval(loadSupportMessages, 10000);
+            }
+        }
+    };
 </script>
 @endpush
 @endsection

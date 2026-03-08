@@ -34,9 +34,9 @@
             </a>
             
             
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.leaves.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.leaves') }}">
-                <span class="material-symbols-outlined shrink-0">edit_document</span>
-                <p class="text-sm font-medium nav-text whitespace-nowrap">Đơn từ / Nghỉ phép</p>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.support.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.support.index') }}">
+                <span class="material-symbols-outlined shrink-0">support_agent</span>
+                <p class="text-sm font-medium nav-text whitespace-nowrap">Hỗ trợ khách hàng</p>
             </a>
             
             <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl nav-item transition-all @if(Route::is('staff.inventory') || Route::is('staff.inventory.*')) active-nav @else hover:bg-rose-50 dark:hover:bg-rose-900/20 text-[#64748b] dark:text-gray-400 @endif" href="{{ route('staff.inventory') }}">

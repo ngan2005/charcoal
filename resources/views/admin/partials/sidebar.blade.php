@@ -72,11 +72,6 @@
                 <span class="material-symbols-outlined shrink-0">local_offer</span>
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Mã giảm giá</p>
             </a>
-            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300 relative nav-item" href="#">
-                <span class="material-symbols-outlined shrink-0">chat_bubble</span>
-                <p class="text-sm font-medium flex-1 nav-text whitespace-nowrap">Chat</p>
-                <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full absolute top-1 right-2 nav-text">3</span>
-            </a>
         </nav>
     </div>
 

@@ -43,6 +43,20 @@ Route::get('/home', function () {
 });
 
 
+// // Support Chat Routes (requires authentication)
+Route::middleware('auth')->group(function () {
+    Route::get('/support/messages', [App\Http\Controllers\SupportController::class, 'getMessages'])->name('support.messages');
+    Route::post('/support/send', [App\Http\Controllers\SupportController::class, 'store'])->name('support.send');
+});
+
+// Staff Support Routes - for staff to reply to customer messages
+Route::prefix('staff/support')->name('staff.support.')->middleware('role:admin,staff')->group(function () {
+    Route::get('/', [App\Http\Controllers\SupportController::class, 'index'])->name('index');
+    Route::get('/conversations', [App\Http\Controllers\SupportController::class, 'getAllConversations'])->name('conversations');
+    Route::get('/user/{userId}/messages', [App\Http\Controllers\SupportController::class, 'getUserMessages'])->name('user.messages');
+    Route::post('/reply', [App\Http\Controllers\SupportController::class, 'reply'])->name('reply');
+});
+
 // Auth routes
 Route::middleware('guest')->group(function () {
     // Register
