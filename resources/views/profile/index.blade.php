@@ -3,11 +3,15 @@
 @section('title', 'Tài khoản của tôi - Pink Charcoal')
 
 @section('content')
-<div class="w-full max-w-[1200px] mx-auto min-h-[60vh] flex flex-col pt-4 pb-12 gap-8">
-    
+<div class="w-full max-w-[1000px] mx-auto min-h-[60vh] flex flex-col pt-4 pb-12 gap-6 relative">
+    {{-- Decorative Background Paw --}}
+    <div class="absolute -top-10 -right-10 opacity-[0.03] pointer-events-none rotate-12 hidden md:block">
+        <span class="material-symbols-outlined text-[300px]">pets</span>
+    </div>
+
     {{-- Page Header --}}
-    <div class="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
-        <div class="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-full flex items-center justify-center shrink-0 border-4 border-white dark:border-slate-800 shadow-sm overflow-hidden text-primary">
+    <div class="flex items-center gap-5 border-b border-pink-100 dark:border-slate-800 pb-5">
+        <div class="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden text-primary">
             @php
                 $headerAvatarUrl = null;
                 if ($user->Avatar) {
@@ -17,12 +21,12 @@
             @if($headerAvatarUrl)
                 <img src="{{ $headerAvatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
             @else
-                <span class="material-symbols-outlined text-4xl drop-shadow-sm">face_3</span>
+                <span class="material-symbols-outlined text-3xl drop-shadow-sm">face_3</span>
             @endif
         </div>
         <div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white font-display">Xin chào, {{ $user->FullName }}!</h1>
-            <p class="text-slate-500 text-sm mt-1">Quản lý thông tin cá nhân và lịch sử dịch vụ, đơn hàng của bạn.</p>
+            <h1 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white font-display">Xin chào, {{ $user->FullName }}!</h1>
+            <p class="text-slate-400 text-xs mt-1">Cập nhật thông tin để chúng mình phục vụ bạn tốt hơn nhé 🐾</p>
         </div>
     </div>
 
@@ -44,23 +48,36 @@
     <div class="flex flex-col md:flex-row gap-8 items-start">
         
         {{-- Sidebar Menu --}}
-        <div class="w-full md:w-1/4 flex flex-col gap-2 sticky top-24">
-            <button onclick="switchTab('profileBtn', 'profileTab')" id="profileBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors bg-primary text-slate-900 shadow-sm border border-transparent">
-                <span class="material-symbols-outlined">person</span> Thông tin Cá Nhân
+        <div class="w-full md:w-72 flex flex-col gap-1.5 sticky top-24">
+            <button onclick="switchTab('profileBtn', 'profileTab')" id="profileBtn" class="profile-nav-btn active w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all bg-primary/20 text-slate-900 border border-primary/10">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">person</span> Thông tin Cá Nhân
+                </div>
+                <span class="material-symbols-outlined text-sm active-paw opacity-100">pets</span>
             </button>
-            <button onclick="switchTab('ordersBtn', 'ordersTab')" id="ordersBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                <span class="material-symbols-outlined">receipt_long</span> Lịch sử Đơn hàng
+            <button onclick="switchTab('ordersBtn', 'ordersTab')" id="ordersBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">receipt_long</span> Lịch sử Đơn hàng
+                </div>
+                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
             </button>
-            <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                <span class="material-symbols-outlined">lock</span> Đổi mật khẩu
+            <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">lock</span> Đổi mật khẩu
+                </div>
+                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
             </button>
-            <button onclick="switchTab('supportBtn', 'supportTab')" id="supportBtn" class="w-full text-left px-5 py-4 rounded-xl font-bold flex items-center gap-3 transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                <span class="material-symbols-outlined">support_agent</span> Hỗ trợ
+            <button onclick="switchTab('supportBtn', 'supportTab')" id="supportBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">support_agent</span> Hỗ trợ
+                </div>
+                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
             </button>
-            <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">
+            
+            <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-pink-50 dark:border-slate-800 pt-4">
                 @csrf
-                <button type="submit" class="w-full text-left px-5 py-3 rounded-xl font-medium flex items-center gap-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors">
-                    <span class="material-symbols-outlined">logout</span> Đăng xuất
+                <button type="submit" class="w-full text-left px-5 py-2.5 rounded-2xl font-medium flex items-center gap-3 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-colors text-sm">
+                    <span class="material-symbols-outlined text-[20px]">logout</span> Đăng xuất
                 </button>
             </form>
         </div>
@@ -69,10 +86,13 @@
         <div class="w-full md:w-3/4">
             
             {{-- Profile Tab --}}
-            <div id="profileTab" class="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-6">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-4">Hồ Sơ Của Tôi</h2>
+            <div id="profileTab" class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-6">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
+                    <span class="material-symbols-outlined text-primary">account_circle</span>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hồ Sơ Của Tôi</h2>
+                </div>
                 
-                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-5 max-w-lg">
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6 max-w-lg">
                     @csrf
                     @method('PUT')
                     
@@ -83,152 +103,169 @@
                             $formAvatarUrl = str_starts_with($user->Avatar, 'http') ? $user->Avatar : asset('storage/' . $user->Avatar);
                         }
                     @endphp
-                    <div class="flex items-center gap-6 mb-2">
-                        <div class="relative w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-sm overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 group">
+                    <div class="flex items-center gap-6 p-4 bg-pink-50/30 dark:bg-slate-800/30 rounded-3xl border border-white dark:border-slate-800 shadow-inner">
+                        <div class="relative w-24 h-24 rounded-3xl border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white dark:bg-slate-800 shrink-0 group">
                             @if($formAvatarUrl)
                                 <img id="avatarPreview" src="{{ $formAvatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
                             @else
-                                <div id="avatarPreviewHolder" class="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
-                                    <span class="material-symbols-outlined text-4xl">person</span>
+                                <div id="avatarPreviewHolder" class="w-full h-full flex items-center justify-center text-slate-200">
+                                    <span class="material-symbols-outlined text-4xl">pets</span>
                                 </div>
                                 <img id="avatarPreview" src="" alt="Avatar" class="hidden w-full h-full object-cover">
                             @endif
-                            <label for="avatarInput" class="absolute inset-0 bg-slate-900/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                <span class="material-symbols-outlined">photo_camera</span>
+                            <label for="avatarInput" class="absolute inset-0 bg-primary/20 backdrop-blur-[2px] text-slate-900 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                                <span class="material-symbols-outlined font-bold">add_a_photo</span>
                             </label>
                         </div>
                         <div class="flex flex-col">
-                            <h3 class="font-bold text-slate-900 dark:text-white">Ảnh Đại Diện</h3>
-                            <p class="text-xs text-slate-500 mb-2">Định dạng JPG, PNG, GIF. Tối đa 5MB</p>
-                            <label for="avatarInput" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-4 py-2 rounded-full cursor-pointer transition-colors max-w-fit flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">upload</span> Chọn ảnh mới
+                            <h3 class="font-bold text-slate-800 dark:text-white text-sm">Ảnh Đại Diện</h3>
+                            <p class="text-[10px] text-slate-400 mb-3 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full w-fit">JPG, PNG, GIF. Tối đa 5MB</p>
+                            <label for="avatarInput" class="text-xs font-bold bg-primary text-slate-900 hover:shadow-lg px-4 py-2.5 rounded-2xl cursor-pointer transition-all max-w-fit flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">upload</span> Thêm hình mới
                             </label>
                             <input type="file" id="avatarInput" name="avatar" class="hidden" accept="image/*" onchange="previewImage(event)">
                         </div>
                     </div>
                     
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Tên Đăng Nhập / Email</label>
-                        <input type="text" value="{{ $user->Username }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-500 focus:outline-none" disabled>
-                        <p class="text-xs text-slate-400 mt-1">Tên đăng nhập không thể thay đổi.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Email / Username</label>
+                            <div class="px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 font-medium text-sm">
+                                {{ $user->Username }}
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Họ và Tên</label>
+                            <input type="text" name="FullName" value="{{ $user->FullName }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none" required>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Họ và Tên</label>
-                        <input type="text" name="FullName" value="{{ $user->FullName }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required>
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Số Điện Thoại</label>
+                        <input type="text" name="Phone" value="{{ $user->Phone }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none">
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Số Điện Thoại</label>
-                        <input type="text" name="Phone" value="{{ $user->Phone }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Địa Chỉ Giao Hàng</label>
+                        <textarea name="Address" rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none resize-none">{{ $user->Address }}</textarea>
                     </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Địa Chỉ Giao Hàng</label>
-                        <textarea name="Address" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none">{{ $user->Address }}</textarea>
-                    </div>
-
-                    <div class="pt-4">
-                        <button type="submit" class="bg-primary hover:bg-primary-dark text-slate-900 font-bold py-3 px-8 rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
-                            Lưu Thông Tin
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-bold py-3.5 px-8 rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all">
+                            Cập Nhật Hồ Sơ 🐾
                         </button>
                     </div>
                 </form>
             </div>
 
             {{-- Orders Tab --}}
-            <div id="ordersTab" class="hidden bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex-col gap-6">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-4">Lịch Sử Mua Hàng</h2>
+            <div id="ordersTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex-col gap-6">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
+                    <span class="material-symbols-outlined text-primary">receipt_long</span>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Lịch Sử Mua Hàng</h2>
+                </div>
                 
                 @if(count($orders) > 0)
                     <div class="flex flex-col gap-4">
                         @foreach($orders as $order)
-                            <div class="border border-slate-100 dark:border-slate-800 rounded-2xl p-5 flex flex-col gap-4 hover:border-primary/50 transition-colors">
-                                <div class="flex justify-between items-center border-b border-dashed border-slate-200 dark:border-slate-700 pb-3">
-                                    <div class="font-bold text-slate-900 dark:text-white">
-                                        Mã Đơn: #{{ str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) }}
+                            <div class="bg-white/50 dark:bg-slate-800/50 border border-slate-50 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-3 hover:border-primary/50 transition-all hover:shadow-md group">
+                                <div class="flex justify-between items-center border-b border-dashed border-pink-100 dark:border-slate-700 pb-3">
+                                    <div class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                        #{{ str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) }}
                                     </div>
-                                    <div class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full text-slate-600 dark:text-slate-300 font-medium tracking-wide">
+                                    <div class="text-[10px] uppercase font-bold bg-white dark:bg-slate-700 px-3 py-1 rounded-full text-slate-500 dark:text-slate-300 border border-slate-100 dark:border-slate-600">
                                         {{ $order->Status }}
                                     </div>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <div class="text-sm text-slate-500">
-                                        {{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y H:i') }}
+                                <div class="flex justify-between items-end">
+                                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        {{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y') }}
                                     </div>
-                                    <div class="font-extrabold text-primary text-lg">
-                                        {{ number_format($order->TotalAmount, 0, ',', '.') }}đ
+                                    <div class="font-bold text-primary text-xl">
+                                        {{ number_format($order->TotalAmount, 0, ',', '.') }}<span class="text-xs ml-0.5">đ</span>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                         
-                        <button class="mt-2 text-center text-primary font-bold hover:text-primary-dark transition-colors py-2 text-sm">Xem tất cả đơn hàng</button>
+                        <button class="mt-2 text-center text-primary font-bold hover:text-primary-dark transition-colors py-2 text-sm flex items-center justify-center gap-1 group">
+                            Xem tất cả đơn hàng <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </button>
                     </div>
                 @else
                     <div class="py-12 flex flex-col items-center justify-center text-center">
-                        <span class="material-symbols-outlined text-6xl text-slate-200 dark:text-slate-700 mb-4">receipt_long</span>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Chưa có đơn hàng nào</h3>
-                        <p class="text-slate-500">Bạn chưa thực hiện giao dịch nào. Hãy khám phá thẻ Cửa hàng nhé!</p>
-                        <a href="{{ route('shop') }}" class="mt-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold py-2.5 px-6 rounded-full transition-colors text-sm">Đi đến Cửa Hàng</a>
+                        <div class="w-16 h-16 bg-pink-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-3xl text-primary/40">shopping_basket</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Giỏ hàng đang đợi bạn</h3>
+                        <p class="text-slate-400 text-sm">Bạn chưa mua món đồ nào cả. Hãy sắm cho các bé cưng nhé!</p>
+                        <a href="{{ route('shop') }}" class="mt-6 bg-primary text-slate-900 font-bold py-3 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-sm">Đi shopping thôi 🐾</a>
                     </div>
                 @endif
             </div>
 
             {{-- Password Tab --}}
-            <div id="passwordTab" class="hidden bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex-col gap-6">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-4">Đổi Mật Khẩu</h2>
+            <div id="passwordTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex-col gap-6">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
+                    <span class="material-symbols-outlined text-primary">key</span>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Đổi Mật Khẩu</h2>
+                </div>
                 
                 <form action="{{ route('profile.password') }}" method="POST" class="flex flex-col gap-5 max-w-lg">
                     @csrf
                     @method('PUT')
                     
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Mật khẩu hiện tại</label>
-                        <input type="password" name="current_password" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required>
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Mật khẩu hiện tại</label>
+                        <input type="password" name="current_password" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none" required>
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Mật khẩu mới</label>
-                        <input type="password" name="new_password" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required>
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Mật khẩu mới</label>
+                        <input type="password" name="new_password" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none" required>
                     </div>
 
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Nhập lại mật khẩu mới</label>
-                        <input type="password" name="new_password_confirmation" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required>
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Nhập lại mật khẩu mới</label>
+                        <input type="password" name="new_password_confirmation" class="w-full px-4 py-2.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm outline-none" required>
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold py-3 px-8 rounded-xl shadow-md transition-all">
-                            Cập Nhật Mật Khẩu
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-slate-800 dark:bg-white text-white dark:text-slate-900 font-bold py-3.5 px-8 rounded-2xl shadow-lg hover:-translate-y-0.5 transition-all">
+                            Cập Nhật Mật Khẩu 🔒
                         </button>
                     </div>
                 </form>
             </div>
 
             {{-- Support Tab --}}
-            <div id="supportTab" class="hidden bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">support_agent</span> Hỗ trợ khách hàng
-                </h2>
+            <div id="supportTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-6">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
+                    <span class="material-symbols-outlined text-primary">support_agent</span>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hỗ trợ khách hàng</h2>
+                </div>
                 
-                <p class="text-slate-500 text-sm">Gửi tin nhắn cho nhân viên cửa hàng. Chúng tôi sẽ phản hồi sớm nhất có thể.</p>
+                <p class="text-slate-400 text-xs italic">Gửi tin nhắn cho chúng mình nhé. Pink Charcoal luôn lắng nghe bạn!</p>
                 
                 {{-- Chat Container --}}
-                <div id="supportChat" class="flex flex-col gap-3 h-[400px] overflow-y-auto p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div class="text-center text-slate-400 text-sm py-8" id="noMessages">
-                        <span class="material-symbols-outlined text-4xl mb-2">chat</span>
-                        <p>Chưa có tin nhắn nào. Hãy gửi tin nhắn đầu tiên!</p>
+                <div id="supportChat" class="flex flex-col gap-3 h-[350px] overflow-y-auto p-5 bg-pink-50/20 dark:bg-slate-800/20 rounded-[1.5rem] border border-pink-50 dark:border-slate-800 shadow-inner scroll-smooth">
+                    <div class="text-center text-slate-300 text-sm py-12" id="noMessages">
+                        <div class="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                            <span class="material-symbols-outlined text-primary/30">forum</span>
+                        </div>
+                        <p class="font-bold">Đừng ngần ngại đặt câu hỏi nha!</p>
                     </div>
                 </div>
 
                 {{-- Send Message Form --}}
-                <form id="supportForm" class="flex gap-3">
+                <form id="supportForm" class="flex gap-2">
                     @csrf
-                    <input type="text" id="supportMessage" name="message" placeholder="Nhập tin nhắn..." 
-                        class="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    <input type="text" id="supportMessage" name="message" placeholder="Nhập lời nhắn yêu thương..." 
+                        class="flex-1 px-5 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none"
                         required>
-                    <button type="submit" class="bg-primary hover:bg-primary-dark text-slate-900 font-bold px-6 py-3 rounded-xl shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-slate-900 font-bold px-5 py-3 rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center">
                         <span class="material-symbols-outlined">send</span>
                     </button>
                 </form>
@@ -258,8 +295,10 @@
         const buttons = ['profileBtn', 'ordersBtn', 'passwordBtn', 'supportBtn'];
         buttons.forEach(id => {
             const btn = document.getElementById(id);
-            btn.classList.remove('bg-primary', 'text-slate-900', 'shadow-sm');
-            btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-50', 'dark:hover:bg-slate-800/50', 'hover:border-slate-200', 'dark:hover:border-slate-700');
+            btn.classList.remove('bg-primary/20', 'text-slate-900', 'border-primary/10');
+            btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-pink-50/50', 'dark:hover:bg-slate-800/50');
+            btn.querySelector('.active-paw').classList.add('opacity-0');
+            btn.querySelector('.active-paw').classList.remove('opacity-100');
         });
 
         // Activate selected tab & button
@@ -267,8 +306,10 @@
         document.getElementById(tabId).classList.add('flex');
         
         const activeBtn = document.getElementById(btnId);
-        activeBtn.classList.add('bg-primary', 'text-slate-900', 'shadow-sm');
-        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-50', 'dark:hover:bg-slate-800/50', 'hover:border-slate-200', 'dark:hover:border-slate-700');
+        activeBtn.classList.add('bg-primary/20', 'text-slate-900', 'border-primary/10');
+        activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-pink-50/50', 'dark:hover:bg-slate-800/50');
+        activeBtn.querySelector('.active-paw').classList.remove('opacity-0');
+        activeBtn.querySelector('.active-paw').classList.add('opacity-100');
     }
 
     function previewImage(event) {

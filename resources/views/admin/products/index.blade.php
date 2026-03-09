@@ -13,6 +13,25 @@
             height: auto;
             margin: 0 auto;
         }
+        .product-detail-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .product-detail-value {
+            font-size: 0.9375rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .detail-card {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid #f1f5f9;
+        }
     </style>
 @endpush
 
@@ -68,85 +87,96 @@
                 <thead class="bg-gray-50 text-gray-600">
                     <tr>
                         <th class="px-4 py-3 text-left">Sản phẩm</th>
-                        <th class="px-4 py-3 text-left">Ảnh</th>
+                        <th class="px-4 py-3 text-left">Ảnh chính</th>
                         <th class="px-4 py-3 text-left">Mã vạch</th>
-                        <th class="px-4 py-3 text-left">Danh mục</th>
-                        <th class="px-4 py-3 text-left">Giá</th>
-                        <th class="px-4 py-3 text-left">Tồn kho</th>
-                        <th class="px-4 py-3 text-left">Trạng thái</th>
                         <th class="px-4 py-3 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($products as $product)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 product-row" 
+                            data-id="{{ $product->ProductID }}"
+                            data-name="{{ $product->ProductName }}"
+                            data-code="{{ $product->ProductCode }}"
+                            data-category="{{ $product->category?->CategoryName ?? 'N/A' }}"
+                            data-price="{{ number_format($product->Price, 0, ',', '.') }} đ"
+                            data-stock="{{ $product->Stock ?? 0 }}"
+                            data-status="{{ $product->status?->StatusName ?? 'N/A' }}"
+                            data-weight="{{ $product->Weight ?? 'N/A' }}"
+                            data-size="{{ $product->Size ?? 'N/A' }}"
+                            data-description="{{ $product->Description ?? 'Không có mô tả' }}"
+                            @php
+                                $allImages = $product->images->pluck('ImageUrl')->toArray();
+                            @endphp
+                            data-images='@json($allImages)'>
                             <td class="px-4 py-3">
-                                <div class="font-medium text-gray-900">{{ $product->ProductName }}</div>
-                                <div class="text-xs text-gray-500">Mã: {{ $product->ProductCode ?? 'N/A' }}</div>
+                                <div class="font-medium text-gray-900 line-clamp-1" title="{{ $product->ProductName }}">{{ $product->ProductName }}</div>
+                                <div class="text-xs text-gray-500 font-mono">ID: {{ $product->ProductID }} | Mã: {{ $product->ProductCode ?? 'N/A' }}</div>
                             </td>
                             <td class="px-4 py-3">
-                                @php($images = $product->images ?? collect())
-                                <div class="flex items-center gap-1">
-                                    @foreach ($images->take(4) as $index => $image)
-                                        <img
-                                            src="{{ $image->ImageUrl }}"
-                                            alt="{{ $product->ProductName }}"
-                                            class="h-10 w-10 rounded border border-gray-200 object-cover cursor-pointer hover:scale-110 transition-transform img-preview-trigger {{ $index === 0 ? 'ring-2 ring-primary' : '' }}"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#imagePreviewModal"
-                                            data-src="{{ $image->ImageUrl }}">
-                                    @endforeach
-                                    @if ($images->count() > 4)
-                                        <span class="text-xs text-gray-500 ml-1">+{{ $images->count() - 4 }}</span>
-                                    @endif
-                                    @if ($images->isEmpty())
-                                        <span class="text-xs text-gray-400">Chưa có ảnh</span>
-                                    @endif
-                                </div>
+                                @php($mainImg = $product->images->where('IsMain', 1)->first() ?? $product->images->first())
+                                @if($mainImg)
+                                    <img src="{{ $mainImg->ImageUrl }}" class="h-12 w-12 rounded-lg border border-gray-200 object-cover shadow-sm">
+                                @else
+                                    <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                                        <span class="material-symbols-outlined text-sm">image_not_supported</span>
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
                                 @if($product->ProductCode)
-                                    <div class="barcode-container">
-                                        <svg class="barcode-display" data-code="{{ $product->ProductCode }}"></svg>
-                                        <div class="text-[10px] text-center mt-1">{{ $product->ProductCode }}</div>
+                                    <div class="barcode-container flex flex-col items-start">
+                                        <svg class="barcode-display h-8" data-code="{{ $product->ProductCode }}"></svg>
+                                        <span class="text-[10px] font-mono text-gray-400 ml-2">{{ $product->ProductCode }}</span>
                                     </div>
                                 @else
-                                    <span class="text-xs text-gray-400">N/A</span>
+                                    <span class="text-xs text-gray-400 italic">Chưa có mã</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-gray-600">{{ $product->category?->CategoryName ?? 'N/A' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ number_format((float) ($product->Price ?? 0), 0, ',', '.') }} đ</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $product->Stock ?? 0 }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $product->status?->StatusName ?? 'N/A' }}</td>
                             <td class="px-4 py-3 text-right">
-                                <div class="inline-flex gap-2">
-                                    <button
-                                        class="btn btn-outline-secondary btn-sm edit-product-btn"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editProductModal"
-                                        data-action="{{ route('admin.products.update', $product->ProductID) }}"
-                                        data-id="{{ $product->ProductID }}"
-                                        data-name="{{ $product->ProductName }}"
-                                        data-code="{{ $product->ProductCode }}"
-                                        data-category="{{ $product->CategoryID }}"
-                                        data-price="{{ $product->Price }}"
-                                        data-weight="{{ $product->Weight }}"
-                                        data-size="{{ $product->Size }}"
-                                        data-stock="{{ $product->Stock }}"
-                                        data-status="{{ $product->StatusID }}"
-                                        data-description="{{ $product->Description }}">
-                                        Sửa
+                                <div class="inline-flex gap-1">
+                                    <button class="btn btn-primary btn-sm px-3 view-product-btn" 
+                                            title="Xem chi tiết">
+                                        Chi tiết
                                     </button>
-                                    <button 
-                                        class="btn btn-outline-primary btn-sm print-barcode-btn"
-                                        onclick="printBarcode('{{ $product->ProductCode }}')">
-                                        In
-                                    </button>
-                                    <form method="POST" action="{{ route('admin.products.destroy', $product->ProductID) }}" data-confirm class="inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-outline-danger btn-sm" type="submit">Xóa</button>
-                                    </form>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            Lệnh
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                                            <li>
+                                                <button class="dropdown-item d-flex align-items-center gap-2 py-2 edit-product-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#editProductModal"
+                                                    data-action="{{ route('admin.products.update', $product->ProductID) }}"
+                                                    data-id="{{ $product->ProductID }}"
+                                                    data-name="{{ $product->ProductName }}"
+                                                    data-code="{{ $product->ProductCode }}"
+                                                    data-category="{{ $product->CategoryID }}"
+                                                    data-price="{{ $product->Price }}"
+                                                    data-weight="{{ $product->Weight }}"
+                                                    data-size="{{ $product->Size }}"
+                                                    data-stock="{{ $product->Stock }}"
+                                                    data-status="{{ $product->StatusID }}"
+                                                    data-description="{{ $product->Description }}">
+                                                    <span class="material-symbols-outlined text-blue-500 text-sm">edit</span> Sửa thông tin
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item d-flex align-items-center gap-2 py-2" onclick="printBarcode('{{ $product->ProductCode }}')">
+                                                    <span class="material-symbols-outlined text-gray-500 text-sm">print</span> In mã vạch
+                                                </button>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.products.destroy', $product->ProductID) }}" data-confirm>
+                                                    @csrf @method('DELETE')
+                                                    <button class="dropdown-item d-flex align-items-center gap-2 py-2 text-red-600" type="submit">
+                                                        <span class="material-symbols-outlined text-sm">delete</span> Xóa sản phẩm
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -430,6 +460,86 @@
         </div>
     </div>
 
+    <!-- View Product Modal -->
+    <div class="modal fade" id="viewProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-xl rounded-2xl">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-bold text-xl">Chi tiết sản phẩm</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <div id="view-product-images" class="carousel slide rounded-xl overflow-hidden shadow-sm bg-gray-50" data-bs-ride="carousel">
+                                <div class="carousel-inner" id="view-images-inner">
+                                    <!-- Images will be injected here -->
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#view-product-images" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#view-product-images" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 id="view-product-name" class="text-2xl font-bold text-gray-900 leading-tight"></h4>
+                                    <p id="view-product-code" class="text-sm font-mono text-primary mt-1"></p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Giá bán</div>
+                                        <div id="view-product-price" class="product-detail-value text-lg text-red-600 font-bold"></div>
+                                    </div>
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Tồn kho</div>
+                                        <div id="view-product-stock" class="product-detail-value text-lg text-blue-600"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Danh mục</div>
+                                        <div id="view-product-category" class="product-detail-value"></div>
+                                    </div>
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Trạng thái</div>
+                                        <div id="view-product-status" class="product-detail-value text-green-600"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Cân nặng</div>
+                                        <div id="view-product-weight" class="product-detail-value"></div>
+                                    </div>
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Kích thước</div>
+                                        <div id="view-product-size" class="product-detail-value"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <div class="detail-card">
+                                <div class="product-detail-label">Mô tả sản phẩm</div>
+                                <div id="view-product-description" class="text-gray-600 text-sm leading-relaxed whitespace-pre-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light px-4 rounded-xl font-semibold" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="go-to-edit-btn" class="btn btn-primary px-4 rounded-xl font-semibold">Chỉnh sửa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Preview Modal -->
     <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -598,6 +708,52 @@
                         console.warn('Cannot generate barcode for:', code);
                     }
                 }
+            });
+
+            // View Product Detail Logic
+            const viewModal = new bootstrap.Modal(document.getElementById('viewProductModal'));
+            document.querySelectorAll('.view-product-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.product-row');
+                    const data = row.dataset;
+                    
+                    document.getElementById('view-product-name').textContent = data.name;
+                    document.getElementById('view-product-code').textContent = 'Mã: ' + data.code;
+                    document.getElementById('view-product-price').textContent = data.price;
+                    document.getElementById('view-product-stock').textContent = data.stock + ' sản phẩm';
+                    document.getElementById('view-product-category').textContent = data.category;
+                    document.getElementById('view-product-status').textContent = data.status;
+                    document.getElementById('view-product-weight').textContent = data.weight + ' kg';
+                    document.getElementById('view-product-size').textContent = data.size;
+                    document.getElementById('view-product-description').textContent = data.description;
+
+                    // Images Carousel
+                    const imagesInner = document.getElementById('view-images-inner');
+                    const images = JSON.parse(data.images);
+                    if (images.length > 0) {
+                        imagesInner.innerHTML = images.map((img, i) => `
+                            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                                <img src="${img}" class="d-block w-full h-[300px] object-cover">
+                            </div>
+                        `).join('');
+                    } else {
+                        imagesInner.innerHTML = `
+                            <div class="carousel-item active">
+                                <div class="d-flex align-items-center justify-center h-[300px] bg-gray-100 text-gray-400">
+                                    <span class="material-symbols-outlined text-4xl">image_not_supported</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Link Edit button
+                    document.getElementById('go-to-edit-btn').onclick = () => {
+                        viewModal.hide();
+                        row.querySelector('.edit-product-btn').click();
+                    };
+
+                    viewModal.show();
+                });
             });
 
             // Initialize create gallery

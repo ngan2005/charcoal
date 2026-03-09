@@ -178,7 +178,7 @@
         </div>
 
         {{-- Products Grid --}}
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3">
             @forelse($products as $product)
                 @php
                     $mainImage = $product->images->where('IsMain', 1)->first();

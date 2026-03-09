@@ -3,10 +3,14 @@
 @section('content')
 
 {{-- Hero Banner Dịch Vụ --}}
-<section class="w-full bg-gradient-to-r from-primary/30 to-rose-100 dark:from-slate-800 dark:to-slate-900 rounded-[2.5rem] overflow-hidden shadow-lg relative group mb-12 border border-white/50 dark:border-slate-800/50">
-    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
-    <div class="flex flex-col md:flex-row items-center justify-between min-h-[340px] relative z-10">
-        <div class="flex-1 px-8 py-12 md:p-16 flex flex-col gap-6 justify-center lg:pl-24">
+<section class="w-full bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-lg relative group mb-12 border border-primary/20 dark:border-slate-800/50">
+    {{-- Ảnh nền minh họa (Ảnh mới) --}}
+    <div class="absolute inset-0 z-0 scale-105 group-hover:scale-100 transition-transform duration-700 opacity-40 dark:opacity-20">
+        <img src="{{ asset('images/service-hero-illustration.png') }}" alt="Background" class="w-full h-full object-cover object-center">
+    </div>
+    
+    <div class="flex flex-col md:flex-row items-center justify-between min-h-[380px] relative z-10">
+        <div class="flex-1 px-8 py-12 md:p-16 flex flex-col gap-6 justify-center lg:pl-24 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80">
             <h1 class="text-slate-900 dark:text-white text-4xl md:text-5xl font-extrabold font-display leading-tight tracking-tight drop-shadow-sm">
                 Dịch Vụ Chăm Sóc <br/> <span class="text-primary-dark dark:text-primary">Thú Cưng Cao Cấp</span>
             </h1>
@@ -14,12 +18,13 @@
                 Trải nghiệm các dịch vụ spa, cắt tỉa lông, khám sức khỏe từ đội ngũ chuyên nghiệp, tận tâm của Pink Charcoal.
             </p>
         </div>
-        <div class="flex-1 w-full md:w-5/12 h-full absolute md:relative right-0 bottom-0 opacity-10 md:opacity-100 flex justify-end">
-            {{-- Hình ảnh minh họa dịch vụ --}}
-            <div class="w-full h-full min-h-[300px] bg-gradient-to-l from-white/20 to-transparent absolute inset-0 rounded-r-[2.5rem] z-10 pointer-events-none"></div>
-            <img alt="Pet spa services"
-                 class="w-full h-full object-cover object-left rounded-r-[2.5rem]"
-                 src="https://placehold.co/800x600/F4C2C3/ffffff?text=Spa+Relax"/>
+        <div class="hidden md:flex flex-1 items-center justify-center p-8">
+            <div class="relative">
+                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
+                <div class="relative bg-white/40 dark:bg-white/10 backdrop-blur-md p-8 rounded-[3rem] border border-white/50 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <h2 class="text-primary-dark dark:text-primary text-5xl font-black font-display tracking-tighter italic">Spa Relax</h2>
+                </div>
+            </div>
         </div>
     </div>
 </section>
