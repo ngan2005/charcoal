@@ -50,13 +50,27 @@
 
                 {{-- Image --}}
                 @php
-                    $serviceImgUrl = 'https://placehold.co/600x400/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
+                    $sMain = $service->images->where('IsMain', 1)->first();
+                    $sFirst = $service->images->first();
+                    $sImgUrl = ($sMain ?? $sFirst)?->ImageUrl;
+                    if ($sImgUrl) {
+                        if (str_contains($sImgUrl, '/storage/')) {
+                            $serviceImgUrl = asset('storage/' . substr($sImgUrl, strpos($sImgUrl, '/storage/') + 9));
+                        } elseif (str_starts_with($sImgUrl, 'http')) {
+                            $serviceImgUrl = $sImgUrl;
+                        } else {
+                            $serviceImgUrl = asset('storage/' . $sImgUrl);
+                        }
+                    } else {
+                        $serviceImgUrl = 'https://placehold.co/600x400/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
+                    }
                     $servicePriceText = number_format($service->BasePrice, 0, ',', '.') . 'đ';
                 @endphp
-                <div class="aspect-[4/3] bg-slate-100 dark:bg-slate-800 relative overflow-hidden group/img cursor-pointer" onclick="event.preventDefault(); openLightbox('{{ $serviceImgUrl }}', '{{ addslashes($service->ServiceName) }}', '{{ $servicePriceText }}')">
+                <div class="aspect-[4/3] bg-slate-100 dark:bg-slate-800 relative overflow-hidden group/img cursor-pointer" onclick="event.preventDefault(); openLightbox('{{ addslashes($serviceImgUrl) }}', '{{ addslashes($service->ServiceName) }}', '{{ $servicePriceText }}')">
                     <img alt="{{ $service->ServiceName }}"
                          class="w-full h-full object-cover transform group-hover/img:scale-110 transition-transform duration-700 ease-out"
-                         src="{{ $serviceImgUrl }}"/>
+                         src="{{ $serviceImgUrl }}"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x400/F4C2C3/ffffff?text={{ urlencode($service->ServiceName) }}';"/>
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover/img:opacity-80 transition-opacity"></div>
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
                         <span class="bg-white/90 text-slate-900 rounded-full p-3 shadow-[0_0_30px_rgba(244,194,195,0.6)] flex backdrop-blur-sm transform translate-y-4 group-hover/img:translate-y-0 transition-all duration-300">

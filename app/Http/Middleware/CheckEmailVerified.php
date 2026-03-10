@@ -16,18 +16,7 @@ class CheckEmailVerified
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->RoleID == 3) { // Customer
-            $emailVerified = DB::table('email_verifications')
-                ->where('user_id', auth()->user()->UserID)
-                ->where('verified_at', '!=', null)
-                ->exists();
-
-            if (!$emailVerified) {
-                auth()->logout();
-                return redirect()->route('login')->with('warning', 'Email của bạn chưa được xác nhận. Vui lòng kiểm tra email.');
-            }
-        }
-
+        // Email verification disabled - pass through
         return $next($request);
     }
 }

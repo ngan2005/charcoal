@@ -35,7 +35,7 @@ class ServiceController extends Controller
             'ServiceName' => ['required', 'string', 'max:150'],
             'BasePrice' => ['required', 'numeric', 'min:0'],
             'Duration' => ['required', 'integer', 'min:0'],
-            'Description' => ['nullable', 'string', 'max:255'],
+            'Description' => ['nullable', 'string', 'max:5000'],
             'Images' => ['nullable', 'array'],
             'Images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
@@ -61,7 +61,7 @@ class ServiceController extends Controller
                         
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
-                            'ImageUrl' => asset('storage/services/' . $filename),
+                            'ImageUrl' => 'services/' . $filename,
                             'IsMain' => $index === 0 ? 1 : 0,
                         ]);
                     }
@@ -80,7 +80,7 @@ class ServiceController extends Controller
             'ServiceName' => ['required', 'string', 'max:150'],
             'BasePrice' => ['required', 'numeric', 'min:0'],
             'Duration' => ['required', 'integer', 'min:0'],
-            'Description' => ['nullable', 'string', 'max:255'],
+            'Description' => ['nullable', 'string', 'max:5000'],
             'DeleteImageIDs' => ['nullable', 'string'],
             'MainImageID' => ['nullable', 'integer'],
             'new_images' => ['nullable', 'array'],
@@ -133,7 +133,7 @@ class ServiceController extends Controller
                         
                         ServiceImage::create([
                             'ServiceID' => $service->ServiceID,
-                            'ImageUrl' => asset('storage/services/' . $filename),
+                            'ImageUrl' => 'services/' . $filename,
                             'IsMain' => 0,
                         ]);
                     }
@@ -163,10 +163,30 @@ class ServiceController extends Controller
             ->with('success', 'Xóa dịch vụ thành công.');
     }
 
-    // API: Lấy danh sách ảnh của dịch vụ
+    // API: Lấy danh sách ảnh của dịch vụ (trả về URL đầy đủ để ảnh hiển thị đúng)
     public function getImages(Service $service)
     {
-        $images = $service->images()->select(['ImageID', 'ImageUrl', 'IsMain'])->get();
+        $images = $service->images()->select(['ImageID', 'ImageUrl', 'IsMain'])->get()->map(function ($img) {
+            return [
+                'ImageID' => $img->ImageID,
+                'ImageUrl' => $this->resolveServiceImageUrl($img->ImageUrl),
+                'IsMain' => $img->IsMain,
+            ];
+        });
         return response()->json(['images' => $images]);
+    }
+
+    private function resolveServiceImageUrl(?string $url): string
+    {
+        if (empty($url)) {
+            return '';
+        }
+        if (str_contains($url, '/storage/')) {
+            return asset('storage/' . substr($url, strpos($url, '/storage/') + 9));
+        }
+        if (str_starts_with($url, 'http')) {
+            return $url;
+        }
+        return asset('storage/' . $url);
     }
 }

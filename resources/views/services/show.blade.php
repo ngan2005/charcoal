@@ -16,13 +16,27 @@
     <div class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 p-8 flex flex-col md:flex-row gap-10">
         {{-- Image --}}
         @php
-            $serviceImgUrl = "https://placehold.co/800x800/F4C2C3/ffffff?text=" . urlencode($service->ServiceName);
+            $sMain = $service->images->where('IsMain', 1)->first();
+            $sFirst = $service->images->first();
+            $sImgUrl = ($sMain ?? $sFirst)?->ImageUrl ?? null;
+            if ($sImgUrl) {
+                if (str_contains($sImgUrl, '/storage/')) {
+                    $serviceImgUrl = asset('storage/' . substr($sImgUrl, strpos($sImgUrl, '/storage/') + 9));
+                } elseif (str_starts_with($sImgUrl, 'http')) {
+                    $serviceImgUrl = $sImgUrl;
+                } else {
+                    $serviceImgUrl = asset('storage/' . $sImgUrl);
+                }
+            } else {
+                $serviceImgUrl = 'https://placehold.co/800x800/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
+            }
             $servicePriceText = number_format($service->BasePrice, 0, ',', '.') . 'đ';
         @endphp
-        <div class="w-full md:w-1/2 aspect-square md:aspect-auto rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 relative group cursor-pointer" onclick="openLightbox('{{ $serviceImgUrl }}', '{{ addslashes($service->ServiceName) }}', '{{ $servicePriceText }}')">
+        <div class="w-full md:w-1/2 aspect-square md:aspect-auto rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 relative group cursor-pointer" onclick="openLightbox('{{ addslashes($serviceImgUrl) }}', '{{ addslashes($service->ServiceName) }}', '{{ $servicePriceText }}')">
             <img alt="{{ $service->ServiceName }}"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                 src="{{ $serviceImgUrl }}"/>
+                 src="{{ $serviceImgUrl }}"
+                 onerror="this.onerror=null; this.src='https://placehold.co/800x800/F4C2C3/ffffff?text={{ urlencode($service->ServiceName) }}';"/>
             <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                 <span class="bg-white/90 text-slate-900 rounded-full p-3 shadow-lg flex backdrop-blur-sm">
                     <span class="material-symbols-outlined">zoom_in</span>
@@ -173,25 +187,35 @@
     
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         @foreach($suggestedProducts as $product)
-            <div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-all group">
+            <a href="{{ route('product.show', $product->ProductID) }}" class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-all group no-underline text-inherit">
                 <div class="aspect-square bg-slate-50 dark:bg-slate-800 relative p-4">
                     @php
                         $img = $product->images->where('IsMain', 1)->first() ?? $product->images->first();
-                        $imageUrl = $img ? $img->ImageURL : null;
-                        $fullImgUrl = $imageUrl ? (str_starts_with($imageUrl, 'http') ? $imageUrl : asset('storage/' . $imageUrl)) : 'https://placehold.co/400x400/F4C2C3/ffffff?text=' . urlencode($product->ProductName);
+                        $imageUrl = $img ? $img->ImageUrl : null;
+                        if ($imageUrl) {
+                            if (str_contains($imageUrl, '/storage/')) {
+                                $fullImgUrl = asset('storage/' . substr($imageUrl, strpos($imageUrl, '/storage/') + 9));
+                            } elseif (str_starts_with($imageUrl, 'http')) {
+                                $fullImgUrl = $imageUrl;
+                            } else {
+                                $fullImgUrl = asset('storage/' . $imageUrl);
+                            }
+                        } else {
+                            $fullImgUrl = 'https://placehold.co/400x400/F4C2C3/ffffff?text=' . urlencode($product->ProductName);
+                        }
                     @endphp
-                    <img src="{{ $fullImgUrl }}" alt="{{ $product->ProductName }}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ $fullImgUrl }}" alt="{{ $product->ProductName }}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x400/F4C2C3/ffffff?text={{ urlencode($product->ProductName) }}'; this.onerror=null;">
                 </div>
                 <div class="p-4 flex flex-col flex-1">
                     <h4 class="font-medium text-slate-900 dark:text-slate-100 text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-2 min-h-[2.5rem]">{{ $product->ProductName }}</h4>
                     <div class="mt-auto flex items-center justify-between">
                         <span class="text-slate-900 dark:text-white font-bold">{{ number_format($product->Price, 0, ',', '.') }}đ</span>
-                        <button class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                        <span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors pointer-events-none">
                             <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
-                        </button>
+                        </span>
                     </div>
                 </div>
-            </div>
+            </a>
         @endforeach
     </div>
 </div>
@@ -204,9 +228,25 @@
     
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         @foreach($otherServices as $other)
+            @php
+                $oMain = $other->images->where('IsMain', 1)->first();
+                $oFirst = $other->images->first();
+                $oImgUrl = ($oMain ?? $oFirst)?->ImageUrl;
+                if ($oImgUrl) {
+                    if (str_contains($oImgUrl, '/storage/')) {
+                        $otherImgSrc = asset('storage/' . substr($oImgUrl, strpos($oImgUrl, '/storage/') + 9));
+                    } elseif (str_starts_with($oImgUrl, 'http')) {
+                        $otherImgSrc = $oImgUrl;
+                    } else {
+                        $otherImgSrc = asset('storage/' . $oImgUrl);
+                    }
+                } else {
+                    $otherImgSrc = 'https://placehold.co/400x300/F4C2C3/ffffff?text=' . urlencode($other->ServiceName);
+                }
+            @endphp
             <a href="{{ route('services.show', $other->ServiceID) }}" class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary transition-colors group">
                 <div class="aspect-video bg-slate-100 relative">
-                    <img src="https://placehold.co/400x300/F4C2C3/ffffff?text={{ urlencode($other->ServiceName) }}" class="w-full h-full object-cover">
+                    <img src="{{ $otherImgSrc }}" alt="{{ $other->ServiceName }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x300/F4C2C3/ffffff?text={{ urlencode($other->ServiceName) }}';">
                 </div>
                 <div class="p-4">
                     <h4 class="font-bold text-slate-900 dark:text-slate-100 text-base leading-tight group-hover:text-primary transition-colors mb-2 line-clamp-1">{{ $other->ServiceName }}</h4>

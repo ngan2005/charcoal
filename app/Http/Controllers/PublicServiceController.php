@@ -9,14 +9,14 @@ class PublicServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::all();
+        $services = Service::with('images')->get();
         return view('services.index', compact('services'));
     }
 
     public function show($id)
     {
-        $service = Service::findOrFail($id);
-        $otherServices = Service::where('ServiceID', '!=', $id)->take(4)->get();
+        $service = Service::with('images')->findOrFail($id);
+        $otherServices = Service::with('images')->where('ServiceID', '!=', $id)->take(4)->get();
         
         // Fetch reviews
         $reviews = \App\Models\Review::with(['customer', 'replies.staff'])
@@ -31,8 +31,8 @@ class PublicServiceController extends Controller
         $reviewCount = $reviews->count();
         $averageRating = $reviewCount > 0 ? $reviews->avg('Rating') : 0;
         
-        // Fetch suggested products
-        $suggestedProducts = \App\Models\Product::inRandomOrder()->take(4)->get();
+        // Fetch suggested products (load images for display)
+        $suggestedProducts = \App\Models\Product::with('images')->inRandomOrder()->take(4)->get();
         
         return view('services.show', compact('service', 'otherServices', 'reviews', 'reviewCount', 'averageRating', 'suggestedProducts'));
     }

@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Exception\TransportException;
-use App\Mail\VerifyEmailMail;
 use App\Mail\ResetPasswordMail;
 use App\Mail\StaffRequestConfirmationMail;
 use DB;
@@ -52,25 +51,6 @@ class AuthController extends Controller
             'RoleID' => 3, // Customer role
             'IsActive' => 1,
         ]);
-
-        if (Schema::hasTable('email_verifications')) {
-            // Generate verification token
-            $verificationToken = Str::random(64);
-            DB::table('email_verifications')->insert([
-                'user_id' => $user->UserID,
-                'token' => $verificationToken,
-                'created_at' => now(),
-            ]);
-
-            // Send verification email (bắt lỗi nếu cấu hình mail chưa đúng)
-            try {
-                Mail::to($user->Email)->send(new VerifyEmailMail($user, $verificationToken));
-                return redirect()->route('login')->with('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
-            } catch (TransportException $e) {
-                \Log::warning('Không gửi được email xác nhận: ' . $e->getMessage());
-                return redirect()->route('login')->with('success', 'Đăng ký thành công! Bạn có thể đăng nhập ngay. (Email xác nhận tạm thời chưa gửi được.)');
-            }
-        }
 
         return redirect()->route('login')->with('success', 'Đăng ký thành công! Bạn có thể đăng nhập ngay.');
     }
@@ -114,38 +94,42 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    // Login user
+    // Login user (chấp nhận Email hoặc Username - đều tra theo cột Email)
     public function login(Request $request)
     {
+        $emailOrUsername = $request->input('Email') ?: $request->input('Username');
+        
         $validated = $request->validate([
-            'Email' => 'required|email',
             'Password' => 'required|min:6',
+        ], [
+            'Password.required' => 'Vui lòng nhập mật khẩu.',
+            'Password.min' => 'Mật khẩu tối thiểu 6 ký tự.',
         ]);
 
-        $user = User::where('Email', $validated['Email'])->first();
+        if (empty($emailOrUsername)) {
+            return back()->withErrors([
+                'Email' => 'Vui lòng nhập email hoặc tên đăng nhập.',
+            ])->onlyInput('Email');
+        }
+
+        if (!filter_var($emailOrUsername, FILTER_VALIDATE_EMAIL)) {
+            return back()->withErrors([
+                'Email' => 'Vui lòng nhập đúng định dạng email.',
+            ])->withInput(['Email' => $emailOrUsername, 'Username' => $emailOrUsername]);
+        }
+
+        $user = User::where('Email', $emailOrUsername)->first();
 
         if (!$user || !Hash::check($validated['Password'], $user->Password)) {
             return back()->withErrors([
                 'Email' => 'Email hoặc mật khẩu không đúng.',
-            ])->onlyInput('Email');
+            ])->withInput(['Email' => $emailOrUsername, 'Username' => $emailOrUsername]);
         }
 
         if (!$user->IsActive) {
             return back()->withErrors([
                 'Email' => 'Tài khoản của bạn đã bị vô hiệu hóa.',
-            ])->onlyInput('Email');
-        }
-
-        // Check if email is verified (only when table exists)
-        if (Schema::hasTable('email_verifications')) {
-            $emailVerified = DB::table('email_verifications')
-                ->where('user_id', $user->UserID)
-                ->where('verified_at', '!=', null)
-                ->exists();
-
-            if ($user->RoleID == 3 && !$emailVerified) {
-                return back()->with('warning', 'Vui lòng xác nhận email trước khi đăng nhập.');
-            }
+            ])->withInput(['Email' => $emailOrUsername, 'Username' => $emailOrUsername]);
         }
 
         // Update last login
@@ -164,6 +148,10 @@ class AuthController extends Controller
             }
         }
 
+        // Khách hàng -> trang shop (trang chủ Pink Charcoal), Admin/Nhân viên -> dashboard
+        if ($user->RoleID == 3) {
+            return redirect()->route('shop')->with('success', 'Đăng nhập thành công!');
+        }
         return redirect()->intended(route('dashboard'))->with('success', 'Đăng nhập thành công!');
     }
 

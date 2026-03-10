@@ -129,9 +129,9 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col gap-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Email / Username</label>
-                            <div class="px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 font-medium text-sm">
-                                {{ $user->Username }}
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                            <div class="px-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 font-medium text-sm">
+                                {{ $user->Email }}
                             </div>
                         </div>
 
@@ -157,6 +157,82 @@
                         </button>
                     </div>
                 </form>
+
+                {{-- Thú cưng của tôi --}}
+                <div class="border-t border-pink-100 dark:border-slate-800 pt-8 mt-6">
+                    <div class="flex items-center justify-between flex-wrap gap-3 border-b border-pink-50 dark:border-slate-800 pb-4 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">pets</span>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-tight">Thú cưng của tôi</h3>
+                        </div>
+                        <a href="{{ route('pets.create') }}" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-slate-900 font-bold py-2.5 px-5 rounded-2xl shadow-md shadow-primary/20 transition-all text-sm">
+                            <span class="material-symbols-outlined text-[18px]">add</span> Thêm thú cưng
+                        </a>
+                    </div>
+                    @if(isset($pets) && $pets->count() > 0)
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            @foreach($pets as $pet)
+                                @php
+                                    $petImageUrl = null;
+                                    if ($pet->images && $pet->images->count() > 0) {
+                                        $mainImage = $pet->images->firstWhere('IsMain', 1);
+                                        if (!$mainImage) {
+                                            $mainImage = $pet->images->first();
+                                        }
+                                        if ($mainImage && $mainImage->ImageUrl) {
+                                            $petImageUrl = str_starts_with($mainImage->ImageUrl, 'http') ? $mainImage->ImageUrl : asset('storage/' . $mainImage->ImageUrl);
+                                        }
+                                    }
+                                @endphp
+                                <div class="bg-white/60 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col gap-2 hover:border-primary/50 transition-all">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="flex items-center gap-3">
+                                            @if($petImageUrl)
+                                                <img src="{{ $petImageUrl }}" alt="{{ $pet->PetName }}" class="w-12 h-12 rounded-xl object-cover shrink-0">
+                                            @else
+                                                <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                                    <span class="material-symbols-outlined text-2xl">pets</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-bold text-slate-800 dark:text-white">{{ $pet->PetName }}</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                                    {{ $pet->Species ?? '—' }}{{ $pet->Breed ? ' · ' . $pet->Breed : '' }}{{ $pet->Age !== null ? ' · ' . $pet->Age . ' tuổi' : '' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1 shrink-0">
+                                            <a href="{{ route('pets.edit', $pet) }}" class="p-2 rounded-xl text-slate-500 hover:bg-primary/20 hover:text-primary transition-colors" title="Sửa">
+                                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                                            </a>
+                                            <form action="{{ route('pets.destroy', $pet) }}" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc muốn xóa thú cưng này?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-2 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors" title="Xóa">
+                                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    @if($pet->Notes)
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 pl-15">{{ $pet->Notes }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-8 flex flex-col items-center justify-center text-center rounded-2xl bg-pink-50/50 dark:bg-slate-800/30 border border-dashed border-pink-200 dark:border-slate-700">
+                            <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-3">
+                                <span class="material-symbols-outlined text-3xl text-primary/60">pets</span>
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 font-medium mb-1">Chưa có thú cưng nào</p>
+                            <p class="text-slate-400 text-sm mb-4">Thêm thú cưng để đặt lịch dịch vụ và mua sắm dễ dàng hơn.</p>
+                            <a href="{{ route('pets.create') }}" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-slate-900 font-bold py-2.5 px-5 rounded-2xl shadow-md transition-all text-sm">
+                                <span class="material-symbols-outlined text-[18px]">add</span> Thêm thú cưng
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             {{-- Orders Tab --}}

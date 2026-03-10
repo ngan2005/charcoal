@@ -55,10 +55,12 @@
             <a class="{{ request()->routeIs('about') ? 'text-primary' : 'text-slate-900 dark:text-slate-100' }} hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="{{ route('about') }}">Giới thiệu</a>
             <button type="button" onclick="typeof toggleSupportChat === 'function' && toggleSupportChat();" class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal">Hỗ trợ</button>
             @auth
+                @if(auth()->user()->RoleID == 1 || auth()->user()->RoleID == 2)
                 <a class="text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal"
-                   href="{{ auth()->user()->RoleID == 1 ? route('admin.dashboard') : (auth()->user()->RoleID == 2 ? route('staff.dashboard') : route('dashboard')) }}">
+                   href="{{ auth()->user()->RoleID == 1 ? route('admin.dashboard') : route('staff.dashboard') }}">
                    Dashboard
                 </a>
+                @endif
             @endauth
         </nav>
 
@@ -163,10 +165,13 @@
                             <form action="{{ route('login') }}" method="POST" class="flex flex-col gap-3">
                                 @csrf
                                 <div class="flex flex-col gap-1.5 focus-within:translate-x-1 transition-transform">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Tên Đăng Nhập</label>
-                                    <input type="text" name="Username" required
-                                           class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all"
-                                           placeholder="Nhập username...">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                                    <input type="email" name="Email" value="{{ old('Email', old('Username')) }}" required autocomplete="email"
+                                           class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all @error('Email') border-red-500 @enderror"
+                                           placeholder="Nhập email...">
+                                    @error('Email')
+                                        <p class="text-[10px] text-red-500 mt-0.5">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="flex flex-col gap-1.5 focus-within:translate-x-1 transition-transform">
                                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Mật khẩu</label>

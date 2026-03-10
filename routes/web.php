@@ -35,6 +35,13 @@ Route::get('/', [ShopController::class, 'index'])->name('shop');
 Route::get('/about', function() { return view('about'); })->name('about');
 Route::get('/services', [\App\Http\Controllers\PublicServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{id}', [\App\Http\Controllers\PublicServiceController::class, 'show'])->name('services.show');
+Route::get('/appointments/create', function (\Illuminate\Http\Request $request) {
+    $serviceId = $request->query('service_id');
+    return $serviceId
+        ? redirect()->route('services.show', $serviceId)
+        : redirect()->route('services.index');
+})->name('appointment.create');
+Route::get('/product/{id}', [ShopController::class, 'show'])->name('product.show');
 Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
 Route::post('/cart', [\App\Http\Controllers\CartController::class, 'store'])->name('cart.store');
 
@@ -89,11 +96,10 @@ Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])-
             if (auth()->user()->RoleID == 1) {
                 return redirect()->route('admin.dashboard');
             } elseif (auth()->user()->RoleID == 2) {
-                // Staff members go to the new staff dashboard
                 return redirect()->route('staff.dashboard');
             }
-            // Customers see the old dashboard (could be replaced with customer dashboard later)
-            return view('dashboard');
+            // Khách hàng: chuyển về trang shop (trang chủ Pink Charcoal)
+            return redirect()->route('shop');
         })->name('dashboard');
 
         // Customer Profile Routes

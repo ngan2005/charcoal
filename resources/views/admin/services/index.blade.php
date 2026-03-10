@@ -218,13 +218,10 @@
                                 @php($images = $service->images ?? collect())
                                 <div class="flex items-center gap-1">
                                     @foreach ($images->take(4) as $index => $image)
-                                        <img
-                                            src="{{ $image->ImageUrl }}"
-                                            alt="{{ $service->ServiceName }}"
+                                        <img src="{{ $image->display_url }}" alt="{{ $service->ServiceName }}"
                                             class="h-10 w-10 rounded border border-gray-200 object-cover cursor-pointer hover:scale-110 transition-transform img-preview-trigger {{ $index === 0 ? 'ring-2 ring-primary' : '' }}"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#imagePreviewModal"
-                                            data-src="{{ $image->ImageUrl }}">
+                                            data-bs-toggle="modal" data-bs-target="#imagePreviewModal" data-src="{{ $image->display_url }}"
+                                            onerror="this.src='https://placehold.co/80/F4C2C3/fff?text=Anh'; this.onerror=null;">
                                     @endforeach
                                     @if ($images->count() > 4)
                                         <span class="text-xs text-gray-500 ml-1">+{{ $images->count() - 4 }}</span>
@@ -305,7 +302,7 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Mô tả</label>
-                                <textarea name="Description" class="form-control" rows="3" placeholder="Nhập mô tả dịch vụ..."></textarea>
+                                <textarea name="Description" class="form-control" rows="5" placeholder="Nhập mô tả dịch vụ..." maxlength="5000"></textarea>
                             </div>
                             
                             <!-- Hình ảnh Dịch vụ -->
@@ -379,7 +376,7 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Mô tả</label>
-                                <textarea name="Description" id="edit-service-description" class="form-control" rows="3"></textarea>
+                                <textarea name="Description" id="edit-service-description" class="form-control" rows="5" maxlength="5000"></textarea>
                             </div>
 
                             <!-- Quản lý Hình ảnh Dịch vụ -->
@@ -686,7 +683,7 @@
 
             container.innerHTML = existingImages.map((img, index) => `
                 <div class="image-item ${img.IsMain || (mainImageId === img.ImageID) ? 'main-image' : ''}" data-image-id="${img.ImageID}">
-                    <img src="${img.ImageUrl}" alt="Ảnh ${index + 1}">
+                    <img src="${img.ImageUrl || 'https://placehold.co/120/F4C2C3/fff?text=Ảnh'}" alt="Ảnh ${index + 1}" onerror="this.src='https://placehold.co/120/F4C2C3/fff?text=Ảnh'; this.onerror=null;">
                     <div class="image-actions">
                         <button type="button" class="btn-star" title="Đặt làm ảnh chính" onclick="setExistingAsMain(${img.ImageID})">
                             <span class="material-symbols-outlined">${img.IsMain || (mainImageId === img.ImageID) ? 'star' : 'star_border'}</span>

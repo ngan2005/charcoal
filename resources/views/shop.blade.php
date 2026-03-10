@@ -138,6 +138,32 @@
                 </label>
             </div>
         </details>
+
+        {{-- Filter by Service --}}
+        <div class="flex flex-col gap-2 mt-2">
+            <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Lọc Dịch Vụ</h3>
+        </div>
+        <details class="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-[15px] py-[7px] group" {{ request('service') ? 'open' : '' }}>
+            <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                <p class="text-slate-900 dark:text-slate-100 text-sm font-medium leading-normal">Loại dịch vụ</p>
+                <span class="material-symbols-outlined text-slate-500 group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <div class="flex flex-col gap-3 pb-3 pt-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input class="h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary dark:bg-slate-800 service-filter"
+                           type="checkbox" value="" {{ !request('service') ? 'checked' : '' }}/>
+                    <span class="text-slate-700 dark:text-slate-300 text-sm">Tất cả dịch vụ</span>
+                </label>
+                @foreach($allServices as $svc)
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input class="h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary dark:bg-slate-800 service-filter"
+                           type="checkbox" value="{{ $svc->ServiceID }}"
+                           {{ in_array($svc->ServiceID, explode(',', request('service', ''))) ? 'checked' : '' }}/>
+                    <span class="text-slate-700 dark:text-slate-300 text-sm">{{ $svc->ServiceName }}</span>
+                </label>
+                @endforeach
+            </div>
+        </details>
     </aside>
 
     {{-- Products Section --}}
@@ -177,15 +203,80 @@
             @endforeach
         </div>
 
-        {{-- Products Grid --}}
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3">
-            @forelse($products as $product)
-                @php
-                    $mainImage = $product->images->where('IsMain', 1)->first();
-                    $firstImage = $product->images->first();
-                    $imageUrl = $mainImage ? $mainImage->ImageUrl : ($firstImage ? $firstImage->ImageUrl : '');
-                @endphp
-                <div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-800">
+        {{-- Services Section (if services are available or filtered) --}}
+        @if($services->count() > 0)
+        <div class="flex flex-col gap-6 mb-12">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-xl">content_cut</span>
+                    Dịch vụ Thú cưng
+                </h2>
+                <span class="text-sm text-slate-500 font-medium">{{ $services->count() }} dịch vụ</span>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach($services as $service)
+                    @php
+                        $sMainImage = $service->images->where('IsMain', 1)->first();
+                        $sFirstImage = $service->images->first();
+                        $sImageUrl = $sMainImage ? $sMainImage->ImageUrl : ($sFirstImage ? $sFirstImage->ImageUrl : '');
+                        if ($sImageUrl) {
+                            if (str_contains($sImageUrl, '/storage/')) {
+                                $sImgSrc = asset('storage/' . substr($sImageUrl, strpos($sImageUrl, '/storage/') + 9));
+                            } elseif (str_starts_with($sImageUrl, 'http')) {
+                                $sImgSrc = $sImageUrl;
+                            } else {
+                                $sImgSrc = asset('storage/' . $sImageUrl);
+                            }
+                        }
+                        $sImgPlaceholder = 'https://placehold.co/600x400/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
+                    @endphp
+                    <div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-slate-100 dark:border-slate-800 border-b-4 border-b-primary/30">
+                        <div class="aspect-[16/10] bg-slate-100 dark:bg-slate-800 relative group overflow-hidden">
+                            @if($sImageUrl)
+                                <img alt="{{ $service->ServiceName }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="{{ $sImgSrc }}" onerror="this.onerror=null; this.src='{{ $sImgPlaceholder }}';"/>
+                            @else
+                                <div class="w-full h-full flex items-center justify-center bg-primary/5">
+                                    <span class="material-symbols-outlined text-4xl text-primary/30">photo</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                <a href="{{ route('services.index') }}" class="text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:underline">
+                                    Xem chi tiết dịch vụ
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col gap-2">
+                            <h3 class="text-slate-900 dark:text-slate-100 font-bold text-sm leading-snug line-clamp-1">{{ $service->ServiceName }}</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-primary font-black text-lg">{{ number_format($service->BasePrice, 0, ',', '.') }}đ</span>
+                                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{{ $service->Duration }} phút</span>
+                            </div>
+                            <a href="{{ route('appointment.create', ['service_id' => $service->ServiceID]) }}" class="mt-2 w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-slate-900 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all text-center">
+                                ĐẶT LỊCH NGAY
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Products Grid with Load More Logic --}}
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-xl">shopping_cart</span>
+            Sản phẩm Thú cưng
+        </h2>
+        <div class="flex flex-col gap-8" x-data="{ totalItems: {{ $products->count() }} }">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3">
+                @foreach($products as $index => $product)
+                    @php
+                        $mainImage = $product->images->where('IsMain', 1)->first();
+                        $firstImage = $product->images->first();
+                        $imageUrl = $mainImage ? $mainImage->ImageUrl : ($firstImage ? $firstImage->ImageUrl : '');
+                    @endphp
+                    <div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-slate-100 dark:border-slate-800">
                     {{-- Image --}}
                     <div class="aspect-square bg-slate-100 dark:bg-slate-800 relative group">
                         @if($imageUrl)
@@ -211,10 +302,10 @@
                             $fullImgUrl = $imageUrl ? (str_starts_with($imageUrl, 'http') ? $imageUrl : asset('storage/' . $imageUrl)) : 'https://placehold.co/800x800/F4C2C3/ffffff?text=' . urlencode($product->ProductName);
                             $priceText = number_format($product->Price, 0, ',', '.') . 'đ';
                         @endphp
-                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onclick="openLightbox('{{ $fullImgUrl }}', '{{ addslashes($product->ProductName) }}', '{{ $priceText }}')">
-                            <button type="button" class="bg-white text-slate-900 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary pointer-events-none">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </button>
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onclick="window.location.href='{{ route('product.show', $product->ProductID) }}'">
+                            <div class="bg-white/90 text-slate-900 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-primary backdrop-blur-sm shadow-lg">
+                                <span class="material-symbols-outlined text-2xl">visibility</span>
+                            </div>
                         </div>
                     </div>
 
@@ -224,29 +315,37 @@
                             <span class="text-xs font-semibold text-primary uppercase tracking-wider">
                                 {{ $product->category ? $product->category->CategoryName : 'Chưa phân loại' }}
                             </span>
-                            <h3 class="text-slate-900 dark:text-slate-100 font-medium text-base leading-snug mt-1 line-clamp-2">
-                                {{ $product->ProductName }}
+                            <h3 class="text-slate-900 dark:text-slate-100 font-medium text-base leading-snug mt-1 line-clamp-2 hover:text-primary transition-colors">
+                                <a href="{{ route('product.show', $product->ProductID) }}">{{ $product->ProductName }}</a>
                             </h3>
                         </div>
                         <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
                             <span class="text-lg font-bold text-slate-900 dark:text-slate-100">
                                 {{ number_format($product->Price, 0, ',', '.') }}đ
                             </span>
-                            <button class="flex items-center justify-center bg-primary hover:bg-primary-dark text-slate-900 rounded-full p-2 transition-colors" title="Thêm vào giỏ">
-                                <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
-                            </button>
+                            <form action="{{ route('cart.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->ProductID }}">
+                                <button type="submit" class="flex items-center justify-center bg-primary hover:bg-primary-dark text-slate-900 rounded-full w-10 h-10 transition-all shadow-sm hover:scale-110 active:scale-95" title="Thêm vào giỏ">
+                                    <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+                                </button>
+                            </form>
+                        </div> {{-- End Price/Cart --}}
+                    </div> {{-- End Info Section --}}
+                </div> {{-- End Product Card --}}
+            @endforeach
+
+                @if($products->isEmpty())
+                    <div class="col-span-full text-center py-12">
+                        <div class="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-4xl text-primary">shopping_bag</span>
                         </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Chưa có sản phẩm nào</h3>
+                        <p class="text-slate-500">Hãy quay lại sau khi admin thêm sản phẩm nhé!</p>
                     </div>
-                </div>
-            @empty
-                <div class="col-span-full text-center py-12">
-                    <div class="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="material-symbols-outlined text-4xl text-primary">shopping_bag</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Chưa có sản phẩm nào</h3>
-                    <p class="text-slate-500">Hãy quay lại sau khi admin thêm sản phẩm nhé!</p>
-                </div>
-            @endforelse
+                @endif
+            </div>
+
         </div>
 
         {{-- Pagination --}}
@@ -319,11 +418,19 @@
             params.delete('price');
         }
 
+        const selectedServices = Array.from(document.querySelectorAll('.service-filter:checked'))
+            .map(cb => cb.value).filter(v => v);
+        if (selectedServices.length > 0) {
+            params.set('service', selectedServices.join(','));
+        } else {
+            params.delete('service');
+        }
+
         // Keep sort & search
         window.location.href = '{{ route("shop") }}?' + params.toString();
     }
 
-    document.querySelectorAll('.category-filter, .price-filter').forEach(input => {
+    document.querySelectorAll('.category-filter, .price-filter, .service-filter').forEach(input => {
         input.addEventListener('change', applyFilters);
     });
 </script>

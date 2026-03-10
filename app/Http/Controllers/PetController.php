@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pet;
+use App\Models\PetImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PetController extends Controller
 {
@@ -14,6 +16,7 @@ class PetController extends Controller
     public function index()
     {
         $pets = Pet::where('OwnerID', Auth::id())
+            ->with('images')
             ->orderBy('PetName')
             ->get();
 
@@ -40,9 +43,10 @@ class PetController extends Controller
             'Size' => ['nullable', 'string', 'max:50'],
             'Age' => ['nullable', 'integer', 'min:0'],
             'Notes' => ['nullable', 'string', 'max:255'],
+            'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
         ]);
 
-        Pet::create([
+        $pet = Pet::create([
             'OwnerID' => Auth::id(),
             'PetName' => $validated['PetName'],
             'Species' => $validated['Species'],
@@ -52,8 +56,20 @@ class PetController extends Controller
             'Notes' => $validated['Notes'] ?? null,
         ]);
 
+        // Handle image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('pet_images', 'public');
+                PetImage::create([
+                    'PetID' => $pet->PetID,
+                    'ImageUrl' => $path,
+                    'IsMain' => $index === 0 ? 1 : 0,
+                ]);
+            }
+        }
+
         return redirect()
-            ->route('pets.index')
+            ->route('profile.index')
             ->with('success', 'Thêm thú cưng thành công!');
     }
 
@@ -66,6 +82,8 @@ class PetController extends Controller
         if ($pet->OwnerID !== Auth::id()) {
             abort(403, 'Bạn không có quyền chỉnh sửa thú cưng này.');
         }
+
+        $pet->load('images');
 
         return view('pets.edit', compact('pet'));
     }
@@ -87,12 +105,47 @@ class PetController extends Controller
             'Size' => ['nullable', 'string', 'max:50'],
             'Age' => ['nullable', 'integer', 'min:0'],
             'Notes' => ['nullable', 'string', 'max:255'],
+            'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+            'delete_images' => ['nullable', 'array'],
+            'delete_images.*' => ['integer'],
+            'set_main' => ['nullable', 'integer'],
         ]);
 
         $pet->update($validated);
 
+        // Handle new image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('pet_images', 'public');
+                PetImage::create([
+                    'PetID' => $pet->PetID,
+                    'ImageUrl' => $path,
+                    'IsMain' => ($request->set_main && $index === 0) ? 1 : 0,
+                ]);
+            }
+        }
+
+        // Handle image deletion
+        if ($request->has('delete_images')) {
+            $deleteIds = $request->delete_images;
+            $imagesToDelete = PetImage::whereIn('ImageID', $deleteIds)->where('PetID', $pet->PetID)->get();
+            
+            foreach ($imagesToDelete as $image) {
+                if ($image->ImageUrl && Storage::disk('public')->exists($image->ImageUrl)) {
+                    Storage::disk('public')->delete($image->ImageUrl);
+                }
+                $image->delete();
+            }
+        }
+
+        // Handle set main image
+        if ($request->has('set_main') && $request->set_main) {
+            PetImage::where('PetID', $pet->PetID)->update(['IsMain' => 0]);
+            PetImage::where('ImageID', $request->set_main)->update(['IsMain' => 1]);
+        }
+
         return redirect()
-            ->route('pets.index')
+            ->route('profile.index')
             ->with('success', 'Cập nhật thú cưng thành công!');
     }
 
@@ -106,10 +159,17 @@ class PetController extends Controller
             abort(403, 'Bạn không có quyền xóa thú cưng này.');
         }
 
+        // Delete images from storage
+        foreach ($pet->images as $image) {
+            if ($image->ImageUrl && Storage::disk('public')->exists($image->ImageUrl)) {
+                Storage::disk('public')->delete($image->ImageUrl);
+            }
+        }
+
         $pet->delete();
 
         return redirect()
-            ->route('pets.index')
+            ->route('profile.index')
             ->with('success', 'Xóa thú cưng thành công!');
     }
 }
