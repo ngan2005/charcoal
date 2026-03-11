@@ -8,12 +8,6 @@
     </div>
     
     <div class="flex items-center gap-4">
-        <!-- Theme Toggle -->
-        <button class="p-2.5 rounded-xl bg-[#f8fafc] dark:bg-gray-800 text-[#475569] dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer flex items-center gap-2 group" onclick="toggleTheme()">
-            <span class="material-symbols-outlined">palette</span>
-            <span class="text-xs font-semibold hidden sm:inline">Giao diện</span>
-        </button>
-
         <!-- Notifications -->
         <button class="p-2.5 rounded-xl bg-[#f8fafc] dark:bg-gray-800 text-[#475569] dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative">
             <span class="material-symbols-outlined">notifications</span>
@@ -38,29 +32,3 @@
         </a>
     </div>
 </header>
-
-<script>
-    function toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.classList.contains('dark');
-        
-        if (isDark) {
-            html.classList.remove('dark');
-            document.getElementById('main-content').style.backgroundColor = '#fdf8f9';
-        } else {
-            html.classList.add('dark');
-            document.getElementById('main-content').style.backgroundColor = '';
-        }
-        
-        // Save preference
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-
-    // Check saved theme on load
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
-    });
-</script>

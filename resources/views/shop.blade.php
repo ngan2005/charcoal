@@ -290,13 +290,13 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="p-4 flex flex-col gap-2">
-                            <h3 class="text-slate-900 dark:text-slate-100 font-bold text-sm leading-snug line-clamp-1">{{ $service->ServiceName }}</h3>
+                        <div class="p-3.5 flex flex-col gap-1.5">
+                            <h3 class="text-slate-900 dark:text-slate-100 font-bold text-[13px] leading-snug line-clamp-1">{{ $service->ServiceName }}</h3>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-primary font-black text-lg">{{ number_format($service->BasePrice, 0, ',', '.') }}đ</span>
-                                <span class="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{{ $service->Duration }} phút</span>
+                                <span class="text-primary font-black text-base">{{ number_format($service->BasePrice, 0, ',', '.') }}đ</span>
+                                <span class="text-[9px] text-slate-400 font-medium uppercase tracking-tighter">{{ $service->Duration }} phút</span>
                             </div>
-                            <a href="{{ route('appointment.create', ['service_id' => $service->ServiceID]) }}" class="mt-2 w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-slate-900 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all text-center">
+                            <a href="{{ route('appointment.create', ['service_id' => $service->ServiceID]) }}" class="mt-1 w-full py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-slate-900 text-slate-700 dark:text-slate-300 rounded-xl text-[10px] font-bold transition-all text-center">
                                 ĐẶT LỊCH NGAY
                             </a>
                         </div>

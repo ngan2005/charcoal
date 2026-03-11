@@ -1,261 +1,479 @@
 @extends('layouts.shop')
 
 @section('content')
+@php
+    $sMain = $service->images->where('IsMain', 1)->first();
+    $sFirst = $service->images->first();
+    $initialImg = ($sMain ?? $sFirst)?->ImageUrl;
+    if ($initialImg) {
+        if (str_contains($initialImg, '/storage/')) {
+            $initialImgUrl = asset('storage/' . substr($initialImg, strpos($initialImg, '/storage/') + 9));
+        } elseif (str_starts_with($initialImg, 'http')) {
+            $initialImgUrl = $initialImg;
+        } else {
+            $initialImgUrl = asset('storage/' . $initialImg);
+        }
+    } else {
+        $initialImgUrl = 'https://placehold.co/800x800/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
+    }
+@endphp
 
-<div class="flex flex-col gap-8 w-full max-w-5xl mx-auto py-4">
-    {{-- Breadcrumb --}}
-    <nav class="flex text-slate-500 text-sm font-medium gap-2">
-        <a href="{{ route('shop') }}" class="hover:text-primary transition-colors">Trang chủ</a> 
-        <span>/</span>
-        <a href="{{ route('services.index') }}" class="hover:text-primary transition-colors">Dịch vụ</a>
-        <span>/</span>
-        <span class="text-slate-900 dark:text-slate-100 truncate max-w-xs">{{ $service->ServiceName }}</span>
+<div class="container-fluid px-4 py-4 max-w-5xl mx-auto" x-data="{ activeImage: '{{ $initialImgUrl }}' }">
+    {{-- Breadcrumbs --}}
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{{ route('shop') }}" class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white inline-flex items-center text-sm font-medium transition-colors">
+                    <span class="material-symbols-outlined text-base mr-2">home</span>
+                    Cửa hàng
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-slate-400 text-sm mx-1">chevron_right</span>
+                    <a href="{{ route('services.index') }}" class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white text-sm font-medium ml-1 md:ml-2 transition-colors">
+                        Dịch vụ
+                    </a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-slate-400 text-sm mx-1">chevron_right</span>
+                    <span class="text-slate-900 dark:text-white text-sm font-bold ml-1 md:ml-2 truncate max-w-[200px]">{{ $service->ServiceName }}</span>
+                </div>
+            </li>
+        </ol>
     </nav>
-    
-    {{-- Service Details --}}
-    <div class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 p-8 flex flex-col md:flex-row gap-10">
-        {{-- Image --}}
-        @php
-            $sMain = $service->images->where('IsMain', 1)->first();
-            $sFirst = $service->images->first();
-            $sImgUrl = ($sMain ?? $sFirst)?->ImageUrl ?? null;
-            if ($sImgUrl) {
-                if (str_contains($sImgUrl, '/storage/')) {
-                    $serviceImgUrl = asset('storage/' . substr($sImgUrl, strpos($sImgUrl, '/storage/') + 9));
-                } elseif (str_starts_with($sImgUrl, 'http')) {
-                    $serviceImgUrl = $sImgUrl;
-                } else {
-                    $serviceImgUrl = asset('storage/' . $sImgUrl);
-                }
-            } else {
-                $serviceImgUrl = 'https://placehold.co/800x800/F4C2C3/ffffff?text=' . urlencode($service->ServiceName);
-            }
-            $servicePriceText = number_format($service->BasePrice, 0, ',', '.') . 'đ';
-        @endphp
-        <div class="w-full md:w-1/2 aspect-square md:aspect-auto rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 relative group cursor-pointer" onclick="openLightbox('{{ addslashes($serviceImgUrl) }}', '{{ addslashes($service->ServiceName) }}', '{{ $servicePriceText }}')">
-            <img alt="{{ $service->ServiceName }}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                 src="{{ $serviceImgUrl }}"
-                 onerror="this.onerror=null; this.src='https://placehold.co/800x800/F4C2C3/ffffff?text={{ urlencode($service->ServiceName) }}';"/>
-            <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                <span class="bg-white/90 text-slate-900 rounded-full p-3 shadow-lg flex backdrop-blur-sm">
-                    <span class="material-symbols-outlined">zoom_in</span>
-                </span>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {{-- Service Gallery (Left) --}}
+        <div class="flex flex-col gap-4">
+            <div class="relative bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800 aspect-square group">
+                <img :src="activeImage" 
+                     alt="{{ $service->ServiceName }}" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                
+                {{-- Zoom Icon Overlay --}}
+                <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-zoom-in"
+                     @click="openLightbox(activeImage, '{{ addslashes($service->ServiceName) }}', '{{ number_format($service->BasePrice, 0, ',', '.') }}đ')">
+                    <div class="bg-white/90 p-5 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                        <span class="material-symbols-outlined text-primary text-3xl font-black">zoom_in</span>
+                    </div>
+                </div>
             </div>
+
+            {{-- Thumbnails --}}
+            @if($service->images->count() > 1)
+            <div class="flex flex-wrap gap-3">
+                @foreach($service->images as $image)
+                    @php
+                        $thumbUrl = $image->ImageUrl;
+                        if (str_contains($thumbUrl, '/storage/')) {
+                            $thumbSrc = asset('storage/' . substr($thumbUrl, strpos($thumbUrl, '/storage/') + 9));
+                        } elseif (str_starts_with($thumbUrl, 'http')) {
+                            $thumbSrc = $thumbUrl;
+                        } else {
+                            $thumbSrc = asset('storage/' . $thumbUrl);
+                        }
+                    @endphp
+                    <button @click="activeImage = '{{ $thumbSrc }}'"
+                            class="w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all hover:scale-105 active:scale-95"
+                            :class="activeImage === '{{ $thumbSrc }}' ? 'border-primary shadow-md ring-4 ring-primary/10' : 'border-slate-100 dark:border-slate-800'">
+                        <img src="{{ $thumbSrc }}" class="w-full h-full object-cover">
+                    </button>
+                @endforeach
+            </div>
+            @endif
         </div>
-        
-        {{-- Info --}}
-        <div class="flex-1 flex flex-col py-2">
-            <h1 class="text-slate-900 dark:text-slate-100 text-3xl sm:text-4xl font-bold leading-tight mb-4">
-                {{ $service->ServiceName }}
-            </h1>
-            
-            <div class="text-3xl font-bold text-primary mb-6">
-                {{ number_format($service->BasePrice, 0, ',', '.') }}đ
+
+        {{-- Service Info (Right) --}}
+        <div class="flex flex-col gap-8 py-2">
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        DỊCH VỤ THÚ CƯNG
+                    </span>
+                    <div class="flex items-center gap-1 text-amber-400">
+                        <span class="material-symbols-outlined text-sm fill-current">star</span>
+                        <span class="text-slate-900 dark:text-white text-xs font-bold">{{ number_format($averageRating, 1) }}</span>
+                    </div>
+                </div>
+                
+                <h1 class="text-slate-900 dark:text-white text-2xl md:text-3xl font-black font-display leading-tight">
+                    {{ $service->ServiceName }}
+                </h1>
+                
+                <div class="flex items-center gap-6">
+                    <div class="text-2xl md:text-3xl font-black text-primary">
+                        {{ number_format($service->BasePrice, 0, ',', '.') }}đ
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <span class="material-symbols-outlined text-slate-500 text-lg">schedule</span>
+                        <span class="text-slate-700 dark:text-slate-300 font-bold uppercase text-[10px]">{{ $service->Duration }} PHÚT</span>
+                    </div>
+                </div>
+
+                <div class="prose dark:prose-invert prose-slate prose-p:leading-relaxed max-w-none border-l-4 border-primary/30 pl-4 text-slate-600 dark:text-slate-400 text-sm italic">
+                    {{ $service->Description ?? 'Chào mừng bạn đến với Pink Charcoal - nơi cung cấp những dịch vụ chăm sóc tốt nhất cho thú cưng yêu quý của bạn.' }}
+                </div>
             </div>
-            
-            <div class="prose dark:prose-invert prose-slate prose-p:leading-relaxed prose-a:text-primary mb-8 border-t border-slate-100 dark:border-slate-800 pt-6">
-                <p>{{ $service->Description ?? 'Dịch vụ này không có mô tả.' }}</p>
-                <p>Quý khách vui lòng đặt lịch trước để được phục vụ tốt nhất. Thời gian làm việc: 8:00 AM - 10:00 PM.</p>
+
+            {{-- Actions --}}
+            <div class="flex flex-col gap-4 pt-4">
+                <form action="{{ route('cart.store') }}" method="POST" class="w-full">
+                    @csrf
+                    <input type="hidden" name="ServiceID" value="{{ $service->ServiceID }}">
+                    <input type="hidden" name="Quantity" value="1">
+                    <input type="hidden" name="redirect" value="checkout">
+                    <button type="submit" 
+                       class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-black py-4 px-6 rounded-[1.25rem] shadow-xl shadow-primary/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 group relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]"></div>
+                        <span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">calendar_month</span>
+                        <span class="text-base uppercase tracking-wide">ĐẶT LỊCH NGAY</span>
+                    </button>
+                </form>
+                
+                <button type="button" onclick="openSupportWithService('{{ addslashes($service->ServiceName) }}', {{ $service->BasePrice }}, '{{ route('services.show', $service->ServiceID) }}')" 
+                        class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold py-3 px-6 rounded-[1.25rem] transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-sm">
+                    <span class="material-symbols-outlined text-xl">support_agent</span>
+                    TƯ VẤN CHI TIẾT
+                </button>
+                <p class="text-slate-400 dark:text-slate-500 text-[11px] text-center italic">Nhắn tin ngay với shop để được tư vấn kĩ hơn về lộ trình chăm sóc bé yêu ✨</p>
             </div>
-            
-            <div class="mt-auto flex flex-col gap-4">
-                <button class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-bold py-4 rounded-xl shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 transform hover:scale-105">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    Đặt Lịch Ngay
-                </button>
-                <button class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">support_agent</span>
-                    Tư Vấn Thêm
-                </button>
+
+            {{-- Service Metadata --}}
+            <div class="grid grid-cols-2 gap-6 mt-4 pt-8 border-t border-dashed border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary text-xl">verified</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-slate-400 text-[9px] font-black uppercase tracking-widest">Cam kết</span>
+                        <span class="text-slate-900 dark:text-white font-bold text-xs">Chuẩn 5 sao</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary text-xl">diversity_1</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-slate-400 text-[9px] font-black uppercase tracking-widest">Đội ngũ</span>
+                        <span class="text-slate-900 dark:text-white font-bold text-xs">Chuyên nghiệp</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{{-- Reviews & Comments Section --}}
-<div class="w-full max-w-5xl mx-auto mt-12 mb-8 bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800">
-    <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3 mb-8">
-        <span class="material-symbols-outlined text-primary text-3xl">forum</span>
-        Đánh Giá & Bình Luận
-    </h3>
+    {{-- Suggested Products --}}
+    @if(isset($suggestedProducts) && $suggestedProducts->count() > 0)
+    <div class="mt-16">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-slate-900 dark:text-white text-2xl font-black font-display tracking-tight flex items-center gap-3">
+                <span class="w-10 h-1.5 bg-primary rounded-full"></span>
+                Sản phẩm đề xuất
+            </h2>
+            <a href="{{ route('shop') }}" class="text-primary font-bold hover:underline flex items-center gap-2 group">
+                Xem thêm
+                <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+        </div>
 
-    <div class="flex flex-col md:flex-row gap-10">
-        {{-- Rating Summary --}}
-        <div class="w-full md:w-1/3 flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-            <div class="text-5xl font-extrabold text-slate-900 dark:text-white mb-2">{{ number_format($averageRating, 1) }}<span class="text-2xl text-slate-400 font-medium">/5</span></div>
-            <div class="flex items-center gap-1 text-amber-400 mb-2">
-                @for($i = 1; $i <= 5; $i++)
-                    @if($i <= round($averageRating))
-                        <span class="material-symbols-outlined text-2xl fill-current">star</span>
-                    @elseif($i - 0.5 <= $averageRating)
-                        <span class="material-symbols-outlined text-2xl fill-current">star_half</span>
-                    @else
-                        <span class="material-symbols-outlined text-2xl text-slate-300">star</span>
-                    @endif
-                @endfor
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach($suggestedProducts as $product)
+                @php
+                    $pImg = $product->images->where('IsMain', 1)->first() ?? $product->images->first();
+                    $pUrl = $pImg ? (str_starts_with($pImg->ImageUrl, 'http') ? $pImg->ImageUrl : asset('storage/' . $pImg->ImageUrl)) : 'https://placehold.co/400x400/F4C2C3/ffffff?text=' . urlencode($product->ProductName);
+                @endphp
+                <div class="flex flex-col bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-slate-800 group hover:-translate-y-2">
+                    <a href="{{ route('product.show', $product->ProductID) }}" class="aspect-square relative overflow-hidden p-4 bg-slate-50 dark:bg-slate-800">
+                        <img src="{{ $pUrl }}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transform group-hover:scale-110 transition-transform duration-700 ease-out">
+                    </a>
+                    <div class="p-6 flex flex-col gap-3">
+                        <h3 class="text-slate-900 dark:text-white font-bold text-sm leading-snug line-clamp-2 hover:text-primary transition-colors">
+                            <a href="{{ route('product.show', $product->ProductID) }}">{{ $product->ProductName }}</a>
+                        </h3>
+                        <div class="flex items-center justify-between mt-2 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800">
+                            <span class="text-lg font-black text-slate-900 dark:text-white">
+                                {{ number_format($product->Price, 0, ',', '.') }}đ
+                            </span>
+                            <form action="{{ route('cart.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="ProductID" value="{{ $product->ProductID }}">
+                                <button type="submit" class="w-10 h-10 rounded-full bg-primary hover:bg-primary-dark text-slate-900 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-90">
+                                    <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Other Services --}}
+    @if(isset($otherServices) && $otherServices->count() > 0)
+    <div class="mt-24">
+        <div class="flex items-center justify-between mb-10">
+            <h2 class="text-slate-900 dark:text-white text-3xl font-black font-display tracking-tight flex items-center gap-4">
+                <span class="w-12 h-1.5 bg-primary rounded-full"></span>
+                Dịch vụ khác
+            </h2>
+            <a href="{{ route('services.index') }}" class="text-primary font-bold hover:underline flex items-center gap-2 group">
+                Xem tất cả
+                <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @foreach($otherServices as $rel)
+                @php
+                    $rMain = $rel->images->where('IsMain', 1)->first();
+                    $rFirst = $rel->images->first();
+                    $rImg = ($rMain ?? $rFirst)?->ImageUrl;
+                    if ($rImg) {
+                        if (str_contains($rImg, '/storage/')) {
+                            $rImgUrl = asset('storage/' . substr($rImg, strpos($rImg, '/storage/') + 9));
+                        } elseif (str_starts_with($rImg, 'http')) {
+                            $rImgUrl = $rImg;
+                        } else {
+                            $rImgUrl = asset('storage/' . $rImg);
+                        }
+                    } else {
+                        $rImgUrl = 'https://placehold.co/600x400/F4C2C3/ffffff?text=' . urlencode($rel->ServiceName);
+                    }
+                @endphp
+                <a href="{{ route('services.show', $rel->ServiceID) }}" class="flex flex-col bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-slate-800 group hover:-translate-y-2">
+                    <div class="aspect-[4/3] relative overflow-hidden">
+                        <img src="{{ $rImgUrl }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out">
+                    </div>
+                    <div class="p-6 flex flex-col gap-3">
+                        <h3 class="text-slate-900 dark:text-white font-bold text-base leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                            {{ $rel->ServiceName }}
+                        </h3>
+                        <div class="flex items-center justify-between mt-2 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800">
+                            <span class="text-lg font-black text-primary">
+                                {{ number_format($rel->BasePrice, 0, ',', '.') }}đ
+                            </span>
+                            <span class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Reviews & Comments --}}
+    <div class="mt-24 bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-xl border border-slate-100 dark:border-slate-800" id="comments-section">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12">
+            <h2 class="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-4">
+                <span class="w-12 h-1.5 bg-primary rounded-full"></span>
+                Đánh giá & Bình luận
+            </h2>
+            <div class="flex items-center gap-8 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col items-center">
+                    <span class="text-4xl font-black text-slate-900 dark:text-white">{{ number_format($averageRating, 1) }}</span>
+                    <span class="text-[10px] text-slate-400 font-black uppercase">trung bình</span>
+                </div>
+                <div class="h-10 w-px bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex flex-col items-center">
+                    <span class="text-4xl font-black text-slate-900 dark:text-white">{{ $reviewCount }}</span>
+                    <span class="text-[10px] text-slate-400 font-black uppercase">lượt đánh giá</span>
+                </div>
             </div>
-            <p class="text-slate-500 text-sm">Dựa trên {{ $reviewCount }} đánh giá</p>
         </div>
 
         {{-- Add Comment Form --}}
-        <div class="w-full md:w-2/3 flex flex-col gap-4">
-            <h4 class="font-bold text-slate-900 dark:text-slate-100 text-lg">Viết đánh giá của bạn</h4>
-            <div class="flex items-center gap-2 mb-2 text-slate-300">
-                <span class="material-symbols-outlined text-3xl cursor-pointer hover:text-amber-400 transition-colors">star</span>
-                <span class="material-symbols-outlined text-3xl cursor-pointer hover:text-amber-400 transition-colors">star</span>
-                <span class="material-symbols-outlined text-3xl cursor-pointer hover:text-amber-400 transition-colors">star</span>
-                <span class="material-symbols-outlined text-3xl cursor-pointer hover:text-amber-400 transition-colors">star</span>
-                <span class="material-symbols-outlined text-3xl cursor-pointer hover:text-amber-400 transition-colors">star</span>
-            </div>
-            <textarea rows="3" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Chia sẻ trải nghiệm của bạn về dịch vụ này..."></textarea>
-            <div class="flex justify-end mt-2">
-                <button class="bg-primary hover:bg-primary-dark text-slate-900 font-bold py-3 px-8 rounded-xl shadow-md transition-all">Gửi Đánh Giá</button>
-            </div>
-        </div>
-    </div>
+        @auth
+        <div class="bg-slate-50 dark:bg-slate-800/30 rounded-[2rem] p-8 mb-12 border border-slate-100 dark:border-slate-800">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Viết đánh giá của bạn</h3>
+            <form id="comment-form" class="space-y-6">
+                @csrf
+                <input type="hidden" name="ServiceID" value="{{ $service->ServiceID }}">
 
-    {{-- Comments List --}}
-    <div class="mt-10 flex flex-col gap-6">
-        <h4 class="font-bold text-slate-900 dark:text-slate-100 text-lg border-b border-slate-100 dark:border-slate-800 pb-2">Bình luận mới nhất</h4>
-        
-        @forelse($reviews as $review)
-            <div class="flex gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
-                @php
-                    $customerName = $review->customer ? $review->customer->FullName : 'Khách vãng lai';
-                @endphp
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($customerName) }}&background=F4C2C3&color=fff" alt="Avatar" class="w-12 h-12 rounded-full shadow-sm shrink-0">
-                <div class="flex flex-col w-full">
-                    <div class="flex justify-between items-start mb-1">
-                        <h5 class="font-bold text-slate-900 dark:text-slate-100">{{ $customerName }}</h5>
-                        <span class="text-xs text-slate-400">{{ $review->CreatedAt ? \Carbon\Carbon::parse($review->CreatedAt)->diffForHumans() : '' }}</span>
-                    </div>
-                    
-                    {{-- Stars --}}
-                    <div class="flex items-center gap-1 text-amber-400 mb-2">
+                <div class="flex items-center gap-4">
+                    <span class="text-slate-600 dark:text-slate-400 font-bold">Chất lượng dịch vụ:</span>
+                    <div class="flex gap-2" id="rating-stars">
                         @for($i = 1; $i <= 5; $i++)
-                            @if($i <= $review->Rating)
-                                <span class="material-symbols-outlined text-sm fill-current">star</span>
-                            @else
-                                <span class="material-symbols-outlined text-sm text-slate-300">star</span>
-                            @endif
+                        <button type="button" class="text-3xl text-slate-300 hover:text-amber-400 transition-colors star-btn transform hover:scale-110" data-rating="{{ $i }}">
+                            <span class="material-symbols-outlined fill-current">star</span>
+                        </button>
                         @endfor
                     </div>
-                    
-                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line">{{ $review->Comment }}</p>
-                    
-                    {{-- Shop Replies --}}
-                    @if($review->replies && $review->replies->count() > 0)
-                        @foreach($review->replies as $reply)
-                            @if(!$reply->Deleted)
-                                <div class="mt-4 bg-primary/10 dark:bg-primary/5 rounded-xl p-4 flex gap-3 border border-primary/20">
-                                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                                        <span class="material-symbols-outlined text-white text-sm">storefront</span>
-                                    </div>
-                                    <div>
-                                        <h6 class="font-bold text-sm text-primary-dark dark:text-primary mb-1">
-                                            Shop Charcoal ({{ $reply->staff ? $reply->staff->FullName : 'Quản trị viên' }})
-                                        </h6>
-                                        <p class="text-slate-600 dark:text-slate-400 text-sm whitespace-pre-line">{{ $reply->Comment }}</p>
+                    <input type="hidden" name="Rating" id="rating-value" value="5">
+                </div>
+
+                <textarea name="Comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về dịch vụ này..."
+                    class="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none text-lg"
+                    required minlength="3" maxlength="1000"></textarea>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-slate-900 font-black py-4 px-10 rounded-2xl shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3">
+                        <span class="material-symbols-outlined">send</span>
+                        GỬI ĐÁNH GIÁ
+                    </button>
+                </div>
+            </form>
+        </div>
+        @else
+        <div class="bg-slate-50 dark:bg-slate-900 rounded-3xl p-10 mb-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl text-primary">lock_open</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400 text-lg mb-4">Vui lòng đăng nhập để viết đánh giá</p>
+            <a href="{{ route('login') }}" class="inline-block bg-primary hover:bg-primary-dark text-slate-900 font-black py-3 px-8 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95">
+                ĐĂNG NHẬP NGAY
+            </a>
+        </div>
+        @endauth
+
+        {{-- Comments List --}}
+        <div class="space-y-6" id="comments-list">
+            @forelse($reviews as $review)
+                <div class="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow">
+                    <div class="flex items-start gap-6">
+                        @php
+                            $cName = $review->customer ? $review->customer->FullName : 'Khách yêu';
+                        @endphp
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($cName) }}&background=F4C2C3&color=fff&size=128" 
+                             alt="Avatar" class="w-16 h-16 rounded-full ring-4 ring-primary/10 shrink-0">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h5 class="font-black text-slate-900 dark:text-white text-lg">{{ $cName }}</h5>
+                                    <div class="flex items-center gap-1 text-amber-400">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <span class="material-symbols-outlined text-sm {{ $i <= $review->Rating ? 'fill-current' : 'text-slate-200' }}">star</span>
+                                        @endfor
                                     </div>
                                 </div>
+                                <span class="text-slate-400 text-xs font-medium">{{ \Carbon\Carbon::parse($review->CreatedAt)->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-base italic">{{ $review->Comment }}</p>
+                            
+                            {{-- Store Response --}}
+                            @if($review->replies && $review->replies->count() > 0)
+                                @foreach($review->replies as $reply)
+                                    @if(!$reply->Deleted)
+                                        <div class="mt-4 bg-primary/10 dark:bg-primary/5 rounded-2xl p-5 flex gap-4 border border-primary/20">
+                                            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-lg">
+                                                <span class="material-symbols-outlined text-slate-900 text-sm">paws</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-black text-sm text-primary-dark dark:text-primary mb-1 inline-flex items-center gap-2">
+                                                    Pink Charcoal Reply
+                                                    <span class="bg-primary/20 text-primary-dark dark:text-primary text-[8px] px-2 py-0.5 rounded-full uppercase">Official</span>
+                                                </h6>
+                                                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ $reply->Comment }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             @endif
-                        @endforeach
-                    @endif
-                </div>
-            </div>
-        @empty
-            <div class="py-8 text-center text-slate-500">
-                Chưa có phần đánh giá nào cho Dịch vụ này.
-            </div>
-        @endforelse
-    </div>
-</div>
-
-{{-- Suggested Products --}}
-@if(isset($suggestedProducts) && $suggestedProducts->count() > 0)
-<div class="w-full max-w-5xl mx-auto mt-12 mb-8 flex flex-col gap-6">
-    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">shopping_bag</span>
-            Sản Phẩm Đề Xuất
-        </h3>
-        <a href="{{ route('shop') }}" class="text-sm font-medium text-primary hover:text-primary-dark flex items-center gap-1 transition-colors">
-            Xem tất cả <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </a>
-    </div>
-    
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        @foreach($suggestedProducts as $product)
-            <a href="{{ route('product.show', $product->ProductID) }}" class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary/50 transition-all group no-underline text-inherit">
-                <div class="aspect-square bg-slate-50 dark:bg-slate-800 relative p-4">
-                    @php
-                        $img = $product->images->where('IsMain', 1)->first() ?? $product->images->first();
-                        $imageUrl = $img ? $img->ImageUrl : null;
-                        if ($imageUrl) {
-                            if (str_contains($imageUrl, '/storage/')) {
-                                $fullImgUrl = asset('storage/' . substr($imageUrl, strpos($imageUrl, '/storage/') + 9));
-                            } elseif (str_starts_with($imageUrl, 'http')) {
-                                $fullImgUrl = $imageUrl;
-                            } else {
-                                $fullImgUrl = asset('storage/' . $imageUrl);
-                            }
-                        } else {
-                            $fullImgUrl = 'https://placehold.co/400x400/F4C2C3/ffffff?text=' . urlencode($product->ProductName);
-                        }
-                    @endphp
-                    <img src="{{ $fullImgUrl }}" alt="{{ $product->ProductName }}" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x400/F4C2C3/ffffff?text={{ urlencode($product->ProductName) }}'; this.onerror=null;">
-                </div>
-                <div class="p-4 flex flex-col flex-1">
-                    <h4 class="font-medium text-slate-900 dark:text-slate-100 text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-2 min-h-[2.5rem]">{{ $product->ProductName }}</h4>
-                    <div class="mt-auto flex items-center justify-between">
-                        <span class="text-slate-900 dark:text-white font-bold">{{ number_format($product->Price, 0, ',', '.') }}đ</span>
-                        <span class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors pointer-events-none">
-                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
-                        </span>
+                        </div>
                     </div>
                 </div>
-            </a>
-        @endforeach
+            @empty
+                <div class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <span class="material-symbols-outlined text-5xl text-slate-300 mb-4">rate_review</span>
+                    <p class="text-slate-500 text-lg">Chưa có đánh giá nào. Hãy là người đầu tiên trải nghiệm!</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 </div>
-@endif
 
-{{-- Related Services --}}
-@if($otherServices->count() > 0)
-<div class="w-full max-w-5xl mx-auto mt-12 mb-8 flex flex-col gap-6">
-    <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Dịch Vụ Khác</h3>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        @foreach($otherServices as $other)
-            @php
-                $oMain = $other->images->where('IsMain', 1)->first();
-                $oFirst = $other->images->first();
-                $oImgUrl = ($oMain ?? $oFirst)?->ImageUrl;
-                if ($oImgUrl) {
-                    if (str_contains($oImgUrl, '/storage/')) {
-                        $otherImgSrc = asset('storage/' . substr($oImgUrl, strpos($oImgUrl, '/storage/') + 9));
-                    } elseif (str_starts_with($oImgUrl, 'http')) {
-                        $otherImgSrc = $oImgUrl;
-                    } else {
-                        $otherImgSrc = asset('storage/' . $oImgUrl);
+<script>
+    function openSupportWithService(serviceName, servicePrice, serviceUrl) {
+        if (typeof toggleSupportChat === 'function') {
+            toggleSupportChat();
+        }
+
+        setTimeout(async function() {
+            const message = `Xin chào! Tôi muốn được tư vấn thêm về dịch vụ "${serviceName}" (giá: ${new Intl.NumberFormat('vi-VN').format(servicePrice)}đ). ✨🐾`;
+            
+            try {
+                const response = await fetch('{{ route("support.send") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (response.ok) {
+                    if (typeof appendMessage === 'function') {
+                        appendMessage(message, false, new Date());
                     }
-                } else {
-                    $otherImgSrc = 'https://placehold.co/400x300/F4C2C3/ffffff?text=' . urlencode($other->ServiceName);
                 }
-            @endphp
-            <a href="{{ route('services.show', $other->ServiceID) }}" class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 hover:border-primary transition-colors group">
-                <div class="aspect-video bg-slate-100 relative">
-                    <img src="{{ $otherImgSrc }}" alt="{{ $other->ServiceName }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x300/F4C2C3/ffffff?text={{ urlencode($other->ServiceName) }}';">
-                </div>
-                <div class="p-4">
-                    <h4 class="font-bold text-slate-900 dark:text-slate-100 text-base leading-tight group-hover:text-primary transition-colors mb-2 line-clamp-1">{{ $other->ServiceName }}</h4>
-                    <span class="text-primary font-bold text-sm">{{ number_format($other->BasePrice, 0, ',', '.') }}đ</span>
-                </div>
-            </a>
-        @endforeach
-    </div>
-</div>
-@endif
+            } catch (error) {
+                console.error('Error sending service info:', error);
+            }
+        }, 800);
+    }
+</script>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const starBtns = document.querySelectorAll('.star-btn');
+    const ratingValue = document.getElementById('rating-value');
+
+    function updateStars(rating) {
+        starBtns.forEach((btn, index) => {
+            const icon = btn.querySelector('span');
+            if (index < rating) {
+                icon.classList.remove('text-slate-300');
+                icon.classList.add('text-amber-400');
+                icon.style.fontVariationSettings = "'FILL' 1";
+            } else {
+                icon.classList.remove('text-amber-400');
+                icon.classList.add('text-slate-300');
+                icon.style.fontVariationSettings = "'FILL' 0";
+            }
+        });
+        ratingValue.value = rating;
+    }
+
+    starBtns.forEach(btn => {
+        btn.addEventListener('click', () => updateStars(parseInt(btn.dataset.rating)));
+    });
+
+    const form = document.getElementById('comment-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch("{{ route('comments.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Cảm ơn bạn đã gửi đánh giá! ✨');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra, vui lòng thử lại sau.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+});
+</script>
+@endpush
 
 @endsection

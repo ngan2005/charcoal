@@ -75,10 +75,12 @@ class CartController extends Controller
 
         $userId = auth()->id();
         $productId = $request->input('ProductID') ?? $request->input('product_id');
+        $serviceId = $request->input('ServiceID') ?? $request->input('service_id');
         $quantity = (int) ($request->input('Quantity') ?? $request->input('quantity', 1));
+        $redirectToCheckout = $request->input('redirect') === 'checkout';
 
-        if (empty($productId)) {
-            return redirect()->back()->with('error', 'Vui lòng chọn sản phẩm để thêm vào giỏ.');
+        if (empty($productId) && empty($serviceId)) {
+            return redirect()->back()->with('error', 'Vui lòng chọn sản phẩm hoặc dịch vụ để thêm vào giỏ.');
         }
 
         // Find or create cart
@@ -94,6 +96,35 @@ class CartController extends Controller
             $cart = DB::table('carts')->where('UserID', $userId)->first();
         }
 
+        // Thêm dịch vụ vào giỏ
+        if (!empty($serviceId)) {
+            $quantity = max(1, $quantity);
+            $item = DB::table('cart_items')
+                ->where('CartID', $cart->CartID)
+                ->where('ServiceID', $serviceId)
+                ->first();
+            if ($item) {
+                DB::table('cart_items')
+                    ->where('CartItemID', $item->CartItemID)
+                    ->update(['Quantity' => $item->Quantity + $quantity]);
+            } else {
+                $maxId = DB::table('cart_items')->max('CartItemID');
+                DB::table('cart_items')->insert([
+                    'CartItemID' => $maxId ? $maxId + 1 : 1,
+                    'CartID' => $cart->CartID,
+                    'ProductID' => null,
+                    'ServiceID' => $serviceId,
+                    'Quantity' => $quantity,
+                    'AddedAt' => now()
+                ]);
+            }
+            if ($redirectToCheckout) {
+                return redirect()->route('checkout.index')->with('success', 'Đã thêm dịch vụ vào giỏ! Chuyển tới thanh toán.');
+            }
+            return redirect()->back()->with('success', 'Đã thêm dịch vụ vào giỏ hàng!');
+        }
+
+        // Thêm sản phẩm vào giỏ
         if ($quantity <= 0) {
             DB::table('cart_items')
                 ->where('CartID', $cart->CartID)
@@ -123,8 +154,7 @@ class CartController extends Controller
             ]);
         }
 
-        // Mua luôn: chuyển thẳng tới checkout
-        if ($request->input('redirect') === 'checkout') {
+        if ($redirectToCheckout) {
             return redirect()->route('checkout.index')->with('success', 'Đã thêm vào giỏ hàng!');
         }
 

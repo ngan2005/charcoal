@@ -38,12 +38,12 @@
         </h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-2">
         @forelse($services as $service)
             <a href="{{ route('services.show', $service->ServiceID) }}" class="flex flex-col bg-white dark:bg-slate-900/80 rounded-[2rem] overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-slate-800 group hover:-translate-y-2 relative">
                 {{-- Floating Price Tag --}}
-                <div class="absolute top-4 right-4 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white/20 transform group-hover:scale-110 transition-transform">
-                    <span class="text-lg font-extrabold text-primary">
+                <div class="absolute top-2.5 right-2.5 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-full shadow-lg border border-white/20 transform group-hover:scale-110 transition-transform">
+                    <span class="text-sm font-extrabold text-primary">
                         {{ number_format($service->BasePrice, 0, ',', '.') }}đ
                     </span>
                 </div>
@@ -80,12 +80,12 @@
                 </div>
 
                 {{-- Info --}}
-                <div class="p-6 md:p-8 flex flex-col gap-4 flex-1 justify-between relative z-10 bg-white dark:bg-slate-900">
+                <div class="p-4 flex flex-col gap-2.5 flex-1 justify-between relative z-10 bg-white dark:bg-slate-900">
                     <div>
-                        <h3 class="text-slate-900 dark:text-slate-100 font-bold font-display text-xl leading-snug mb-3 group-hover:text-primary transition-colors">
+                        <h3 class="text-slate-900 dark:text-slate-100 font-bold font-display text-base leading-snug mb-1.5 group-hover:text-primary transition-colors line-clamp-1">
                             {{ $service->ServiceName }}
                         </h3>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 leading-relaxed font-medium">
+                        <p class="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2 leading-relaxed font-medium">
                             {{ $service->Description ?? 'Không có mô tả chi tiết cho dịch vụ này.' }}
                         </p>
                     </div>
@@ -99,8 +99,8 @@
                             <span class="material-symbols-outlined text-base fill-current">star</span>
                             <span class="text-slate-400 ml-1">(5.0)</span>
                         </div>
-                        <span class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                        <span class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
                         </span>
                     </div>
                 </div>

@@ -116,6 +116,10 @@
             border-radius: 4px;
             font-weight: 600;
         }
+        /* Chi tiết dịch vụ modal */
+        .product-detail-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 600; margin-bottom: 0.25rem; }
+        .product-detail-value { font-size: 0.9375rem; color: #1e293b; font-weight: 500; }
+        .detail-card { background: #f8fafc; border-radius: 0.75rem; padding: 1rem; border: 1px solid #f1f5f9; }
         .image-info {
             position: absolute;
             bottom: 4px;
@@ -209,7 +213,17 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($services as $service)
-                        <tr class="hover:bg-gray-50">
+                        @php
+                            $serviceImages = $service->images ?? collect();
+                            $serviceImageUrls = $serviceImages->map(fn($img) => $img->display_url ?? '')->filter()->values()->toArray();
+                        @endphp
+                        <tr class="hover:bg-gray-50 service-row"
+                            data-name="{{ $service->ServiceName }}"
+                            data-id="{{ $service->ServiceID }}"
+                            data-price="{{ number_format((float) $service->BasePrice, 0, ',', '.') }}"
+                            data-duration="{{ $service->Duration }}"
+                            data-description="{{ e($service->Description ?? '') }}"
+                            data-images="{{ json_encode($serviceImageUrls) }}">
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900">{{ $service->ServiceName }}</div>
                                 <div class="text-xs text-gray-500">ID: {{ $service->ServiceID }}</div>
@@ -234,7 +248,11 @@
                             <td class="px-4 py-3 text-gray-600">{{ number_format((float) $service->BasePrice) }} VNĐ</td>
                             <td class="px-4 py-3 text-gray-600">{{ $service->Duration }} phút</td>
                             <td class="px-4 py-3 text-right">
-                                <div class="inline-flex gap-2">
+                                <div class="inline-flex gap-2 flex-wrap justify-content-end">
+                                    <button type="button" class="btn btn-primary btn-sm view-service-btn" title="Xem chi tiết">
+                                        <span class="material-symbols-outlined align-middle" style="font-size: 16px;">visibility</span>
+                                        Xem chi tiết
+                                    </button>
                                     <button
                                         class="btn btn-outline-secondary btn-sm edit-service-btn"
                                         data-bs-toggle="modal"
@@ -267,6 +285,63 @@
 
         <div>
             {{ $services->links() }}
+        </div>
+    </div>
+
+    <!-- Modal xem chi tiết dịch vụ (trong admin) -->
+    <div class="modal fade" id="viewServiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-xl rounded-2xl">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-bold text-xl">Chi tiết dịch vụ</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <div id="view-service-images" class="carousel slide rounded-xl overflow-hidden shadow-sm bg-gray-50" data-bs-ride="carousel">
+                                <div class="carousel-inner" id="view-service-images-inner">
+                                    <!-- Ảnh được chèn bằng JS -->
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#view-service-images" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#view-service-images" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 id="view-service-name" class="text-2xl font-bold text-gray-900 leading-tight"></h4>
+                                    <p id="view-service-id" class="text-sm font-mono text-primary mt-1"></p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Giá</div>
+                                        <div id="view-service-price" class="product-detail-value text-lg text-red-600 font-bold"></div>
+                                    </div>
+                                    <div class="detail-card">
+                                        <div class="product-detail-label">Thời lượng</div>
+                                        <div id="view-service-duration" class="product-detail-value text-lg text-blue-600"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <div class="detail-card">
+                                <div class="product-detail-label">Mô tả dịch vụ</div>
+                                <div id="view-service-description" class="text-gray-600 text-sm leading-relaxed whitespace-pre-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light px-4 rounded-xl font-semibold" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="view-service-go-edit-btn" class="btn btn-primary px-4 rounded-xl font-semibold">Chỉnh sửa</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -604,6 +679,45 @@
                     if (result.isConfirmed) {
                         form.submit();
                     }
+                });
+            });
+
+            // Modal xem chi tiết dịch vụ (trong admin)
+            const viewServiceModal = new bootstrap.Modal(document.getElementById('viewServiceModal'));
+            document.querySelectorAll('.view-service-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.service-row');
+                    const data = row.dataset;
+                    document.getElementById('view-service-name').textContent = data.name || '';
+                    document.getElementById('view-service-id').textContent = 'ID: ' + (data.id || '');
+                    document.getElementById('view-service-price').textContent = (data.price || '0') + ' VNĐ';
+                    document.getElementById('view-service-duration').textContent = (data.duration || '0') + ' phút';
+                    document.getElementById('view-service-description').textContent = data.description || 'Chưa có mô tả.';
+
+                    const imagesInner = document.getElementById('view-service-images-inner');
+                    let images = [];
+                    try { images = JSON.parse(data.images || '[]'); } catch (e) {}
+                    if (images.length > 0) {
+                        imagesInner.innerHTML = images.map((img, i) => `
+                            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                                <img src="${img}" class="d-block w-100 h-[300px] object-cover" onerror="this.src='https://placehold.co/400x300/F4C2C3/fff?text=Ảnh'">
+                            </div>
+                        `).join('');
+                    } else {
+                        imagesInner.innerHTML = `
+                            <div class="carousel-item active">
+                                <div class="d-flex align-items-center justify-center h-[300px] bg-gray-100 text-gray-400">
+                                    <span class="material-symbols-outlined text-4xl">image_not_supported</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('view-service-go-edit-btn').onclick = () => {
+                        viewServiceModal.hide();
+                        row.querySelector('.edit-service-btn').click();
+                    };
+                    viewServiceModal.show();
                 });
             });
 
