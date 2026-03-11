@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
              ServiceSeeder::class,
              ServiceImageSeeder::class,
              AppointmentSeeder::class,
+             VoucherSeeder::class,
          ]);
     }
 }

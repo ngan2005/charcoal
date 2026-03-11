@@ -164,6 +164,49 @@
                 @endforeach
             </div>
         </details>
+
+        {{-- Vouchers / Promotions --}}
+        @if(isset($vouchers) && $vouchers->count() > 0)
+        <div class="flex flex-col gap-4 mt-4">
+            <div class="flex flex-col gap-1">
+                <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Mã Giảm Giá</h3>
+                <p class="text-[10px] text-slate-500 font-medium italic">Bấm vào mã để sao chép nhanh ✨</p>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                @foreach($vouchers as $voucher)
+                <div class="relative bg-white dark:bg-slate-900 border-2 border-dashed border-primary/40 rounded-2xl p-4 flex flex-col gap-2 group hover:border-primary transition-all cursor-pointer overflow-hidden shadow-sm shadow-primary/5"
+                     onclick="copyVoucherCode('{{ $voucher->Code }}', this)">
+                    {{-- Ticket Cutouts --}}
+                    <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-background-light dark:bg-background-dark rounded-full border-r-2 border-dashed border-primary/40 group-hover:border-primary"></div>
+                    <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-background-light dark:bg-background-dark rounded-full border-l-2 border-dashed border-primary/40 group-hover:border-primary"></div>
+                    
+                    <div class="flex justify-between items-center z-10">
+                        <span class="text-xs font-black text-primary bg-primary/10 px-2 py-1 rounded-lg tracking-widest uppercase">
+                            {{ $voucher->Code }}
+                        </span>
+                        <span class="material-symbols-outlined text-primary text-sm opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+                    </div>
+                    
+                    <div class="flex flex-col z-10">
+                        <p class="text-slate-900 dark:text-slate-100 text-xs font-bold">{{ $voucher->Description }}</p>
+                        @if($voucher->MinOrderAmount > 0)
+                        <p class="text-[10px] text-slate-400">Đơn tối thiểu: {{ number_format($voucher->MinOrderAmount, 0, ',', '.') }}đ</p>
+                        @endif
+                    </div>
+                    
+                    {{-- Copy Success Overlay --}}
+                    <div class="copy-success absolute inset-0 bg-primary/95 flex items-center justify-center translate-y-full transition-transform duration-300 z-20">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-slate-900">check_circle</span>
+                            <span class="text-[10px] font-black text-slate-900 uppercase">Đã sao chép!</span>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </aside>
 
     {{-- Products Section --}}
@@ -325,7 +368,7 @@
                             </span>
                             <form action="{{ route('cart.store') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->ProductID }}">
+                                <input type="hidden" name="ProductID" value="{{ $product->ProductID }}">
                                 <button type="submit" class="flex items-center justify-center bg-primary hover:bg-primary-dark text-slate-900 rounded-full w-10 h-10 transition-all shadow-sm hover:scale-110 active:scale-95" title="Thêm vào giỏ">
                                     <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
                                 </button>
@@ -433,6 +476,18 @@
     document.querySelectorAll('.category-filter, .price-filter, .service-filter').forEach(input => {
         input.addEventListener('change', applyFilters);
     });
+
+    // Copy Voucher Code
+    window.copyVoucherCode = function(code, element) {
+        navigator.clipboard.writeText(code).then(() => {
+            const successOverlay = element.querySelector('.copy-success');
+            successOverlay.classList.remove('translate-y-full');
+            
+            setTimeout(() => {
+                successOverlay.classList.add('translate-y-full');
+            }, 1000);
+        });
+    }
 </script>
 @endpush
 

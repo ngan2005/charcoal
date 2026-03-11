@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentControll
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,8 +44,25 @@ Route::get('/appointments/create', function (\Illuminate\Http\Request $request) 
         : redirect()->route('services.index');
 })->name('appointment.create');
 Route::get('/product/{id}', [ShopController::class, 'show'])->name('product.show');
+
+// Comments Routes
+Route::get('/comments/{productId}', [CommentController::class, 'getComments'])->name('comments.get');
+Route::middleware('auth')->group(function () {
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+});
 Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
 Route::post('/cart', [\App\Http\Controllers\CartController::class, 'store'])->name('cart.store');
+Route::put('/cart/item/{id}', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/item/{id}', [\App\Http\Controllers\CartController::class, 'destroy'])->name('cart.destroy');
+Route::delete('/cart/clear', [\App\Http\Controllers\CartController::class, 'destroyAll'])->name('cart.clear');
+
+// Checkout Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/apply-voucher', [CheckoutController::class, 'applyVoucher'])->name('checkout.apply-voucher');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
+});
 
 Route::get('/home', function () {
     return redirect()->route('dashboard');

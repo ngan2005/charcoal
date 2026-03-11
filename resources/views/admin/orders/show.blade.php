@@ -18,44 +18,74 @@
                     <p class="text-sm text-gray-500">Ngày đặt: {{ $order->CreatedAt->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 @switch($order->Status)
                     @case('pending')
-                        <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=confirmed" class="btn btn-success">
-                            <span class="material-symbols-outlined me-1 align-middle">check</span>
-                            Xác nhận
-                        </a>
+                        <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="Status" value="confirmed">
+                            <button type="submit" class="btn btn-success">
+                                <span class="material-symbols-outlined me-1 align-middle">check</span>
+                                Xác nhận
+                            </button>
+                        </form>
                         @break
                     @case('confirmed')
-                        <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=processing" class="btn btn-primary">
-                            <span class="material-symbols-outlined me-1 align-middle">sync</span>
-                            Bắt đầu xử lý
-                        </a>
+                        <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="Status" value="processing">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-symbols-outlined me-1 align-middle">sync</span>
+                                Bắt đầu xử lý
+                            </button>
+                        </form>
                         @break
                     @case('processing')
-                        <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=shipping" class="btn btn-info">
-                            <span class="material-symbols-outlined me-1 align-middle">local_shipping</span>
-                            Giao hàng
-                        </a>
+                        <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="Status" value="shipping">
+                            <button type="submit" class="btn btn-info">
+                                <span class="material-symbols-outlined me-1 align-middle">local_shipping</span>
+                                Giao hàng
+                            </button>
+                        </form>
                         @break
                     @case('shipping')
-                        <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=delivered" class="btn btn-success">
-                            <span class="material-symbols-outlined me-1 align-middle">check_circle</span>
-                            Đã giao
-                        </a>
+                        <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="Status" value="delivered">
+                            <button type="submit" class="btn btn-success">
+                                <span class="material-symbols-outlined me-1 align-middle">check_circle</span>
+                                Đã giao
+                            </button>
+                        </form>
                         @break
                     @case('delivered')
-                        <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=completed" class="btn btn-success">
-                            <span class="material-symbols-outlined me-1 align-middle">task_alt</span>
-                            Hoàn thành
-                        </a>
+                        <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="Status" value="completed">
+                            <button type="submit" class="btn btn-success">
+                                <span class="material-symbols-outlined me-1 align-middle">task_alt</span>
+                                Hoàn thành
+                            </button>
+                        </form>
                         @break
                 @endswitch
                 @if(!in_array($order->Status, ['cancelled', 'completed', 'refunded']))
-                    <a href="{{ route('admin.orders.update-status', $order->OrderID) }}?Status=cancelled" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
-                        <span class="material-symbols-outlined me-1 align-middle">cancel</span>
-                        Hủy đơn
-                    </a>
+                    <form action="{{ route('admin.orders.update-status', $order->OrderID) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="Status" value="cancelled">
+                        <button type="submit" class="btn btn-danger">
+                            <span class="material-symbols-outlined me-1 align-middle">cancel</span>
+                            Hủy đơn
+                        </button>
+                    </form>
                 @endif
             </div>
         </div>

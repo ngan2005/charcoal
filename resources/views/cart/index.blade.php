@@ -2,6 +2,66 @@
 
 @section('title', 'Giỏ hàng của bạn - Pink Charcoal')
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle quantity buttons
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const action = this.dataset.action;
+            const itemEl = document.querySelector(`.cart-item[data-item-id="${id}"]`);
+            const input = itemEl.querySelector('.qty-input');
+            let qty = parseInt(input.value);
+
+            if (action === 'decrease' && qty > 1) {
+                qty--;
+            } else if (action === 'increase') {
+                qty++;
+            } else {
+                return;
+            }
+
+            updateQuantity(id, qty);
+        });
+    });
+
+    function updateQuantity(id, qty) {
+        fetch(`/cart/item/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ quantity: qty })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Update quantity input
+                const itemEl = document.querySelector(`.cart-item[data-item-id="${id}"]`);
+                itemEl.querySelector('.qty-input').value = qty;
+                itemEl.querySelector('.item-total').textContent = data.itemTotal;
+
+                // Update subtotal and count
+                document.querySelector('.cart-subtotal').textContent = data.subtotal;
+                document.querySelector('.cart-count').textContent = `Tạm tính (${data.itemCount} món)`;
+
+                // Update total in order summary
+                document.querySelectorAll('.cart-subtotal').forEach(el => {
+                    el.textContent = data.subtotal;
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    }
+});
+</script>
+@endpush
+
 @section('content')
 <div class="w-full max-w-[1200px] mx-auto min-h-[60vh] flex flex-col pt-4 pb-12">
     <div class="flex items-center gap-3 mb-8">
@@ -31,20 +91,25 @@
                 {{-- Cart Items --}}
                 @foreach($cartItems as $item)
                     @php
-                        $name = $item->ProductID ? $item->ProductName : $item->ServiceName;
-                        $price = $item->ProductID ? $item->ProductPrice : $item->ServicePrice;
+                        $name = $item->ProductID ? ($item->ProductName ?? '') : ($item->ServiceName ?? '');
+                        $price = $item->ProductID ? ($item->ProductPrice ?? 0) : ($item->ServicePrice ?? 0);
                         $total = $price * $item->Quantity;
-                        $imgUrl = $item->ImageURL ? (str_starts_with($item->ImageURL, 'http') ? $item->ImageURL : asset('storage/' . $item->ImageURL)) : 'https://placehold.co/150x150/F4C2C3/ffffff?text=' . urlencode($name);
+                        $imageUrl = $item->ImageURL ?? null;
+                        $imgUrl = $imageUrl ? (str_starts_with($imageUrl, 'http') ? $imageUrl : asset('storage/' . $imageUrl)) : 'https://placehold.co/150x150/F4C2C3/ffffff?text=' . urlencode($name ?: 'N/A');
                         $typeBadge = $item->ProductID ? 'Sản phẩm' : 'Dịch vụ';
-                        $routeLink = $item->ProductID ? route('shop', ['search' => $name]) : route('services.show', $item->ServiceID);
+                        $routeLink = $item->ProductID ? route('shop', ['search' => $name]) : route('services.show', $item->ServiceID ?? 0);
                     @endphp
 
-                    <div class="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group relative">
+                    <div class="cart-item flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group relative" data-item-id="{{ $item->CartItemID }}" data-price="{{ $price }}">
                         
-                        {{-- Remove button (Absolute on mobile, regular on desktop) --}}
-                        <button class="absolute top-4 right-4 md:static md:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors z-10">
-                            <span class="material-symbols-outlined text-sm">close</span>
-                        </button>
+                        {{-- Remove button (Mobile) --}}
+                        <form action="{{ route('cart.destroy', $item->CartItemID) }}" method="POST" class="absolute top-4 right-4 md:static md:hidden z-10">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </form>
 
                         {{-- Product Info --}}
                         <div class="w-full md:w-[55%] flex items-center gap-4">
@@ -71,11 +136,11 @@
                         <div class="w-full md:w-[15%] flex justify-between md:justify-center items-center mt-2 md:mt-0">
                             <span class="md:hidden text-sm text-slate-500 font-medium">Số lượng:</span>
                             <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-200 dark:border-slate-700">
-                                <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all focus:outline-none">
+                                <button type="button" class="qty-btn w-8 h-8 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all focus:outline-none" data-action="decrease" data-id="{{ $item->CartItemID }}">
                                     <span class="material-symbols-outlined text-sm">remove</span>
                                 </button>
-                                <input type="text" value="{{ $item->Quantity }}" class="w-8 text-center bg-transparent border-none text-sm font-bold text-slate-900 dark:text-white focus:ring-0 p-0" readonly>
-                                <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all focus:outline-none">
+                                <input type="text" value="{{ $item->Quantity }}" class="qty-input w-8 text-center bg-transparent border-none text-sm font-bold text-slate-900 dark:text-white focus:ring-0 p-0" readonly data-id="{{ $item->CartItemID }}">
+                                <button type="button" class="qty-btn w-8 h-8 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all focus:outline-none" data-action="increase" data-id="{{ $item->CartItemID }}">
                                     <span class="material-symbols-outlined text-sm">add</span>
                                 </button>
                             </div>
@@ -83,12 +148,16 @@
 
                         {{-- Total Price & Remove (Desktop) --}}
                         <div class="hidden md:flex w-[15%] justify-end items-center gap-4">
-                            <div class="font-extrabold text-primary text-lg">
+                            <div class="item-total font-extrabold text-primary text-lg">
                                 {{ number_format($total, 0, ',', '.') }}đ
                             </div>
-                            <button class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0">
-                                <span class="material-symbols-outlined text-sm">delete</span>
-                            </button>
+                            <form action="{{ route('cart.destroy', $item->CartItemID) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
@@ -98,9 +167,13 @@
                 <a href="{{ route('shop') }}" class="text-slate-500 hover:text-primary font-medium flex items-center gap-1 transition-colors text-sm">
                     <span class="material-symbols-outlined text-sm">arrow_back</span> Tiếp tục mua sắm
                 </a>
-                <button class="text-red-500 hover:text-red-600 font-medium text-sm flex items-center gap-1 transition-colors">
-                    <span class="material-symbols-outlined text-sm">delete_sweep</span> Xóa toàn bộ
-                </button>
+                <form action="{{ route('cart.clear') }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-500 hover:text-red-600 font-medium text-sm flex items-center gap-1 transition-colors">
+                        <span class="material-symbols-outlined text-sm">delete_sweep</span> Xóa toàn bộ
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -116,8 +189,8 @@
 
                 <div class="flex flex-col gap-4 relative z-10">
                     <div class="flex justify-between items-center text-slate-600 dark:text-slate-400 text-sm font-medium">
-                        <span>Tạm tính ({{ $cartItems->count() }} món)</span>
-                        <span class="font-bold text-slate-900 dark:text-white">{{ number_format($subtotal, 0, ',', '.') }}đ</span>
+                        <span class="cart-count">Tạm tính ({{ $cartItems->count() }} món)</span>
+                        <span class="cart-subtotal font-bold text-slate-900 dark:text-white">{{ number_format($subtotal, 0, ',', '.') }}đ</span>
                     </div>
                     
                     <div class="flex justify-between items-center text-slate-600 dark:text-slate-400 text-sm font-medium">
@@ -133,7 +206,7 @@
                     <div class="flex flex-col gap-2 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700 mt-2">
                         <div class="flex justify-between items-end">
                             <span class="font-bold text-slate-900 dark:text-white text-lg">Tổng cộng</span>
-                            <span class="font-extrabold text-primary text-3xl">{{ number_format($subtotal, 0, ',', '.') }}đ</span>
+                            <span class="font-extrabold text-primary text-3xl cart-subtotal">{{ number_format($subtotal, 0, ',', '.') }}đ</span>
                         </div>
                         <p class="text-[11px] text-slate-400 text-right">(Đã bao gồm VAT nếu có)</p>
                     </div>
@@ -141,10 +214,10 @@
 
                 {{-- Action Button --}}
                 <div class="mt-4 flex flex-col gap-3 relative z-10">
-                    <button class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-bold text-lg py-4 rounded-2xl shadow-[0_4px_14px_0_rgba(244,194,195,0.39)] hover:shadow-[0_6px_20px_rgba(244,194,195,0.23)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2 group">
+                    <a href="{{ route('checkout.index') }}" class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-bold text-lg py-4 rounded-2xl shadow-[0_4px_14px_0_rgba(244,194,195,0.39)] hover:shadow-[0_6px_20px_rgba(244,194,195,0.23)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2 group text-center">
                         Thanh Toán Ngay
                         <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </button>
+                    </a>
                     
                     <div class="flex items-center justify-center gap-2 text-slate-400 text-xs mt-2">
                         <span class="material-symbols-outlined text-sm">lock</span>

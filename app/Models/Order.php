@@ -38,6 +38,14 @@ class Order extends Model
     }
 
     /**
+     * Get the payment for this order
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'OrderID', 'OrderID');
+    }
+
+    /**
      * Get the vouchers applied to this order
      */
     public function vouchers()

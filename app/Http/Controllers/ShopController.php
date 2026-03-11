@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
@@ -57,6 +58,14 @@ class ShopController extends Controller
 
         $services = $serviceQuery->get();
         
+        // --- Xử lý Voucher ---
+        $vouchers = \App\Models\Voucher::where('IsActive', 1)
+            ->where('ExpiredAt', '>', now())
+            ->where('Quantity', '>', 0)
+            ->orderBy('CreatedAt', 'desc')
+            ->limit(3)
+            ->get();
+        
         // Lấy sản phẩm nổi bật
         $featuredProducts = Product::with(['category', 'images'])
             ->where('StatusID', 1)
@@ -64,7 +73,7 @@ class ShopController extends Controller
             ->limit(8)
             ->get();
 
-        return view('shop', compact('products', 'featuredProducts', 'categories', 'allServices', 'services'));
+        return view('shop', compact('products', 'featuredProducts', 'categories', 'allServices', 'services', 'vouchers'));
     }
 
     /**
@@ -102,6 +111,49 @@ class ShopController extends Controller
             ->limit(4)
             ->get();
 
-        return view('product-detail', compact('product', 'relatedProducts'));
+        // Lấy sản phẩm mua cùng nhau (frequently bought together)
+        $frequentlyBoughtTogether = $this->getFrequentlyBoughtTogether($id);
+
+        return view('product-detail', compact('product', 'relatedProducts', 'frequentlyBoughtTogether'));
+    }
+
+    /**
+     * Get frequently bought together products
+     */
+    private function getFrequentlyBoughtTogether($productId)
+    {
+        // Lấy các đơn hàng có chứa sản phẩm này
+        $ordersWithProduct = DB::table('order_details')
+            ->where('ProductID', $productId)
+            ->pluck('OrderID')
+            ->toArray();
+
+        if (empty($ordersWithProduct)) {
+            return collect();
+        }
+
+        // Tìm các sản phẩm khác trong cùng đơn hàng
+        $relatedProductIds = DB::table('order_details')
+            ->whereIn('OrderID', $ordersWithProduct)
+            ->where('ProductID', '!=', $productId)
+            ->whereNotNull('ProductID')
+            ->select('ProductID', DB::raw('COUNT(*) as order_count'))
+            ->groupBy('ProductID')
+            ->orderByDesc('order_count')
+            ->limit(4)
+            ->pluck('ProductID')
+            ->toArray();
+
+        if (empty($relatedProductIds)) {
+            return collect();
+        }
+
+        // Lấy thông tin sản phẩm
+        return Product::with(['category', 'images'])
+            ->whereIn('ProductID', $relatedProductIds)
+            ->where('StatusID', 1)
+            ->get()
+            ->sortBy(fn($item) => array_search($item->ProductID, $relatedProductIds))
+            ->values();
     }
 }

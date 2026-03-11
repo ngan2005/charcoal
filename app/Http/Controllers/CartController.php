@@ -45,15 +45,15 @@ class CartController extends Controller
             
         // For images we need to fetch separately because of the 1-N relationship
         foreach ($cartItems as $item) {
-            if ($item->ProductID) {
+            if (!empty($item->ProductID)) {
                 // Get main image or first image
                 $image = DB::table('product_images')
                     ->where('ProductID', $item->ProductID)
                     ->orderByDesc('IsMain')
                     ->first();
-                $item->ImageURL = $image ? $image->ImageURL : null;
-            } else if ($item->ServiceID) {
-                $item->ImageURL = null; // Services might not have specific cart images if schema doesn't support, but we can fall back to placehold.
+                $item->ImageURL = $image ? ($image->ImageUrl ?? null) : null;
+            } else {
+                $item->ImageURL = null; // Service or fallback: no image
             }
         }
 
@@ -74,8 +74,12 @@ class CartController extends Controller
         }
 
         $userId = auth()->id();
-        $productId = $request->input('ProductID');
-        $quantity = $request->input('Quantity', 1);
+        $productId = $request->input('ProductID') ?? $request->input('product_id');
+        $quantity = (int) ($request->input('Quantity') ?? $request->input('quantity', 1));
+
+        if (empty($productId)) {
+            return redirect()->back()->with('error', 'Vui lòng chọn sản phẩm để thêm vào giỏ.');
+        }
 
         // Find or create cart
         $cart = DB::table('carts')->where('UserID', $userId)->first();
@@ -113,11 +117,135 @@ class CartController extends Controller
                 'CartItemID' => $maxId ? $maxId + 1 : 1,
                 'CartID' => $cart->CartID,
                 'ProductID' => $productId,
+                'ServiceID' => null,
                 'Quantity' => $quantity,
                 'AddedAt' => now()
             ]);
         }
 
+        // Mua luôn: chuyển thẳng tới checkout
+        if ($request->input('redirect') === 'checkout') {
+            return redirect()->route('checkout.index')->with('success', 'Đã thêm vào giỏ hàng!');
+        }
+
         return redirect()->back()->with('success', 'Đã thêm vào giỏ hàng!');
+    }
+
+    /**
+     * Update quantity of a cart item
+     */
+    public function update(Request $request, $id)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Vui lòng đăng nhập.'], 401);
+        }
+
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $userId = auth()->id();
+        $cart = DB::table('carts')->where('UserID', $userId)->first();
+
+        if (!$cart) {
+            return response()->json(['error' => 'Giỏ hàng không tồn tại.'], 404);
+        }
+
+        $quantity = $request->input('quantity');
+
+        // Update quantity
+        DB::table('cart_items')
+            ->where('CartItemID', $id)
+            ->where('CartID', $cart->CartID)
+            ->update(['Quantity' => $quantity]);
+
+        // Get updated item to calculate new totals
+        $item = DB::table('cart_items')
+            ->leftJoin('products', 'cart_items.ProductID', '=', 'products.ProductID')
+            ->leftJoin('services', 'cart_items.ServiceID', '=', 'services.ServiceID')
+            ->where('cart_items.CartItemID', $id)
+            ->select(
+                'cart_items.*',
+                'products.Price as ProductPrice',
+                'services.BasePrice as ServicePrice'
+            )
+            ->first();
+
+        if (!$item) {
+            return response()->json(['error' => 'Mục không tồn tại.'], 404);
+        }
+
+        $price = ($item->ProductID ? $item->ProductPrice : $item->ServicePrice) ?? 0;
+        $itemTotal = $price * $quantity;
+
+        // Calculate cart subtotal (phải select ProductID/ServiceID để phân biệt giá)
+        $allItems = DB::table('cart_items')
+            ->leftJoin('products', 'cart_items.ProductID', '=', 'products.ProductID')
+            ->leftJoin('services', 'cart_items.ServiceID', '=', 'services.ServiceID')
+            ->where('cart_items.CartID', $cart->CartID)
+            ->select(
+                'cart_items.ProductID',
+                'cart_items.ServiceID',
+                'cart_items.Quantity',
+                'products.Price as ProductPrice',
+                'services.BasePrice as ServicePrice'
+            )
+            ->get();
+
+        $subtotal = 0;
+        foreach ($allItems as $i) {
+            $p = ($i->ProductID ? ($i->ProductPrice ?? 0) : ($i->ServicePrice ?? 0)) ?: 0;
+            $subtotal += ($p * $i->Quantity);
+        }
+
+        return response()->json([
+            'success' => true,
+            'itemTotal' => number_format($itemTotal, 0, ',', '.') . 'đ',
+            'subtotal' => number_format($subtotal, 0, ',', '.') . 'đ',
+            'itemCount' => $allItems->count()
+        ]);
+    }
+
+    /**
+     * Remove a single item from cart
+     */
+    public function destroy($id)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập.');
+        }
+
+        $userId = auth()->id();
+        $cart = DB::table('carts')->where('UserID', $userId)->first();
+
+        if (!$cart) {
+            return redirect()->route('cart.index')->with('error', 'Giỏ hàng không tồn tại.');
+        }
+
+        DB::table('cart_items')
+            ->where('CartItemID', $id)
+            ->where('CartID', $cart->CartID)
+            ->delete();
+
+        return redirect()->route('cart.index')->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng.');
+    }
+
+    /**
+     * Clear all items from cart
+     */
+    public function destroyAll()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập.');
+        }
+
+        $userId = auth()->id();
+        $cart = DB::table('carts')->where('UserID', $userId)->first();
+
+        if ($cart) {
+            DB::table('cart_items')->where('CartID', $cart->CartID)->delete();
+        }
+
+        return redirect()->route('cart.index')->with('success', 'Đã xóa toàn bộ giỏ hàng.');
     }
 }

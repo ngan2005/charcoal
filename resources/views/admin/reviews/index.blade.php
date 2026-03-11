@@ -181,14 +181,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div style="max-width: 300px;">
-                                    <p class="mb-0 text-truncate" title="{{ $review->Comment }}">{{ $review->Comment }}</p>
-                                    @if($review->product)
-                                        <small class="text-success">{{ $review->product->ProductName }}</small>
-                                    @elseif($review->service)
-                                        <small class="text-info">{{ $review->service->ServiceName }}</small>
-                                    @elseif($review->staff)
-                                        <small class="text-warning">{{ $review->staff->FullName }}</small>
-                                    @endif
+                                    <p class="mb-0 text-truncate text-gray-700" title="{{ $review->Comment }}">{{ $review->Comment }}</p>
                                 </div>
                             </td>
                             <td class="px-4 py-3">
