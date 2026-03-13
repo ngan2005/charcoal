@@ -168,20 +168,34 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống.');
         }
 
-        // Get cart items
+        // Get cart items (kèm Stock để kiểm tra tồn kho)
         $cartItems = DB::table('cart_items')
             ->leftJoin('products', 'cart_items.ProductID', '=', 'products.ProductID')
             ->leftJoin('services', 'cart_items.ServiceID', '=', 'services.ServiceID')
             ->where('cart_items.CartID', $cart->CartID)
             ->select(
-                'cart_items.*', 
+                'cart_items.*',
                 'products.Price as ProductPrice',
+                'products.Stock as ProductStock',
+                'products.ProductName',
                 'services.BasePrice as ServicePrice'
             )
             ->get();
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống.');
+        }
+
+        // Kiểm tra đủ tồn kho cho từng sản phẩm
+        foreach ($cartItems as $item) {
+            if ($item->ProductID !== null) {
+                $stock = (int) ($item->ProductStock ?? 0);
+                $qty = (int) $item->Quantity;
+                if ($stock < $qty) {
+                    $name = $item->ProductName ?? 'Sản phẩm';
+                    return redirect()->back()->withInput()->with('error', "Sản phẩm \"{$name}\" không đủ tồn kho (còn {$stock}, bạn đặt {$qty}). Vui lòng giảm số lượng hoặc bỏ khỏi giỏ.");
+                }
+            }
         }
 
         // Calculate total

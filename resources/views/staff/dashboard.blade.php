@@ -100,15 +100,37 @@
                                             <p class="text-sm text-[#64748b] dark:text-gray-400">Khách hàng: {{ $appointment->customer?->FullName }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2 flex-wrap">
                                         <span class="px-3 py-1 rounded-full text-xs font-bold border
                                             @if($appointment->Status == 'pending') bg-yellow-100 text-yellow-700 border-yellow-200
                                             @elseif($appointment->Status == 'confirmed') bg-blue-100 text-blue-700 border-blue-200
                                             @elseif($appointment->Status == 'completed') bg-green-100 text-green-700 border-green-200
                                             @else bg-gray-100 text-gray-700 border-gray-200 @endif">
-                                            {{ ucfirst($appointment->Status) }}
+                                            @if($appointment->Status == 'pending') Chờ xác nhận
+                                            @elseif($appointment->Status == 'confirmed') Đã xác nhận
+                                            @elseif($appointment->Status == 'in_progress') Đang thực hiện
+                                            @elseif($appointment->Status == 'completed') Hoàn thành
+                                            @else {{ $appointment->Status }} @endif
                                         </span>
-                                        <button class="material-symbols-outlined text-[#94a3b8] hover:text-primary transition-colors">more_vert</button>
+                                        @if(in_array($appointment->Status, ['pending', 'confirmed']))
+                                            <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="Status" value="{{ $appointment->Status == 'pending' ? 'confirmed' : 'in_progress' }}">
+                                                <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-white hover:opacity-90 transition-opacity">
+                                                    {{ $appointment->Status == 'pending' ? 'Xác nhận' : 'Bắt đầu' }}
+                                                </button>
+                                            </form>
+                                        @elseif($appointment->Status == 'in_progress')
+                                            <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="Status" value="completed">
+                                                <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-600 text-white hover:bg-green-700 transition-colors">
+                                                    Xác nhận đã hoàn thành
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

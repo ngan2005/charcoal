@@ -147,6 +147,7 @@ Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])-
         // Staff appointments
         Route::get('/appointments/create', [StaffController::class, 'createAppointment'])->name('appointments.create');
         Route::post('/appointments', [StaffController::class, 'storeAppointment'])->name('appointments.store');
+        Route::put('/appointments/{id}/status', [StaffController::class, 'updateAppointmentStatus'])->name('appointments.update-status');
 
     });
 
@@ -216,18 +217,18 @@ Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])-
         Route::delete('appointments/{appointmentId}/services/{serviceId}', [AdminAppointmentController::class, 'removeService'])->name('appointments.remove-service');
         Route::get('appointments/{id}/staff-suggestions', [AdminAppointmentController::class, 'getStaffSuggestions'])->name('appointments.staff-suggestions');
 
-        // Inventory Routes
+        // Inventory Routes (statistics phải đứng trước {id} để không bị match nhầm)
         Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('inventory/statistics', [InventoryController::class, 'statistics'])->name('inventory.statistics');
         Route::put('inventory/{id}/stock', [InventoryController::class, 'updateStock'])->name('inventory.update-stock');
         Route::get('inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
-        Route::get('inventory/statistics', [InventoryController::class, 'statistics'])->name('inventory.statistics');
 
-        // Review Routes
+        // Review Routes (statistics phải đứng trước {id})
         Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::get('reviews/statistics', [ReviewController::class, 'statistics'])->name('reviews.statistics');
         Route::get('reviews/{id}', [ReviewController::class, 'show'])->name('reviews.show');
         Route::get('reviews/{id}/hide', [ReviewController::class, 'hide'])->name('reviews.hide');
         Route::post('reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
-        Route::get('reviews/statistics', [ReviewController::class, 'statistics'])->name('reviews.statistics');
 
         // Voucher Routes
         Route::get('vouchers', [VoucherController::class, 'index'])->name('vouchers.index');

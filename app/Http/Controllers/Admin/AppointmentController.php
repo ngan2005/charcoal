@@ -58,13 +58,11 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
-        $appointment = Appointment::with(['customer', 'staff', 'pet', 'services.service'])
+        $appointment = Appointment::with(['customer', 'staff', 'pet', 'services'])
             ->where('AppointmentID', $id)
             ->firstOrFail();
 
-        $allServices = Service::where('IsActive', 1)->get();
-
-        return view('admin.appointments.show', compact('appointment', 'allServices'));
+        return view('admin.appointments.show', compact('appointment'));
     }
 
     /**

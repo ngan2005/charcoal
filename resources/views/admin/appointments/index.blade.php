@@ -23,7 +23,7 @@
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Quản lý lịch hẹn</h1>
-                <p class="text-sm text-gray-500">Theo dõi và xử lý lịch hẹn của khách hàng</p>
+                <p class="text-sm text-gray-500">Theo dõi lịch hẹn (chỉ xem). Nhân viên phụ trách xác nhận và hoàn thành dịch vụ.</p>
             </div>
         </div>
 

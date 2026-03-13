@@ -18,16 +18,39 @@ class DashboardController extends Controller
         $totalStaff = User::where('RoleID', 2)->count();
         $totalProducts = Product::count();
         $totalServices = Service::count();
-        $totalRevenue = Order::sum('TotalAmount');
+
+        // Doanh thu đơn hàng: chỉ khi admin ấn "Đã giao hàng" / "Hoàn thành"
+        $orderRevenue = Order::whereIn('Status', ['delivered', 'completed'])->sum('TotalAmount');
+        // Doanh thu lịch hẹn: chỉ khi nhân viên ấn "Hoàn thành" (completed)
+        $appointmentRevenue = DB::table('appointments')
+            ->join('appointment_services', 'appointments.AppointmentID', '=', 'appointment_services.AppointmentID')
+            ->join('services', 'appointment_services.ServiceID', '=', 'services.ServiceID')
+            ->where('appointments.Status', 'completed')
+            ->sum('services.BasePrice');
+        $totalRevenue = $orderRevenue + $appointmentRevenue;
 
         $startDate = Carbon::now()->subDays(6)->startOfDay();
-        $dailyRevenue = Order::select([
+        $endDate = Carbon::now()->endOfDay();
+
+        // Doanh thu đơn hàng theo ngày
+        $dailyOrderRevenue = Order::select([
                 DB::raw("DATE(CreatedAt) as date"),
                 DB::raw("SUM(TotalAmount) as total"),
             ])
+            ->whereIn('Status', ['delivered', 'completed'])
             ->where('CreatedAt', '>=', $startDate)
             ->groupBy(DB::raw("DATE(CreatedAt)"))
-            ->orderBy(DB::raw("DATE(CreatedAt)"))
+            ->get()
+            ->keyBy('date');
+
+        // Doanh thu lịch hẹn (nhân viên ấn hoàn thành) theo ngày
+        $dailyAppointmentRevenue = DB::table('appointments')
+            ->join('appointment_services', 'appointments.AppointmentID', '=', 'appointment_services.AppointmentID')
+            ->join('services', 'appointment_services.ServiceID', '=', 'services.ServiceID')
+            ->where('appointments.Status', 'completed')
+            ->whereBetween('appointments.AppointmentTime', [$startDate, $endDate])
+            ->select(DB::raw('DATE(appointments.AppointmentTime) as date'), DB::raw('SUM(services.BasePrice) as total'))
+            ->groupBy(DB::raw('DATE(appointments.AppointmentTime)'))
             ->get()
             ->keyBy('date');
 
@@ -36,7 +59,9 @@ class DashboardController extends Controller
         for ($i = 0; $i < 7; $i++) {
             $date = $startDate->copy()->addDays($i)->toDateString();
             $labels[] = Carbon::parse($date)->format('d/m');
-            $values[] = (float) ($dailyRevenue[$date]->total ?? 0);
+            $orderTotal = (float) (optional($dailyOrderRevenue->get($date))->total ?? 0);
+            $appointmentTotal = (float) (optional($dailyAppointmentRevenue->get($date))->total ?? 0);
+            $values[] = $orderTotal + $appointmentTotal;
         }
 
         $recentProducts = Product::orderByDesc('CreatedAt')
@@ -60,8 +85,9 @@ class DashboardController extends Controller
      */
     public function export()
     {
-        // Lấy danh sách 100 đơn hàng gần nhất (hoặc tất cả nếu cần)
+        // Chỉ lấy đơn đã giao / hoàn thành để báo cáo doanh thu
         $orders = Order::with('user')
+            ->whereIn('Status', ['delivered', 'completed'])
             ->orderByDesc('CreatedAt')
             ->get();
 

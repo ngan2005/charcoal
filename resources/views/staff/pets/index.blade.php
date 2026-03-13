@@ -151,16 +151,30 @@
                         </div>
 
                         <div class="d-flex gap-2 pt-3 border-top">
-                            @if($appointment->Status == 'pending' || $appointment->Status == 'confirmed')
-                                <button class="btn btn-primary flex-grow-1 fw-semibold rounded-3">Bắt đầu</button>
+                            @if($appointment->Status == 'pending')
+                                <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="flex-grow-1">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="Status" value="confirmed">
+                                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Xác nhận</button>
+                                </form>
+                            @elseif($appointment->Status == 'confirmed')
+                                <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="flex-grow-1">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="Status" value="in_progress">
+                                    <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Bắt đầu</button>
+                                </form>
                             @elseif($appointment->Status == 'in_progress')
-                                <button class="btn btn-success flex-grow-1 fw-semibold rounded-3">Hoàn thành</button>
+                                <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="flex-grow-1">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="Status" value="completed">
+                                    <button type="submit" class="btn btn-success w-100 fw-semibold rounded-3">Xác nhận đã hoàn thành</button>
+                                </form>
                             @else
-                                <button class="btn btn-light flex-grow-1 fw-semibold rounded-3 disabled text-muted">Đã xong</button>
+                                <span class="btn btn-light flex-grow-1 fw-semibold rounded-3 disabled text-muted">Đã xong</span>
                             @endif
-                            <button class="btn btn-outline-secondary rounded-3 px-3">
-                                <span class="material-symbols-outlined fs-6 mt-1">visibility</span>
-                            </button>
                         </div>
                     </div>
                 </div>

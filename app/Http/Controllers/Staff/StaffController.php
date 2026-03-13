@@ -292,8 +292,32 @@ class StaffController extends Controller
     }
 
     /**
+     * Nhân viên cập nhật trạng thái lịch hẹn (Bắt đầu / Xác nhận đã hoàn thành).
+     */
+    public function updateAppointmentStatus(Request $request, $id)
+    {
+        $appointment = \App\Models\Appointment::findOrFail($id);
 
+        if ($appointment->StaffID != Auth::id()) {
+            abort(403, 'Bạn không phải nhân viên phụ trách lịch hẹn này.');
+        }
 
+        $request->validate([
+            'Status' => 'required|in:confirmed,in_progress,completed',
+        ]);
+
+        $appointment->update(['Status' => $request->Status]);
+
+        $messages = [
+            'confirmed' => 'Đã xác nhận lịch hẹn.',
+            'in_progress' => 'Đã bắt đầu thực hiện.',
+            'completed' => 'Đã xác nhận hoàn thành dịch vụ.',
+        ];
+
+        return redirect()->back()->with('success', $messages[$request->Status] ?? 'Đã cập nhật trạng thái.');
+    }
+
+    /**
      * Show the staff timekeeping page.
      */
     public function timekeeping()
