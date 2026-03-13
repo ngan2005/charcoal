@@ -163,7 +163,7 @@ class UserController extends Controller
 
     public function resetPassword(User $user)
     {
-        $newPassword = Str::random(10);
+        $newPassword = '123456';
 
         $user->update([
             'Password' => Hash::make($newPassword),

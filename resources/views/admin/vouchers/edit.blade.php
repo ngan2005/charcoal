@@ -241,7 +241,7 @@
                                 </div>
                                 <div class="mt-3 d-flex justify-content-between small">
                                     <span>HSD: {{ $voucher->ExpiredAt->format('d/m/Y H:i') }}</span>
-                                    <span>Còn lại: {{ $voucher->Quantity - $voucher->orders()->count() }} mã</span>
+                                    <span>Còn lại: {{ $voucher->remaining_quantity }} mã</span>
                                 </div>
                             </div>
                         </div>

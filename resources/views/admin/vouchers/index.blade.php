@@ -129,7 +129,7 @@
                                             <div class="progress mt-1" style="height: 4px; width: 80px;">
                                                 @php
                                                     $qty = (int) $voucher->Quantity;
-                                                    $usedPercent = $qty > 0 ? min(100, ($voucher->orders()->count() / $qty) * 100) : 0;
+                                                    $usedPercent = $qty > 0 ? min(100, ($voucher->used_count / $qty) * 100) : 0;
                                                 @endphp
                                                 <div class="progress-bar {{ $usedPercent >= 90 ? 'bg-danger' : 'bg-primary' }}" 
                                                      style="width: {{ 100 - $usedPercent }}%"></div>

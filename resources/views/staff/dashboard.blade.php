@@ -122,12 +122,12 @@
                                                 </button>
                                             </form>
                                         @elseif($appointment->Status == 'in_progress')
-                                            <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="inline">
+                                            <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="inline" onsubmit="return confirm('Xác nhận khách đã thanh toán dịch vụ tại quầy?');">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="Status" value="completed">
                                                 <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-600 text-white hover:bg-green-700 transition-colors">
-                                                    Xác nhận đã hoàn thành
+                                                    Hoàn thành & thu tiền
                                                 </button>
                                             </form>
                                         @endif

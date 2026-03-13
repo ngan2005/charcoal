@@ -52,4 +52,12 @@ class Order extends Model
     {
         return $this->belongsToMany(Voucher::class, 'order_vouchers', 'OrderID', 'VoucherID');
     }
+
+    /**
+     * Lịch hẹn dịch vụ tạo từ đơn hàng (phân công nhân viên)
+     */
+    public function appointment()
+    {
+        return $this->hasOne(Appointment::class, 'OrderID', 'OrderID');
+    }
 }

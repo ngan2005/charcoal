@@ -313,6 +313,22 @@
                                     <p class="text-sm text-slate-600 dark:text-slate-300">
                                         <span class="font-medium">Dịch vụ:</span> {{ $apt->services->pluck('ServiceName')->join(', ') }}
                                     </p>
+                                    @if(isset($apt->total_price) && $apt->total_price > 0)
+                                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                                            <span class="font-medium">Giá dịch vụ:</span> <span class="text-primary font-semibold">{{ number_format($apt->total_price, 0, ',', '.') }}đ</span>
+                                        </p>
+                                    @endif
+                                    @if(in_array($apt->Status, ['pending', 'confirmed']))
+                                        <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-semibold rounded-full">
+                                            <span class="material-symbols-outlined text-[14px]">payments</span>
+                                            Thanh toán tại quầy
+                                        </div>
+                                    @elseif($apt->Status === 'completed')
+                                        <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded-full">
+                                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                            Đã thanh toán
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         @endforeach

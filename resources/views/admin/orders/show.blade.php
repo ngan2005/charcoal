@@ -96,6 +96,12 @@
                 {{ session('success') }}
             </div>
         @endif
+        @if (session('error'))
+            <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-red-700 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined">error</span>
+                {{ session('error') }}
+            </div>
+        @endif
 
         <div class="row g-4">
             <!-- Order Info -->
@@ -246,6 +252,54 @@
                 </div>
             </div>
         </div>
+
+        {{-- Phân công nhân viên (khi đơn có dịch vụ) --}}
+        @if(isset($serviceDetails) && $serviceDetails->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-info">badge</span>
+                    Phân công nhân viên thực hiện dịch vụ
+                </h5>
+                @if(isset($orderAppointment) && $orderAppointment)
+                    <div class="alert alert-success mb-0 d-flex align-items-center gap-3">
+                        <span class="material-symbols-outlined fs-4">check_circle</span>
+                        <div>
+                            <strong>Đã phân công:</strong> {{ $orderAppointment->staff->FullName ?? 'N/A' }}
+                            — Lịch hẹn: {{ $orderAppointment->AppointmentTime?->format('d/m/Y H:i') }}, trạng thái: {{ $orderAppointment->Status }}
+                        </div>
+                        <a href="{{ route('admin.appointments.show', $orderAppointment->AppointmentID) }}" class="btn btn-sm btn-outline-primary">Xem lịch hẹn</a>
+                    </div>
+                @else
+                    <form action="{{ route('admin.orders.assign-service-staff', $order->OrderID) }}" method="POST" class="row g-3">
+                        @csrf
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">Nhân viên thực hiện</label>
+                            <select name="StaffID" class="form-select" required>
+                                <option value="">-- Chọn nhân viên --</option>
+                                @foreach($staffMembers ?? [] as $staff)
+                                    <option value="{{ $staff->UserID }}">{{ $staff->FullName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Ngày thực hiện</label>
+                            <input type="date" name="appointment_date" class="form-control" value="{{ old('appointment_date', now()->format('Y-m-d')) }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Giờ</label>
+                            <input type="time" name="appointment_time" class="form-control" value="{{ old('appointment_time', '09:00') }}" required>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <span class="material-symbols-outlined me-1 align-middle" style="font-size: 18px;">person_add</span>
+                                Phân công
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-muted small mt-2 mb-0">Dịch vụ trong đơn: {{ $serviceDetails->map(fn($d) => $d->service?->ServiceName)->filter()->join(', ') }}</p>
+                @endif
+            </div>
+        @endif
 
         <!-- Order Items -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

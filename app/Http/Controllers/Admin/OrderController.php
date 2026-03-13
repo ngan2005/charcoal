@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
@@ -64,13 +65,22 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['user', 'payment'])
+        $order = Order::with(['user', 'payment', 'appointment'])
             ->where('OrderID', $id)
             ->firstOrFail();
 
         $orderDetails = OrderDetail::with(['product', 'service', 'pet'])
             ->where('OrderID', $id)
             ->get();
+
+        // Chi tiết dịch vụ trong đơn (để phân công nhân viên)
+        $serviceDetails = $orderDetails->filter(fn($d) => $d->ServiceID !== null);
+
+        // Lịch hẹn đã tạo từ đơn này (nếu có)
+        $orderAppointment = Appointment::where('OrderID', $id)->with(['staff', 'services', 'pet'])->first();
+
+        // Danh sách nhân viên (RoleID = 2) để phân công
+        $staffMembers = User::where('RoleID', 2)->orderBy('FullName')->get(['UserID', 'FullName', 'Email']);
 
         // Tính tổng tiền từ chi tiết
         $calculatedTotal = $orderDetails->sum(function($item) {
@@ -79,7 +89,10 @@ class OrderController extends Controller
 
         $paymentStatuses = PaymentStatus::all();
 
-        return view('admin.orders.show', compact('order', 'orderDetails', 'calculatedTotal', 'paymentStatuses'));
+        return view('admin.orders.show', compact(
+            'order', 'orderDetails', 'calculatedTotal', 'paymentStatuses',
+            'serviceDetails', 'orderAppointment', 'staffMembers'
+        ));
     }
 
     /**
@@ -127,6 +140,64 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.show', $id)
             ->with('success', 'Cập nhật thanh toán thành công!');
+    }
+
+    /**
+     * Phân công nhân viên thực hiện dịch vụ từ đơn hàng (tạo lịch hẹn)
+     */
+    public function assignServiceStaff(Request $request, $id)
+    {
+        $order = Order::with('details')->where('OrderID', $id)->firstOrFail();
+
+        $serviceDetails = $order->details->filter(fn($d) => $d->ServiceID !== null);
+        if ($serviceDetails->isEmpty()) {
+            return redirect()->route('admin.orders.show', $id)
+                ->with('error', 'Đơn hàng không có dịch vụ để phân công.');
+        }
+
+        // Đã phân công rồi thì không tạo trùng
+        if (Appointment::where('OrderID', $id)->exists()) {
+            return redirect()->route('admin.orders.show', $id)
+                ->with('error', 'Đơn hàng này đã được phân công nhân viên.');
+        }
+
+        $request->validate([
+            'StaffID' => 'required|exists:users,UserID',
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'required|string',
+        ]);
+
+        $appointmentTime = $request->appointment_date . ' ' . $request->appointment_time;
+        $firstDetailWithPet = $order->details->first(fn($d) => $d->PetID);
+        $petId = $firstDetailWithPet ? $firstDetailWithPet->PetID : null;
+
+        DB::beginTransaction();
+        try {
+            $appointment = Appointment::create([
+                'CustomerID' => $order->UserID,
+                'StaffID' => $request->StaffID,
+                'PetID' => $petId,
+                'AppointmentTime' => $appointmentTime,
+                'Status' => 'pending',
+                'OrderID' => $order->OrderID,
+            ]);
+
+            $serviceIds = $serviceDetails->pluck('ServiceID')->unique();
+            foreach ($serviceIds as $serviceId) {
+                DB::table('appointment_services')->insert([
+                    'AppointmentID' => $appointment->AppointmentID,
+                    'ServiceID' => $serviceId,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.orders.show', $id)
+                ->with('success', 'Đã phân công nhân viên thực hiện dịch vụ. Nhân viên sẽ thấy lịch trong bảng điều khiển.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('admin.orders.show', $id)
+                ->with('error', 'Có lỗi: ' . $e->getMessage());
+        }
     }
 }
 

@@ -18,7 +18,8 @@ class Appointment extends Model
         'StaffID',
         'PetID',
         'AppointmentTime',
-        'Status'
+        'Status',
+        'OrderID',
     ];
 
     protected $casts = [
@@ -43,5 +44,10 @@ class Appointment extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class, 'appointment_services', 'AppointmentID', 'ServiceID');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'OrderID', 'OrderID');
     }
 }

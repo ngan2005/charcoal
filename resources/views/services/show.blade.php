@@ -127,20 +127,26 @@
                     <input type="hidden" name="ServiceID" value="{{ $service->ServiceID }}">
                     <input type="hidden" name="Quantity" value="1">
                     <input type="hidden" name="redirect" value="checkout">
-                    <button type="submit" 
+                    <button type="submit"
                        class="w-full bg-primary hover:bg-primary-dark text-slate-900 font-black py-4 px-6 rounded-[1.25rem] shadow-xl shadow-primary/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 group relative overflow-hidden">
                         <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[-20deg]"></div>
                         <span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">calendar_month</span>
                         <span class="text-base uppercase tracking-wide">ĐẶT LỊCH NGAY</span>
                     </button>
                 </form>
-                
-                <button type="button" onclick="openSupportWithService('{{ addslashes($service->ServiceName) }}', {{ $service->BasePrice }}, '{{ route('services.show', $service->ServiceID) }}')" 
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-start gap-2">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[18px] shrink-0 mt-0.5">info</span>
+                    <p class="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                        Sau khi đặt lịch, bạn sẽ <strong>thanh toán tại quầy</strong> khi đưa thú cưng đến shop. Vui lòng đến đúng giờ hẹn!
+                    </p>
+                </div>
+
+                <button type="button" onclick="openSupportWithService('{{ addslashes($service->ServiceName) }}', {{ $service->BasePrice }}, '{{ route('services.show', $service->ServiceID) }}')"
                         class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold py-3 px-6 rounded-[1.25rem] transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 text-sm">
                     <span class="material-symbols-outlined text-xl">support_agent</span>
                     TƯ VẤN CHI TIẾT
                 </button>
-                <p class="text-slate-400 dark:text-slate-500 text-[11px] text-center italic">Nhắn tin ngay với shop để được tư vấn kĩ hơn về lộ trình chăm sóc bé yêu ✨</p>
             </div>
 
             {{-- Service Metadata --}}

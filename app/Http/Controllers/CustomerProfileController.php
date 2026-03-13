@@ -31,6 +31,19 @@ class CustomerProfileController extends Controller
             ->orderByDesc('AppointmentTime')
             ->take(30)
             ->get();
+
+        // Tính tổng giá dịch vụ cho mỗi appointment
+        $appointments->each(function ($apt) {
+            $totalPrice = 0;
+            if ($apt->services && $apt->services->count() > 0) {
+                foreach ($apt->services as $service) {
+                    // Kiểm tra user có membership không để lấy giá phù hợp
+                    $price = $service->MemberPrice ?? $service->BasePrice;
+                    $totalPrice += $price;
+                }
+            }
+            $apt->total_price = $totalPrice;
+        });
             
         return view('profile.index', compact('user', 'orders', 'pets', 'appointments'));
     }

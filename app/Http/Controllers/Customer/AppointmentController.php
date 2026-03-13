@@ -53,7 +53,7 @@ class AppointmentController extends Controller
             $admins = User::where('RoleID', 1)->get();
             Notification::send($admins, new AppointmentBookedNotification($appointment));
 
-            return redirect()->back()->with('success', 'Đặt lịch hẹn thành công! Vui lòng chờ xác nhận.');
+            return redirect()->back()->with('success', 'Đặt lịch hẹn thành công! Vui lòng chờ xác nhận. <strong>Thanh toán tại quầy</strong> khi đưa thú cưng đến shop.');
 
         } catch (\Exception $e) {
             DB::rollBack();

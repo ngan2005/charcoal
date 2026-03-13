@@ -166,11 +166,11 @@
                                     <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3">Bắt đầu</button>
                                 </form>
                             @elseif($appointment->Status == 'in_progress')
-                                <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="flex-grow-1">
+                                <form action="{{ route('staff.appointments.update-status', $appointment->AppointmentID) }}" method="POST" class="flex-grow-1" onsubmit="return confirm('Xác nhận khách đã thanh toán dịch vụ tại quầy?');">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="Status" value="completed">
-                                    <button type="submit" class="btn btn-success w-100 fw-semibold rounded-3">Xác nhận đã hoàn thành</button>
+                                    <button type="submit" class="btn btn-success w-100 fw-semibold rounded-3">Hoàn thành & thu tiền</button>
                                 </form>
                             @else
                                 <span class="btn btn-light flex-grow-1 fw-semibold rounded-3 disabled text-muted">Đã xong</span>

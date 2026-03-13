@@ -43,11 +43,11 @@
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
                                 <span class="text-muted">Đã sử dụng:</span>
-                                <span class="fw-bold">{{ $voucher->orders()->count() }}</span>
+                                <span class="fw-bold">{{ $voucher->used_count }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
                                 <span class="text-muted">Còn lại:</span>
-                                <span class="fw-bold">{{ $voucher->Quantity - $voucher->orders()->count() }}</span>
+                                <span class="fw-bold">{{ $voucher->remaining_quantity }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
                                 <span class="text-muted">Ngày hết hạn:</span>
@@ -104,56 +104,15 @@
                         <div class="d-flex align-items-center">
                             <span class="material-symbols-outlined text-primary me-2">history</span>
                             <h5 class="mb-0 fw-semibold">Lịch sử sử dụng</h5>
-                            <span class="badge bg-secondary ms-2">{{ $voucher->orders()->count() }}</span>
+                            <span class="badge bg-secondary ms-2">{{ $voucher->used_count }}</span>
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        @if($voucher->orders->count() > 0)
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="px-4 py-3">Đơn hàng</th>
-                                            <th class="px-4 py-3">Khách hàng</th>
-                                            <th class="px-4 py-3">Ngày đặt</th>
-                                            <th class="px-4 py-3 text-end">Tổng tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y">
-                                        @foreach($voucher->orders as $order)
-                                            <tr>
-                                                <td class="px-4 py-3">
-                                                    <a href="{{ route('admin.orders.show', $order->OrderID) }}" class="text-primary fw-medium">
-                                                        #{{ $order->OrderID }}
-                                                    </a>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="material-symbols-outlined me-2 text-muted">person</span>
-                                                        {{ $order->user->FullName ?? 'N/A' }}
-                                                    </div>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="material-symbols-outlined me-2 text-muted">schedule</span>
-                                                        {{ $order->CreatedAt->format('d/m/Y H:i') }}
-                                                    </div>
-                                                </td>
-                                                <td class="px-4 py-3 text-end fw-medium">
-                                                    {{ number_format($order->TotalAmount, 0, ',', '.') }}₫
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="text-center py-5">
-                                <span class="material-symbols-outlined text-muted" style="font-size: 64px;">receipt_long</span>
-                                <h5 class="mt-3 text-muted">Chưa có lịch sử sử dụng</h5>
-                                <p class="text-muted">Mã giảm giá này chưa được sử dụng bởi khách hàng nào.</p>
-                            </div>
-                        @endif
+                        <div class="text-center py-5">
+                            <span class="material-symbols-outlined text-muted" style="font-size: 64px;">receipt_long</span>
+                            <h5 class="mt-3 text-muted">Chưa có lịch sử sử dụng</h5>
+                            <p class="text-muted">Lịch sử đơn hàng dùng mã không còn lưu trong hệ thống.</p>
+                        </div>
                     </div>
                 </div>
             </div>

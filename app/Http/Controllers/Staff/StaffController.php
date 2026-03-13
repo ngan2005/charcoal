@@ -52,10 +52,10 @@ class StaffController extends Controller
         // Số thông báo chưa đọc (bảng notifications đã bỏ, dùng 0 hoặc có thể lấy từ support_messages nếu cần)
         $unreadNotificationsCount = 0;
 
-        // 2. Lịch làm việc hôm nay
+        // 2. Lịch làm việc hôm nay - hiển thị tất cả (chưa gán + đã gán cho mình)
         $todayAppointments = \App\Models\Appointment::with(['pet', 'services'])
-            ->where('StaffID', $userId)
             ->whereBetween('AppointmentTime', [$today, $endOfToday])
+            ->whereIn('Status', ['pending', 'confirmed', 'in_progress'])
             ->orderBy('AppointmentTime', 'asc')
             ->get();
 
@@ -116,28 +116,24 @@ class StaffController extends Controller
         $endOfToday = now()->endOfDay();
         $search = $request->input('search');
 
-        // Thống kê (Dữ liệu thống kê vẫn tính trên tổng thể trong ngày)
-        $currentlyCaring = \App\Models\Appointment::where('StaffID', $userId)
-            ->where('Status', 'in_progress')
-            ->count();
-
-        $completedToday = \App\Models\Appointment::where('StaffID', $userId)
-            ->where('Status', 'completed')
+        // Thống kê (Dữ liệu thống kê tính trên tất cả lịch trong ngày)
+        $currentlyCaring = \App\Models\Appointment::where('Status', 'in_progress')
             ->whereBetween('AppointmentTime', [$today, $endOfToday])
             ->count();
 
-        $pendingToday = \App\Models\Appointment::where('StaffID', $userId)
-            ->whereIn('Status', ['pending', 'confirmed'])
+        $completedToday = \App\Models\Appointment::where('Status', 'completed')
             ->whereBetween('AppointmentTime', [$today, $endOfToday])
             ->count();
 
-        $totalToday = \App\Models\Appointment::where('StaffID', $userId)
+        $pendingToday = \App\Models\Appointment::whereIn('Status', ['pending', 'confirmed'])
             ->whereBetween('AppointmentTime', [$today, $endOfToday])
             ->count();
 
-        // Danh sách thú cưng thông qua lịch hẹn hôm nay (Có lọc theo tìm kiếm)
+        $totalToday = \App\Models\Appointment::whereBetween('AppointmentTime', [$today, $endOfToday])
+            ->count();
+
+        // Danh sách thú cưng thông qua lịch hẹn hôm nay (hiển thị tất cả lịch trong ngày)
         $query = \App\Models\Appointment::with(['pet', 'services', 'customer'])
-            ->where('StaffID', $userId)
             ->whereBetween('AppointmentTime', [$today, $endOfToday]);
 
         if ($search) {
@@ -286,12 +282,15 @@ class StaffController extends Controller
 
     /**
      * Nhân viên cập nhật trạng thái lịch hẹn (Bắt đầu / Xác nhận đã hoàn thành).
+     * Staff có thể nhận lịch chưa được gán hoặc cập nhật lịch đã được gán cho mình.
      */
     public function updateAppointmentStatus(Request $request, $id)
     {
         $appointment = \App\Models\Appointment::findOrFail($id);
 
-        if ($appointment->StaffID != Auth::id()) {
+        // Nếu lịch chưa có StaffID, tự động gán cho nhân viên hiện tại
+        // Nếu đã có StaffID, chỉ cho phép nếu là nhân viên được gán
+        if ($appointment->StaffID != null && $appointment->StaffID != Auth::id()) {
             abort(403, 'Bạn không phải nhân viên phụ trách lịch hẹn này.');
         }
 
@@ -299,12 +298,19 @@ class StaffController extends Controller
             'Status' => 'required|in:confirmed,in_progress,completed',
         ]);
 
-        $appointment->update(['Status' => $request->Status]);
+        $data = ['Status' => $request->Status];
+
+        // Tự động gán nhân viên khi nhận lịch
+        if ($appointment->StaffID == null) {
+            $data['StaffID'] = Auth::id();
+        }
+
+        $appointment->update($data);
 
         $messages = [
-            'confirmed' => 'Đã xác nhận lịch hẹn.',
-            'in_progress' => 'Đã bắt đầu thực hiện.',
-            'completed' => 'Đã xác nhận hoàn thành dịch vụ.',
+            'confirmed' => 'Đã xác nhận lịch hẹn. Khách vui lòng thanh toán tại quầy khi đến.',
+            'in_progress' => 'Đã bắt đầu thực hiện dịch vụ.',
+            'completed' => 'Đã xác nhận hoàn thành dịch vụ và thu tiền.',
         ];
 
         return redirect()->back()->with('success', $messages[$request->Status] ?? 'Đã cập nhật trạng thái.');

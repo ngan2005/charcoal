@@ -67,7 +67,7 @@ class Voucher extends Model
      */
     public function getRemainingQuantityAttribute()
     {
-        return max(0, $this->Quantity - $this->orders()->count());
+        return max(0, (int) $this->Quantity - $this->orders()->count());
     }
 }
 
