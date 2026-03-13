@@ -257,7 +257,7 @@ class CheckoutController extends Controller
         // Create order details
         foreach ($cartItems as $item) {
             $price = $item->ProductID ? $item->ProductPrice : $item->ServicePrice;
-            
+
             DB::table('order_details')->insert([
                 'OrderID' => $orderId,
                 'ProductID' => $item->ProductID,
@@ -267,8 +267,13 @@ class CheckoutController extends Controller
                 'UnitPrice' => $price,
             ]);
 
-            // Update purchase count for products
             if ($item->ProductID) {
+                // Trừ tồn kho khi đặt hàng
+                DB::table('products')
+                    ->where('ProductID', $item->ProductID)
+                    ->decrement('Stock', $item->Quantity);
+
+                // Cập nhật số lượng đã bán (PurchaseCount)
                 DB::table('products')
                     ->where('ProductID', $item->ProductID)
                     ->increment('PurchaseCount', $item->Quantity);
