@@ -57,7 +57,16 @@ class CommentController extends Controller
             'CreatedAt' => now(),
         ]);
 
-        $comment->load('user');
+        $comment->load(['user' => function ($query) {
+            $query->select('UserID', 'FullName', 'Avatar', 'RoleID');
+        }]);
+
+        // Thêm role_name vào user
+        if ($comment->user && $comment->user->RoleID == 1) {
+            $comment->user->role_name = 'Admin';
+        } else {
+            $comment->user->role_name = null;
+        }
 
         return response()->json([
             'success' => true,
@@ -71,15 +80,104 @@ class CommentController extends Controller
      */
     public function getComments($productId)
     {
-        $comments = Comment::with('user')
+        // Lấy reviews (đánh giá gốc) cho sản phẩm
+        $reviews = Review::with(['customer' => function ($query) {
+                $query->select('UserID', 'FullName', 'Avatar', 'RoleID');
+            }, 'replies' => function ($query) {
+                $query->with(['customer' => function ($q) {
+                    $q->select('UserID', 'FullName', 'Avatar', 'RoleID');
+                }])->where('Deleted', 0);
+            }])
             ->where('ProductID', $productId)
-            ->where('Status', true)
-            ->orderBy('created_at', 'desc')
+            ->whereNull('ParentReviewID')
+            ->where('Deleted', 0)
+            ->orderBy('CreatedAt', 'desc')
             ->get();
+
+        // Thêm role name vào mỗi review và replies
+        $reviews->transform(function ($review) {
+            if ($review->customer && $review->customer->RoleID == 1) {
+                $review->customer->role_name = 'Admin';
+            } else {
+                $review->customer->role_name = null;
+            }
+
+            // Xử lý replies
+            $review->replies->transform(function ($reply) {
+                if ($reply->customer && $reply->customer->RoleID == 1) {
+                    $reply->customer->role_name = 'Admin';
+                } else {
+                    $reply->customer->role_name = null;
+                }
+                return $reply;
+            });
+
+            return $review;
+        });
 
         return response()->json([
             'success' => true,
-            'comments' => $comments,
+            'comments' => $reviews,
+        ]);
+    }
+
+    /**
+     * Delete a comment/review.
+     */
+    public function destroy(Request $request, $commentId)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập.'
+            ], 401);
+        }
+
+        // Thử tìm trong bảng reviews trước (cho sản phẩm)
+        $review = Review::find($commentId);
+
+        if ($review) {
+            $user = Auth::user();
+            if ($user->RoleID != 1 && $review->CustomerID != $user->UserID) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền xóa đánh giá này.'
+                ], 403);
+            }
+
+            $review->Deleted = true;
+            $review->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã xóa đánh giá.'
+            ]);
+        }
+
+        // Nếu không có trong reviews, thử bảng comments
+        $comment = Comment::find($commentId);
+
+        if (!$comment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bình luận không tồn tại.'
+            ], 404);
+        }
+
+        $user = Auth::user();
+        if ($user->RoleID != 1 && $comment->UserID != $user->UserID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền xóa bình luận này.'
+            ], 403);
+        }
+
+        $comment->Status = false;
+        $comment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa bình luận.'
         ]);
     }
 }

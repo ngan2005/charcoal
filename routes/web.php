@@ -36,6 +36,8 @@ use App\Http\Controllers\CommentController;
 Route::get('/', [ShopController::class, 'index'])->name('shop');
 Route::get('/about', function() { return view('about'); })->name('about');
 Route::get('/services', [\App\Http\Controllers\PublicServiceController::class, 'index'])->name('services.index');
+Route::post('/services/reviews', [\App\Http\Controllers\PublicServiceController::class, 'storeReview'])->name('service-reviews.store')->middleware('auth');
+Route::delete('/services/reviews/{reviewId}', [\App\Http\Controllers\PublicServiceController::class, 'destroyReview'])->name('service-reviews.destroy')->middleware('auth');
 Route::get('/services/{id}', [\App\Http\Controllers\PublicServiceController::class, 'show'])->name('services.show');
 Route::get('/appointments/create', function (\Illuminate\Http\Request $request) {
     $serviceId = $request->query('service_id');
@@ -49,6 +51,7 @@ Route::get('/product/{id}', [ShopController::class, 'show'])->name('product.show
 Route::get('/comments/{productId}', [CommentController::class, 'getComments'])->name('comments.get');
 Route::middleware('auth')->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{commentId}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
 Route::post('/cart', [\App\Http\Controllers\CartController::class, 'store'])->name('cart.store');

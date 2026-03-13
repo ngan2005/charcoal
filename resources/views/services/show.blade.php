@@ -2,6 +2,8 @@
 
 @section('content')
 @php
+    use Illuminate\Support\Facades\Auth;
+    $currentUser = Auth::user();
     $sMain = $service->images->where('IsMain', 1)->first();
     $sFirst = $service->images->first();
     $initialImg = ($sMain ?? $sFirst)?->ImageUrl;
@@ -338,20 +340,39 @@
                     <div class="flex items-start gap-6">
                         @php
                             $cName = $review->customer ? $review->customer->FullName : 'Khách yêu';
+                            $cAvatar = $review->customer && $review->customer->Avatar ? $review->customer->Avatar : null;
+                            $avatarUrl = $cAvatar
+                                ? (str_starts_with($cAvatar, 'http') ? $cAvatar : asset('storage/' . $cAvatar))
+                                : 'https://ui-avatars.com/api/?name=' . urlencode($cName) . '&background=F4C2C3&color=fff&size=128';
+                            $isAdmin = $review->customer && $review->customer->RoleID == 1;
+                            $canDelete = $currentUser && ($currentUser->RoleID == 1 || $currentUser->UserID == $review->CustomerID);
                         @endphp
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($cName) }}&background=F4C2C3&color=fff&size=128" 
-                             alt="Avatar" class="w-16 h-16 rounded-full ring-4 ring-primary/10 shrink-0">
+                        <img src="{{ $avatarUrl }}" alt="{{ $cName }}" class="w-16 h-16 rounded-full ring-4 ring-primary/10 shrink-0">
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-3">
                                 <div>
-                                    <h5 class="font-black text-slate-900 dark:text-white text-lg">{{ $cName }}</h5>
+                                    <h5 class="font-black text-slate-900 dark:text-white text-lg inline-flex items-center gap-2">
+                                        {{ $cName }}
+                                        @if($isAdmin)
+                                            <span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-medium">Admin</span>
+                                        @endif
+                                    </h5>
                                     <div class="flex items-center gap-1 text-amber-400">
                                         @for($i = 1; $i <= 5; $i++)
                                             <span class="material-symbols-outlined text-sm {{ $i <= $review->Rating ? 'fill-current' : 'text-slate-200' }}">star</span>
                                         @endfor
                                     </div>
                                 </div>
-                                <span class="text-slate-400 text-xs font-medium">{{ \Carbon\Carbon::parse($review->CreatedAt)->diffForHumans() }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-xs font-medium">{{ \Carbon\Carbon::parse($review->CreatedAt)->diffForHumans() }}</span>
+                                    @if($canDelete)
+                                        <button onclick="deleteReview({{ $review->ReviewID }})" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Xóa đánh giá">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                             <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-base italic">{{ $review->Comment }}</p>
                             
@@ -449,9 +470,9 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             const formData = new FormData(form);
-            
+
             try {
-                const response = await fetch("{{ route('comments.store') }}", {
+                const response = await fetch("{{ route('service-reviews.store') }}", {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': "{{ csrf_token() }}",
@@ -459,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: formData
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     alert('Cảm ơn bạn đã gửi đánh giá! ✨');
@@ -472,6 +493,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Delete review function
+    window.deleteReview = async function(reviewId) {
+        if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/services/reviews/${reviewId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra!');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra, vui lòng thử lại!');
+        }
+    };
 });
 </script>
 @endpush

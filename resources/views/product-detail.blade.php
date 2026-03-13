@@ -1,6 +1,9 @@
 @extends('layouts.shop')
 
 @section('content')
+@php
+    $currentUser = Auth::user();
+@endphp
 <div class="container-fluid px-4 py-6 max-w-7xl mx-auto" x-data="{ activeImage: '{{ $product->images->where('IsMain', 1)->first() ? (str_starts_with($product->images->where('IsMain', 1)->first()->ImageUrl, 'http') ? $product->images->where('IsMain', 1)->first()->ImageUrl : asset('storage/' . $product->images->where('IsMain', 1)->first()->ImageUrl)) : ( $product->images->first() ? (str_starts_with($product->images->first()->ImageUrl, 'http') ? $product->images->first()->ImageUrl : asset('storage/' . $product->images->first()->ImageUrl)) : 'https://placehold.co/800x800/F4C2C3/ffffff?text=' . urlencode($product->ProductName) ) }}' }">
     {{-- Breadcrumbs --}}
     <nav class="flex mb-6" aria-label="Breadcrumb">
@@ -328,6 +331,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const productId = {{ $product->ProductID }};
+    const currentUserId = {{ $currentUser ? $currentUser->UserID : 'null' }};
+    const currentUserRole = {{ $currentUser ? $currentUser->RoleID : 'null' }};
 
     // Load comments on page load
     loadComments();
@@ -416,27 +421,73 @@ document.addEventListener('DOMContentLoaded', function() {
                 let html = '';
                 data.comments.forEach(comment => {
                     const stars = '★'.repeat(comment.Rating) + '☆'.repeat(5 - comment.Rating);
-                    const avatar = comment.user && comment.user.avatar
-                        ? (comment.user.avatar.startsWith('http') ? comment.user.avatar : '/storage/' + comment.user.avatar)
-                        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.user ? comment.user.name : 'User') + '&background=random';
-                    const date = new Date(comment.created_at).toLocaleDateString('vi-VN', {
+                    const userName = comment.customer ? (comment.customer.FullName || comment.customer.full_name || 'Người dùng') : 'Người dùng';
+                    const userAvatar = comment.customer && (comment.customer.Avatar || comment.customer.avatar);
+                    const avatar = userAvatar
+                        ? (userAvatar.startsWith('http') ? userAvatar : '/storage/' + userAvatar)
+                        : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userName) + '&background=random';
+                    const date = new Date(comment.CreatedAt).toLocaleDateString('vi-VN', {
                         day: '2-digit', month: '2-digit', year: 'numeric'
                     });
+                    const roleBadge = comment.customer && comment.customer.role_name === 'Admin'
+                        ? '<span class="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-medium">Admin</span>'
+                        : '';
+                    const canDelete = (currentUserId && (currentUserRole === 1 || currentUserId === comment.CustomerID))
+                        ? `<button onclick="deleteComment(${comment.ReviewID})" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Xóa bình luận">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                           </button>`
+                        : '';
+
+                    // Generate replies HTML
+                    let repliesHtml = '';
+                    if (comment.replies && comment.replies.length > 0) {
+                        comment.replies.forEach(reply => {
+                            const replyUserName = reply.customer ? (reply.customer.FullName || 'Admin') : 'Admin';
+                            const replyAvatar = reply.customer && reply.customer.Avatar
+                                ? (reply.customer.Avatar.startsWith('http') ? reply.customer.Avatar : '/storage/' + reply.customer.Avatar)
+                                : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(replyUserName) + '&background=FF6B6B&color=fff&size=128';
+                            const replyRoleBadge = reply.customer && reply.customer.role_name === 'Admin'
+                                ? '<span class="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-medium">Admin</span>'
+                                : '';
+                            const replyDate = new Date(reply.CreatedAt).toLocaleDateString('vi-VN', {
+                                day: '2-digit', month: '2-digit', year: 'numeric'
+                            });
+
+                            repliesHtml += `
+                            <div class="mt-4 bg-primary/10 dark:bg-primary/5 rounded-2xl p-5 flex gap-4 border border-primary/20">
+                                <img src="${replyAvatar}" alt="${replyUserName}" class="w-10 h-10 rounded-full ring-2 ring-primary/20 shrink-0">
+                                <div class="flex-1">
+                                    <h6 class="font-black text-sm text-primary-dark dark:text-primary mb-1 inline-flex items-center gap-2">
+                                        ${replyUserName}${replyRoleBadge}
+                                        <span class="bg-primary/20 text-primary-dark dark:text-primary text-[8px] px-2 py-0.5 rounded-full uppercase">Official</span>
+                                        <span class="text-slate-400 text-xs font-normal ml-2">${replyDate}</span>
+                                    </h6>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">${reply.Comment}</p>
+                                </div>
+                            </div>`;
+                        });
+                    }
 
                     html += `
                     <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
                         <div class="flex items-start gap-4">
-                            <img src="${avatar}" alt="${comment.user ? comment.user.name : 'User'}"
+                            <img src="${avatar}" alt="${userName}"
                                 class="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20">
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-2">
                                     <div>
-                                        <span class="font-bold text-slate-900 dark:text-white">${comment.user ? comment.user.name : 'Người dùng'}</span>
+                                        <span class="font-bold text-slate-900 dark:text-white">${userName}</span>${roleBadge}
                                         <span class="text-amber-400 ml-2 text-sm">${stars}</span>
                                     </div>
-                                    <span class="text-slate-400 text-sm">${date}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-400 text-sm">${date}</span>
+                                        ${canDelete}
+                                    </div>
                                 </div>
-                                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">${comment.Content}</p>
+                                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">${comment.Comment}</p>
+                                ${repliesHtml}
                             </div>
                         </div>
                     </div>`;
@@ -457,6 +508,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>`;
         }
     }
+
+    // Delete comment function
+    window.deleteComment = async function(commentId) {
+        if (!confirm('Bạn có chắc muốn xóa bình luận này?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                loadComments();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra!');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra, vui lòng thử lại!');
+        }
+    };
 });
 </script>
 @endpush
