@@ -52,9 +52,8 @@
     </div>
 </div>
 
-<!-- Main Content Grid -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-    <div class="xl:col-span-2 space-y-8">
+<!-- Main Content -->
+<div class="space-y-8">
         <!-- Today's Schedule -->
         <div class="bg-white dark:bg-[#111827] rounded-2xl border border-[#f3e8ea] dark:border-gray-800 shadow-sm overflow-hidden">
             <div class="p-6 border-b border-[#f3e8ea] dark:border-gray-800 flex justify-between items-center">
@@ -147,76 +146,5 @@
                 @endforelse
             </div>
         </div>
-    </div>
-
-
-    <!-- Right Sidebar -->
-    <div class="space-y-6">
-        <!-- Theme Customization -->
-        <div class="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-[#f3e8ea] dark:border-gray-800 shadow-sm">
-            <h3 class="text-base font-bold mb-5 flex items-center gap-2 text-gray-800 dark:text-white">
-                <span class="material-symbols-outlined text-primary">format_paint</span>
-                Tùy chỉnh không gian
-            </h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button class="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-primary transition-all bg-[#fdf8f9]" onclick="setTheme('light')">
-                    <div class="w-full h-10 rounded-lg bg-white border border-rose-100"></div>
-                    <span class="text-[11px] font-bold text-gray-500">Sáng sạch</span>
-                </button>
-                <button class="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-primary transition-all bg-[#101622]" onclick="setTheme('dark')">
-                    <div class="w-full h-10 rounded-lg bg-gray-900 border border-gray-800"></div>
-                    <span class="text-[11px] font-bold text-gray-400">Chế độ tối</span>
-                </button>
-                <button class="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-primary transition-all bg-[#fff1f2]" onclick="setTheme('pink')">
-                    <div class="w-full h-10 rounded-lg bg-rose-100 border border-rose-200"></div>
-                    <span class="text-[11px] font-bold text-rose-500">Hồng Pastel</span>
-                </button>
-                <button class="flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-primary transition-all bg-[#eff6ff]" onclick="setTheme('blue')">
-                    <div class="w-full h-10 rounded-lg bg-blue-100 border border-blue-200"></div>
-                    <span class="text-[11px] font-bold text-blue-500">Xanh Dương</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Important Reminder -->
-        <div class="bg-primary rounded-2xl p-6 text-white shadow-lg shadow-primary/20 relative overflow-hidden">
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl opacity-10">pets</span>
-            <h4 class="font-bold text-lg mb-2 relative z-10">Nhắc nhở quan trọng</h4>
-            <p class="text-sm text-white/80 leading-relaxed mb-4 relative z-10">Đừng quên kiểm tra kỹ nhiệt độ nước tắm cho các bé thú cưng trong ngày hôm nay.</p>
-            <button class="w-full py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all backdrop-blur-md">Đã hiểu</button>
-        </div>
-    </div>
 </div>
-
-<script>
-    function setTheme(theme) {
-        const html = document.documentElement;
-        const mainContent = document.getElementById('main-content');
-        
-        html.classList.remove('dark');
-        mainContent.style.backgroundColor = '';
-        
-        switch(theme) {
-            case 'dark':
-                html.classList.add('dark');
-                break;
-            case 'pink':
-                mainContent.style.backgroundColor = '#fff1f2';
-                break;
-            case 'blue':
-                mainContent.style.backgroundColor = '#eff6ff';
-                break;
-            default:
-                mainContent.style.backgroundColor = '#fdf8f9';
-        }
-        
-        localStorage.setItem('theme', theme);
-    }
-
-    // Initialize theme from localStorage
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        setTheme(savedTheme);
-    });
-</script>
 @endsection

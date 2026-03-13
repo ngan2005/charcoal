@@ -56,13 +56,28 @@ class PetController extends Controller
             'Notes' => $validated['Notes'] ?? null,
         ]);
 
-        // Handle image uploads
+        // Handle image uploads - chỉ xử lý file thực sự được tải lên (path không rỗng)
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('pet_images', 'public');
+            $files = $request->file('images');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+            $files = array_filter($files, function ($file) {
+                return $file && $file->isValid() && $file->getSize() > 0;
+            });
+            $files = array_values($files);
+            Storage::disk('public')->makeDirectory('pet_images');
+            foreach ($files as $index => $image) {
+                $filename = time() . '_' . $index . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $image->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $image->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_pet_' . $index . '.' . strtolower($ext);
+                }
+                $relativePath = 'pet_images/' . $filename;
+                Storage::disk('public')->put($relativePath, $image->get());
                 PetImage::create([
                     'PetID' => $pet->PetID,
-                    'ImageUrl' => $path,
+                    'ImageUrl' => $relativePath,
                     'IsMain' => $index === 0 ? 1 : 0,
                 ]);
             }
@@ -98,7 +113,7 @@ class PetController extends Controller
             abort(403, 'Bạn không có quyền chỉnh sửa thú cưng này.');
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'PetName' => ['required', 'string', 'max:100'],
             'Species' => ['required', 'string', 'max:50'],
             'Breed' => ['nullable', 'string', 'max:50'],
@@ -111,16 +126,40 @@ class PetController extends Controller
             'set_main' => ['nullable', 'integer'],
         ]);
 
-        $pet->update($validated);
+        // Chỉ cập nhật các trường thuộc bảng pets, tránh đưa file/array vào model
+        $pet->update([
+            'PetName' => $request->PetName,
+            'Species' => $request->Species,
+            'Breed' => $request->Breed ?? null,
+            'Size' => $request->Size ?? null,
+            'Age' => $request->Age ?? null,
+            'Notes' => $request->Notes ?? null,
+        ]);
 
-        // Handle new image uploads
+        // Handle new image uploads - dùng put() thay vì store() để tránh lỗi "Path must not be empty" trên Windows
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('pet_images', 'public');
+            $files = $request->file('images');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+            $files = array_filter($files, function ($file) {
+                return $file && $file->isValid() && $file->getSize() > 0;
+            });
+            $files = array_values($files);
+            Storage::disk('public')->makeDirectory('pet_images');
+            $existingCount = $pet->images()->count();
+            foreach ($files as $index => $image) {
+                $filename = time() . '_' . $index . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $image->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $image->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_pet_' . $index . '.' . strtolower($ext);
+                }
+                $relativePath = 'pet_images/' . $filename;
+                Storage::disk('public')->put($relativePath, $image->get());
                 PetImage::create([
                     'PetID' => $pet->PetID,
-                    'ImageUrl' => $path,
-                    'IsMain' => ($request->set_main && $index === 0) ? 1 : 0,
+                    'ImageUrl' => $relativePath,
+                    'IsMain' => ($existingCount === 0 && $index === 0) ? 1 : 0,
                 ]);
             }
         }

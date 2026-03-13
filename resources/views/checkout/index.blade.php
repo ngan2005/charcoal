@@ -186,45 +186,16 @@
                         Phương thức thanh toán
                     </h2>
 
-                    <div class="space-y-3">
-                        {{-- Cash on Delivery --}}
-                        <label class="payment-card flex items-center gap-4 cursor-pointer" for="payment_cash">
-                            <input type="radio" name="payment_method" id="payment_cash" value="cash" class="hidden" {{ old('payment_method', 'cash') === 'cash' ? 'checked' : '' }}>
-                            <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
-                            </div>
-                            <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 check-icon">check_circle</span>
-                        </label>
-
-                        {{-- VNPay --}}
-                        <label class="payment-card flex items-center gap-4 cursor-pointer" for="payment_vnpay">
-                            <input type="radio" name="payment_method" id="payment_vnpay" value="vnpay" class="hidden" {{ old('payment_method') === 'vnpay' ? 'checked' : '' }}>
-                            <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">account_balance</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-slate-900 dark:text-white">VNPay</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Thanh toán qua cổng VNPay</p>
-                            </div>
-                            <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 check-icon">check_circle</span>
-                        </label>
-
-                        {{-- MoMo --}}
-                        <label class="payment-card flex items-center gap-4 cursor-pointer" for="payment_momo">
-                            <input type="radio" name="payment_method" id="payment_momo" value="momo" class="hidden" {{ old('payment_method') === 'momo' ? 'checked' : '' }}>
-                            <div class="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-pink-600 dark:text-pink-400">smartphone</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-slate-900 dark:text-white">MoMo</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Thanh toán qua ứng dụng MoMo</p>
-                            </div>
-                            <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 check-icon">check_circle</span>
-                        </label>
+                    <input type="hidden" name="payment_method" value="cash">
+                    <div class="flex items-center gap-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
+                        </div>
+                        <span class="material-symbols-outlined text-emerald-500">check_circle</span>
                     </div>
                     @error('payment_method')
                         <div class="text-danger small mt-2">{{ $message }}</div>
@@ -351,23 +322,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle payment card selection
-    const paymentCards = document.querySelectorAll('.payment-card');
-    paymentCards.forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove selected class from all
-            paymentCards.forEach(c => {
-                c.classList.remove('selected');
-                c.querySelector('.check-icon').classList.remove('text-primary');
-            });
-            // Add selected class to clicked
-            this.classList.add('selected');
-            this.querySelector('.check-icon').classList.add('text-primary');
-        });
-    });
-
-    // Initial state
-    document.querySelector('input[name="payment_method"]:checked')?.closest('.payment-card')?.classList.add('selected');
+    // Chỉ dùng thanh toán khi nhận hàng - không cần chọn phương thức
 
     // Voucher handling
     const subtotal = {{ $subtotal }};
@@ -487,10 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        if (!document.querySelector('input[name="payment_method"]:checked')) {
-            valid = false;
-            alert('Vui lòng chọn phương thức thanh toán!');
-        }
+        // payment_method luôn là "cash" (hidden input)
 
         if (!valid) {
             e.preventDefault();

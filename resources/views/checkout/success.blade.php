@@ -137,14 +137,14 @@
             <span class="material-symbols-outlined text-primary">email</span>
             <span class="font-medium text-slate-900 dark:text-white">Kiểm tra email của bạn</span>
         </div>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Chúng tôi đã gửi xác nhận đơn hàng qua email. Bạn có thể theo dõi trạng thái đơn hàng trong phần <a href="{{ route('orders.index') }}" class="text-primary hover:underline font-medium">đơn hàng của tôi</a>.</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Chúng tôi đã gửi xác nhận đơn hàng qua email. Bạn có thể theo dõi trạng thái đơn hàng trong phần <a href="{{ route('profile.index') }}" class="text-primary hover:underline font-medium">đơn hàng của tôi</a>.</p>
     </div>
 
     {{-- Action Buttons --}}
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="{{ route('orders.show', $order->OrderID) }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-slate-900 font-bold rounded-full transition-all hover:-translate-y-1">
+        <a href="{{ route('profile.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-slate-900 font-bold rounded-full transition-all hover:-translate-y-1">
             <span class="material-symbols-outlined text-sm">visibility</span>
-            Xem chi tiết đơn
+            Xem đơn hàng của tôi
         </a>
         <a href="{{ route('shop') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-full transition-all">
             <span class="material-symbols-outlined text-sm">shopping_bag</span>

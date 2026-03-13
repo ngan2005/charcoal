@@ -3,15 +3,15 @@
 @section('title', 'Tài khoản của tôi - Pink Charcoal')
 
 @section('content')
-<div class="w-full max-w-[1000px] mx-auto min-h-[60vh] flex flex-col pt-4 pb-12 gap-6 relative">
+<div class="w-full max-w-[880px] mx-auto min-h-[50vh] flex flex-col pt-2 pb-8 gap-4 relative">
     {{-- Decorative Background Paw --}}
-    <div class="absolute -top-10 -right-10 opacity-[0.03] pointer-events-none rotate-12 hidden md:block">
-        <span class="material-symbols-outlined text-[300px]">pets</span>
+    <div class="absolute -top-8 -right-8 opacity-[0.03] pointer-events-none rotate-12 hidden md:block">
+        <span class="material-symbols-outlined text-[220px]">pets</span>
     </div>
 
     {{-- Page Header --}}
-    <div class="flex items-center gap-5 border-b border-pink-100 dark:border-slate-800 pb-5">
-        <div class="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden text-primary">
+    <div class="flex items-center gap-3 border-b border-pink-100 dark:border-slate-800 pb-3">
+        <div class="w-11 h-11 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden text-primary">
             @php
                 $headerAvatarUrl = null;
                 if ($user->Avatar) {
@@ -21,12 +21,12 @@
             @if($headerAvatarUrl)
                 <img src="{{ $headerAvatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
             @else
-                <span class="material-symbols-outlined text-3xl drop-shadow-sm">face_3</span>
+                <span class="material-symbols-outlined text-2xl drop-shadow-sm">face_3</span>
             @endif
         </div>
         <div>
-            <h1 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white font-display">Xin chào, {{ $user->FullName }}!</h1>
-            <p class="text-slate-400 text-xs mt-1">Cập nhật thông tin để chúng mình phục vụ bạn tốt hơn nhé 🐾</p>
+            <h1 class="text-lg md:text-xl font-bold text-slate-800 dark:text-white font-display">Xin chào, {{ $user->FullName }}!</h1>
+            <p class="text-slate-400 text-[11px] mt-0.5">Cập nhật thông tin để chúng mình phục vụ bạn tốt hơn nhé 🐾</p>
         </div>
     </div>
 
@@ -45,51 +45,51 @@
         </div>
     @endif
 
-    <div class="flex flex-col md:flex-row gap-8 items-start">
+    <div class="flex flex-col md:flex-row gap-5 items-start">
         
         {{-- Sidebar Menu --}}
-        <div class="w-full md:w-72 flex flex-col gap-1.5 sticky top-24">
-            <button onclick="switchTab('profileBtn', 'profileTab')" id="profileBtn" class="profile-nav-btn active w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all bg-primary/20 text-slate-900 border border-primary/10">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-[20px]">person</span> Thông tin Cá Nhân
+        <div class="w-full md:w-52 flex flex-col gap-1 sticky top-20">
+            <button onclick="switchTab('profileBtn', 'profileTab')" id="profileBtn" class="profile-nav-btn active w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all bg-primary/20 text-slate-900 border border-primary/10">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">person</span> Thông tin Cá Nhân
                 </div>
-                <span class="material-symbols-outlined text-sm active-paw opacity-100">pets</span>
+                <span class="material-symbols-outlined text-xs active-paw opacity-100">pets</span>
             </button>
-            <button onclick="switchTab('ordersBtn', 'ordersTab')" id="ordersBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-[20px]">receipt_long</span> Lịch sử Đơn hàng
+            <button onclick="switchTab('ordersBtn', 'ordersTab')" id="ordersBtn" class="profile-nav-btn w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">receipt_long</span> Lịch sử Đơn hàng
                 </div>
-                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
+                <span class="material-symbols-outlined text-xs active-paw opacity-0">pets</span>
             </button>
-            <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-[20px]">lock</span> Đổi mật khẩu
+            <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="profile-nav-btn w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">lock</span> Đổi mật khẩu
                 </div>
-                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
+                <span class="material-symbols-outlined text-xs active-paw opacity-0">pets</span>
             </button>
-            <button onclick="switchTab('supportBtn', 'supportTab')" id="supportBtn" class="profile-nav-btn w-full text-left px-5 py-3 rounded-2xl font-bold flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-[20px]">support_agent</span> Hỗ trợ
+            <button onclick="switchTab('supportBtn', 'supportTab')" id="supportBtn" class="profile-nav-btn w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">support_agent</span> Hỗ trợ
                 </div>
-                <span class="material-symbols-outlined text-sm active-paw opacity-0">pets</span>
+                <span class="material-symbols-outlined text-xs active-paw opacity-0">pets</span>
             </button>
             
-            <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-pink-50 dark:border-slate-800 pt-4">
+            <form method="POST" action="{{ route('logout') }}" class="mt-3 border-t border-pink-50 dark:border-slate-800 pt-3">
                 @csrf
-                <button type="submit" class="w-full text-left px-5 py-2.5 rounded-2xl font-medium flex items-center gap-3 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-colors text-sm">
-                    <span class="material-symbols-outlined text-[20px]">logout</span> Đăng xuất
+                <button type="submit" class="w-full text-left px-4 py-2 rounded-xl font-medium flex items-center gap-2.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 transition-colors text-xs">
+                    <span class="material-symbols-outlined text-[18px]">logout</span> Đăng xuất
                 </button>
             </form>
         </div>
 
         {{-- Content Area --}}
-        <div class="w-full md:w-3/4">
+        <div class="w-full min-w-0 flex-1">
             
             {{-- Profile Tab --}}
-            <div id="profileTab" class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-6">
-                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
-                    <span class="material-symbols-outlined text-primary">account_circle</span>
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hồ Sơ Của Tôi</h2>
+            <div id="profileTab" class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-5">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">account_circle</span>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hồ Sơ Của Tôi</h2>
                 </div>
                 
                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6 max-w-lg">
@@ -236,39 +236,33 @@
             </div>
 
             {{-- Orders Tab --}}
-            <div id="ordersTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex-col gap-6">
-                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
-                    <span class="material-symbols-outlined text-primary">receipt_long</span>
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Lịch Sử Mua Hàng</h2>
+            <div id="ordersTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-4">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Lịch Sử Mua Hàng</h2>
                 </div>
                 
                 @if(count($orders) > 0)
-                    <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-3 max-w-xl">
                         @foreach($orders as $order)
-                            <div class="bg-white/50 dark:bg-slate-800/50 border border-slate-50 dark:border-slate-800 rounded-3xl p-5 flex flex-col gap-3 hover:border-primary/50 transition-all hover:shadow-md group">
-                                <div class="flex justify-between items-center border-b border-dashed border-pink-100 dark:border-slate-700 pb-3">
-                                    <div class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-primary"></div>
-                                        #{{ str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) }}
-                                    </div>
-                                    <div class="text-[10px] uppercase font-bold bg-white dark:bg-slate-700 px-3 py-1 rounded-full text-slate-500 dark:text-slate-300 border border-slate-100 dark:border-slate-600">
+                            <a href="{{ route('checkout.success', $order->OrderID) }}" class="block bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 hover:border-primary/50 hover:shadow-md transition-all group">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-2 h-2 rounded-full bg-primary shrink-0"></div>
+                                    <span class="font-bold text-slate-800 dark:text-white text-sm">#{{ str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="text-[11px] text-slate-400">{{ isset($order->CreatedAt) ? \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y') : '--' }}</span>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <span class="text-[10px] uppercase font-semibold bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full text-slate-500 dark:text-slate-300">
                                         {{ $order->Status }}
-                                    </div>
+                                    </span>
+                                    <span class="font-bold text-primary text-base whitespace-nowrap">{{ number_format($order->TotalAmount, 0, ',', '.') }}<span class="text-xs ml-0.5">đ</span></span>
                                 </div>
-                                <div class="flex justify-between items-end">
-                                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                        {{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y') }}
-                                    </div>
-                                    <div class="font-bold text-primary text-xl">
-                                        {{ number_format($order->TotalAmount, 0, ',', '.') }}<span class="text-xs ml-0.5">đ</span>
-                                    </div>
-                                </div>
-                            </div>
+                            </a>
                         @endforeach
                         
-                        <button class="mt-2 text-center text-primary font-bold hover:text-primary-dark transition-colors py-2 text-sm flex items-center justify-center gap-1 group">
-                            Xem tất cả đơn hàng <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                        </button>
+                        <a href="{{ route('shop') }}" class="mt-1 text-center text-primary font-semibold hover:text-primary-dark transition-colors py-1.5 text-xs flex items-center justify-center gap-1 group">
+                            Tiếp tục mua sắm <span class="material-symbols-outlined text-xs group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                        </a>
                     </div>
                 @else
                     <div class="py-12 flex flex-col items-center justify-center text-center">
@@ -283,10 +277,10 @@
             </div>
 
             {{-- Password Tab --}}
-            <div id="passwordTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex-col gap-6">
-                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
-                    <span class="material-symbols-outlined text-primary">key</span>
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Đổi Mật Khẩu</h2>
+            <div id="passwordTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-5">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">key</span>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Đổi Mật Khẩu</h2>
                 </div>
                 
                 <form action="{{ route('profile.password') }}" method="POST" class="flex flex-col gap-5 max-w-lg">
@@ -317,10 +311,10 @@
             </div>
 
             {{-- Support Tab --}}
-            <div id="supportTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[2rem] p-6 md:p-10 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-6">
-                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-5">
-                    <span class="material-symbols-outlined text-primary">support_agent</span>
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hỗ trợ khách hàng</h2>
+            <div id="supportTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-5">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">support_agent</span>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Hỗ trợ khách hàng</h2>
                 </div>
                 
                 <p class="text-slate-400 text-xs italic">Gửi tin nhắn cho chúng mình nhé. Pink Charcoal luôn lắng nghe bạn!</p>

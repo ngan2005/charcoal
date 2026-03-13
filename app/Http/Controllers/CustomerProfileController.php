@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Pet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CustomerProfileController extends Controller
 {
@@ -44,27 +45,23 @@ class CustomerProfileController extends Controller
             'Address' => $request->Address,
         ];
 
+        // Handle Avatar Upload - dùng get() thay vì storeAs để tránh lỗi "Path must not be empty" trên Windows
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-            // Chỉ xử lý khi upload thực sự thành công (tránh Path must not be empty)
-            if ($file->getError() === \UPLOAD_ERR_OK && $file->isValid()) {
-                try {
-                    $path = $file->getRealPath();
-                    if ($path && is_uploaded_file($path)) {
-                        $ext = $file->getClientOriginalExtension() ?: 'jpg';
-                        $filename = 'avatar_' . $user->UserID . '_' . time() . '.' . strtolower($ext);
-                        $avatarPath = $file->storeAs('avatars', $filename, 'public');
-                        if (!empty($avatarPath)) {
-                            // Xóa ảnh cũ nếu có
-                            if ($user->Avatar && Storage::disk('public')->exists($user->Avatar)) {
-                                Storage::disk('public')->delete($user->Avatar);
-                            }
-                            $data['Avatar'] = $avatarPath;
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    // Bỏ qua lỗi upload, vẫn cập nhật họ tên, SĐT, địa chỉ
+            if ($file->isValid() && $file->getSize() > 0) {
+                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $file->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_avatar.' . strtolower($ext);
                 }
+                Storage::disk('public')->makeDirectory('avatars');
+                $relativePath = 'avatars/' . $filename;
+                Storage::disk('public')->put($relativePath, $file->get());
+                if ($user->Avatar && Storage::disk('public')->exists($user->Avatar)) {
+                    Storage::disk('public')->delete($user->Avatar);
+                }
+                $user->Avatar = $relativePath;
+                $user->save();
             }
         }
 

@@ -103,74 +103,10 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Work Stats -->
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
-                <div class="p-4 border-b border-gray-100 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                        <span class="material-symbols-outlined">work</span>
-                    </div>
-                    <h3 class="font-bold text-gray-900">Thông tin công việc</h3>
-                </div>
-                <div class="p-4">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="text-center p-4 rounded-xl bg-pink-50">
-                            <p class="text-2xl font-bold text-pink-600">20</p>
-                            <p class="text-xs text-gray-500 mt-1">Tổng ca làm</p>
-                        </div>
-                        <div class="text-center p-4 rounded-xl bg-green-50">
-                            <p class="text-2xl font-bold text-green-600">180h</p>
-                            <p class="text-xs text-gray-500 mt-1">Giờ làm việc</p>
-                        </div>
-                        <div class="text-center p-4 rounded-xl bg-blue-50">
-                            <p class="text-2xl font-bold text-blue-600">4.8</p>
-                            <p class="text-xs text-gray-500 mt-1">Đánh giá TB</p>
-                        </div>
-                        <div class="text-center p-4 rounded-xl bg-amber-50">
-                            <p class="text-2xl font-bold text-amber-600">5</p>
-                            <p class="text-xs text-gray-500 mt-1">Năm kinh nghiệm</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Right Column -->
         <div class="space-y-6">
-            <!-- Quick Stats -->
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <h3 class="font-bold text-gray-900 mb-4">Thống kê nhanh</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-sm">hourglass_empty</span>
-                            </div>
-                            <span class="text-sm text-gray-600">Chờ xác nhận</span>
-                        </div>
-                        <span class="font-bold text-gray-900">3</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-sm">check_circle</span>
-                            </div>
-                            <span class="text-sm text-gray-600">Đã xác nhận</span>
-                        </div>
-                        <span class="font-bold text-gray-900">5</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-sm">task_alt</span>
-                            </div>
-                            <span class="text-sm text-gray-600">Hoàn thành</span>
-                        </div>
-                        <span class="font-bold text-gray-900">12</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Quick Links -->
             <div class="bg-gradient-to-br from-pink-50 to-white rounded-xl border border-pink-100 p-4">
                 <h3 class="font-bold text-gray-900 mb-4">Liên kết nhanh</h3>

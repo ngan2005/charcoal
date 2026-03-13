@@ -141,34 +141,11 @@
                     Đăng nhập
                 </button>
 
-                <!-- Divider -->
-                <div class="relative flex items-center gap-4 my-8">
-                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-widest">Hoặc đăng nhập bằng</span>
-                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                </div>
-
-                <!-- Social Logins -->
-                <div class="grid grid-cols-2 gap-4">
-                    <button class="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" type="button">
-                        <img alt="Google Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4E8fzAlLCivQvZSlc_NE2wYvL50KJWKNTVz28xMliDS2wf1Au9LyhOiZiOx6HRvEkosydiNne0saon6JMmWBctwElLv3Aa587t1iDjznneN-pm1aztHj_1L_MSM07sda5zUksEL9BTZhIYGZ0yEa4wRI76vSCWQpIUb-sfBAGglXVFTekwcZmhbRWt6CGJxHor_Jksmr0tRVTViOjBt5-KD7CBvXSV6opBwwO8AM7edc5sn_EcLSJGfqAbjptHQCqxjus9oPqVw"/>
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Google</span>
-                    </button>
-                    <button class="flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" type="button">
-                        <img alt="Facebook Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_HIqvze6iy3r30b_LFw5fWHa1uco1Bb7GjPU79f12gZKThP7YjIkcQ841D0mptol8gtbCGXpB768ivApCnh1HjzIbufLOLiOmqZ-JQf3SdGzbEa_hGWpx-SnVDcXRlbW2I1oZN7YvYQBnzqoi2NDEKaPir0HhP7r0NHt0u4NmQ4dnh4FDbLw9r4zaW1e-X3EgyyMJ6OVqZVgg9R5x4oZd01XGWznRrcNLQHwympTBJgaoIM27fj5rt-7r_npVb_DfMiNAfmxXsA"/>
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Facebook</span>
-                    </button>
-                </div>
-
                 <!-- Register Link -->
                 <div class="text-center space-y-3 mt-8">
                     <p class="text-slate-600 dark:text-slate-400 text-sm">
                         Chưa có tài khoản? 
                         <a class="text-primary font-bold hover:underline ml-1" href="{{ route('register-customer') }}">Đăng ký ngay</a>
-                    </p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                        Hoặc là nhân viên mới? 
-                        <a href="{{ route('register-staff') }}" class="text-primary font-medium hover:underline ml-1">Gửi hồ sơ tuyển dụng</a>
                     </p>
                 </div>
             </form>

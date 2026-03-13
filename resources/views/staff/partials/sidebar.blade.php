@@ -1,13 +1,13 @@
 <aside class="w-64 bg-white dark:bg-[#111827] border-r border-[#f3e8ea] dark:border-gray-800 flex flex-col justify-between p-4 shrink-0 transition-all duration-300 relative z-30 shadow-sm h-screen fixed left-0 top-0">
     <div class="flex flex-col gap-6">
         <!-- Logo -->
-        <div class="flex items-center gap-3 px-2 branding-container">
+        <a href="{{ route('staff.dashboard') }}" class="flex items-center gap-3 px-2 py-1.5 rounded-xl branding-container hover:bg-rose-50/50 dark:hover:bg-rose-900/10 transition-colors -mx-1">
             <img src="{{ asset('images/logo-pink-charcoal.png') }}" class="w-10 h-10 rounded-xl shadow-lg shadow-primary/20 object-cover" alt="Pink Charcoal Logo">
             <div class="flex flex-col branding-text min-w-0">
                 <h1 class="text-[#111318] dark:text-white text-base font-bold leading-tight">Pink Charcoal</h1>
                 <p class="text-[#616f89] dark:text-gray-400 text-xs font-normal">Staff Dashboard</p>
             </div>
-        </div>
+        </a>
 
         <!-- Navigation -->
         <nav class="flex flex-col gap-1.5">

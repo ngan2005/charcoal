@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StaffController extends Controller
 {
@@ -393,14 +394,23 @@ class StaffController extends Controller
         $user->Phone = $validated['Phone'];
         $user->Address = $validated['Address'];
 
-        // Handle Avatar Upload
+        // Handle Avatar Upload - dùng get() thay vì storeAs để tránh lỗi "Path must not be empty" trên Windows
         if ($request->hasFile('AvatarFile')) {
             $file = $request->file('AvatarFile');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            // Store in storage/app/public/avatars
-            $path = $file->storeAs('public/avatars', $filename);
-            // Save relative path to DB (e.g., avatars/filename.jpg) - accessible via storage/avatars/filename.jpg
-            $user->Avatar = 'avatars/' . $filename;
+            if ($file->isValid() && $file->getSize() > 0) {
+                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $file->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_avatar.' . strtolower($ext);
+                }
+                Storage::disk('public')->makeDirectory('avatars');
+                $relativePath = 'avatars/' . $filename;
+                Storage::disk('public')->put($relativePath, $file->get());
+                if ($user->Avatar && Storage::disk('public')->exists($user->Avatar)) {
+                    Storage::disk('public')->delete($user->Avatar);
+                }
+                $user->Avatar = $relativePath;
+            }
         }
 
         // Handle Password Change

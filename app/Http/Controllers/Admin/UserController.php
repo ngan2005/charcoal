@@ -67,8 +67,18 @@ class UserController extends Controller
         $data['Password'] = Hash::make($validated['Password']);
 
         if ($request->hasFile('AvatarFile')) {
-            $path = $request->file('AvatarFile')->store('avatars', 'public');
-            $data['Avatar'] = Storage::disk('public')->url($path);
+            $file = $request->file('AvatarFile');
+            if ($file->isValid() && $file->getSize() > 0) {
+                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $file->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_avatar.' . strtolower($ext);
+                }
+                Storage::disk('public')->makeDirectory('avatars');
+                $relativePath = 'avatars/' . $filename;
+                Storage::disk('public')->put($relativePath, $file->get());
+                $data['Avatar'] = $relativePath;
+            }
         }
 
         User::create($data);
@@ -104,8 +114,21 @@ class UserController extends Controller
         }
 
         if ($request->hasFile('AvatarFile')) {
-            $path = $request->file('AvatarFile')->store('avatars', 'public');
-            $data['Avatar'] = Storage::disk('public')->url($path);
+            $file = $request->file('AvatarFile');
+            if ($file->isValid() && $file->getSize() > 0) {
+                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                if (!$filename || strpos($filename, '_.') !== false) {
+                    $ext = $file->getClientOriginalExtension() ?: 'jpg';
+                    $filename = time() . '_avatar.' . strtolower($ext);
+                }
+                Storage::disk('public')->makeDirectory('avatars');
+                $relativePath = 'avatars/' . $filename;
+                Storage::disk('public')->put($relativePath, $file->get());
+                if ($user->Avatar && Storage::disk('public')->exists($user->Avatar)) {
+                    Storage::disk('public')->delete($user->Avatar);
+                }
+                $data['Avatar'] = $relativePath;
+            }
         }
 
         $user->update($data);

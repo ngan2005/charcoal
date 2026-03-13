@@ -251,7 +251,6 @@ class CheckoutController extends Controller
                 'PetID' => $item->PetID,
                 'Quantity' => $item->Quantity,
                 'UnitPrice' => $price,
-                'CreatedAt' => now(),
             ]);
 
             // Update purchase count for products
