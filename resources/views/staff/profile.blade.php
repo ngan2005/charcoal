@@ -91,15 +91,6 @@
                                 <p class="font-semibold text-gray-900">{{ auth()->user()->Phone ?? 'Chưa cập nhật' }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4 p-3 rounded-lg bg-gray-50">
-                            <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-gray-400">cake</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Ngày sinh</p>
-                                <p class="font-semibold text-gray-900">{{ auth()->user()->DateOfBirth ? auth()->user()->DateOfBirth->format('d/m/Y') : 'Chưa cập nhật' }}</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

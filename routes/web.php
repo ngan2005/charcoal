@@ -92,20 +92,9 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/register-customer', [AuthController::class, 'showRegisterCustomer'])->name('register-customer');
     Route::post('auth/register-customer', [AuthController::class, 'registerCustomer'])->name('register.customer');
     
-    Route::get('auth/register-staff', [AuthController::class, 'showRegisterStaff'])->name('register-staff');
-    Route::post('auth/register-staff', [AuthController::class, 'registerStaff'])->name('register.staff');
-    
     // Login
     Route::get('auth/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('auth/login', [AuthController::class, 'login'])->name('login.post');
-    
-    // Forgot Password
-    Route::get('auth/forgot-password', [AuthController::class, 'showForgotPassword'])->name('forgot-password');
-    Route::post('auth/send-reset-link', [AuthController::class, 'sendResetLink'])->name('send-reset-link');
-    
-    // Reset Password
-    Route::get('auth/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('reset-password.show');
-    Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 });
 
     // Authenticated routes
@@ -164,11 +153,6 @@ Route::middleware('guest')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
-        Route::get('staff-requests', [AdminController::class, 'staffRequests'])->name('staff-requests');
-        Route::get('staff-request/{id}', [AdminController::class, 'showRequest'])->name('staff-request.show');
-        Route::post('staff-request/{id}/approve', [AdminController::class, 'approveRequest'])->name('staff-request.approve');
-        Route::post('staff-request/{id}/reject', [AdminController::class, 'rejectRequest'])->name('staff-request.reject');
-
         Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
         Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');

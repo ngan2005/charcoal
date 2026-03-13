@@ -61,6 +61,12 @@
                 </div>
                 <span class="material-symbols-outlined text-xs active-paw opacity-0">pets</span>
             </button>
+            <button onclick="switchTab('careHistoryBtn', 'careHistoryTab')" id="careHistoryBtn" class="profile-nav-btn w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
+                <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-[18px]">spa</span> Lịch sử chăm sóc dịch vụ
+                </div>
+                <span class="material-symbols-outlined text-xs active-paw opacity-0">pets</span>
+            </button>
             <button onclick="switchTab('passwordBtn', 'passwordTab')" id="passwordBtn" class="profile-nav-btn w-full text-left px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-between transition-all text-slate-500 dark:text-slate-400 hover:bg-pink-50/50 dark:hover:bg-slate-800/50">
                 <div class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-[18px]">lock</span> Đổi mật khẩu
@@ -276,6 +282,53 @@
                 @endif
             </div>
 
+            {{-- Lịch sử chăm sóc dịch vụ Tab --}}
+            <div id="careHistoryTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-4">
+                <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
+                    <span class="material-symbols-outlined text-primary text-[20px]">spa</span>
+                    <h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Lịch Sử Chăm Sóc Dịch Vụ</h2>
+                </div>
+                @if(isset($appointments) && $appointments->count() > 0)
+                    <div class="flex flex-col gap-3 max-w-xl">
+                        @foreach($appointments as $apt)
+                            <div class="bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-4 flex flex-col gap-2 hover:border-primary/50 transition-all">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
+                                        <span class="font-bold text-slate-800 dark:text-white text-sm">{{ $apt->AppointmentTime ? $apt->AppointmentTime->format('d/m/Y') : '—' }}</span>
+                                        <span class="text-slate-400 text-xs">{{ $apt->AppointmentTime ? $apt->AppointmentTime->format('H:i') : '' }}</span>
+                                    </div>
+                                    <span class="text-[10px] uppercase font-semibold px-2.5 py-1 rounded-full
+                                        @if($apt->Status === 'completed') bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400
+                                        @elseif($apt->Status === 'cancelled') bg-slate-100 dark:bg-slate-700 text-slate-500
+                                        @else bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+                                        @endif">
+                                        {{ $apt->Status === 'completed' ? 'Hoàn thành' : ($apt->Status === 'cancelled' ? 'Đã hủy' : ($apt->Status === 'confirmed' ? 'Đã xác nhận' : $apt->Status)) }}
+                                    </span>
+                                </div>
+                                @if($apt->pet)
+                                    <p class="text-sm text-slate-600 dark:text-slate-300"><span class="font-medium">Thú cưng:</span> {{ $apt->pet->PetName }}</p>
+                                @endif
+                                @if($apt->services && $apt->services->count() > 0)
+                                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                                        <span class="font-medium">Dịch vụ:</span> {{ $apt->services->pluck('ServiceName')->join(', ') }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="py-12 flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 bg-pink-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-3xl text-primary/40">spa</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Chưa có lịch chăm sóc nào</h3>
+                        <p class="text-slate-400 text-sm">Bạn chưa đặt lịch dịch vụ spa, grooming cho thú cưng. Đặt lịch ngay nhé!</p>
+                        <a href="{{ route('services.index') }}" class="mt-6 bg-primary text-slate-900 font-bold py-3 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all text-sm">Xem dịch vụ 🐾</a>
+                    </div>
+                @endif
+            </div>
+
             {{-- Password Tab --}}
             <div id="passwordTab" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-5 md:p-6 shadow-xl shadow-pink-100/20 dark:shadow-none border border-white dark:border-slate-800 flex flex-col gap-5">
                 <div class="flex items-center gap-2 border-b border-pink-50 dark:border-slate-800 pb-3">
@@ -354,6 +407,12 @@
         
         document.getElementById('ordersTab').classList.add('hidden');
         document.getElementById('ordersTab').classList.remove('flex');
+
+        const careHistoryTab = document.getElementById('careHistoryTab');
+        if (careHistoryTab) {
+            careHistoryTab.classList.add('hidden');
+            careHistoryTab.classList.remove('flex');
+        }
         
         document.getElementById('passwordTab').classList.add('hidden');
         document.getElementById('passwordTab').classList.remove('flex');
@@ -362,7 +421,7 @@
         document.getElementById('supportTab').classList.remove('flex');
 
         // Reset all buttons style
-        const buttons = ['profileBtn', 'ordersBtn', 'passwordBtn', 'supportBtn'];
+        const buttons = ['profileBtn', 'ordersBtn', 'careHistoryBtn', 'passwordBtn', 'supportBtn'];
         buttons.forEach(id => {
             const btn = document.getElementById(id);
             btn.classList.remove('bg-primary/20', 'text-slate-900', 'border-primary/10');

@@ -116,9 +116,8 @@
                 </div>
                 <!-- Password Input -->
                 <div class="space-y-2">
-                    <div class="flex justify-between items-center ml-1">
+                    <div class="ml-1">
                         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Mật khẩu</label>
-                        <a class="text-sm font-medium text-primary hover:underline" href="{{ route('forgot-password') }}">Quên mật khẩu?</a>
                     </div>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>

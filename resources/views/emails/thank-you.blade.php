@@ -12,17 +12,15 @@
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
                     <!-- Header with Pink Charcoal branding -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); padding: 40px 30px; text-align: center;">
+                        <td style="background-color: #F4C2C3; padding: 40px 30px; text-align: center;">
                             <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td align="center">
-                                        <!-- Logo/Brand Icon -->
-                                        <div style="width: 80px; height: 80px; background-color: #ffffff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                                            <span style="font-size: 36px;">🎀</span>
-                                        </div>
+                                        <!-- Logo Pink Charcoal -->
+                                        <img src="{{ config('app.url') }}/images/logo-pink-charcoal.png" alt="Pink Charcoal" width="120" height="120" style="display: block; margin: 0 auto 16px auto; max-width: 120px; height: auto; border-radius: 50%; background-color: #ffffff; padding: 8px; box-sizing: border-box;">
                                         <!-- Brand Name -->
-                                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Pink Charcoal</h1>
-                                        <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Nơi thú cưng được yêu thương</p>
+                                        <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 700;">Pink Charcoal</h1>
+                                        <p style="color: #475569; margin: 8px 0 0 0; font-size: 14px;">Nơi thú cưng được yêu thương</p>
                                     </td>
                                 </tr>
                             </table>
@@ -69,7 +67,7 @@
                                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
                                             <tr>
                                                 <td align="center">
-                                                    <a href="{{ route('shop') }}" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+                                                    <a href="{{ route('shop') }}" style="display: inline-block; background: linear-gradient(135deg, #e197bc 0%, #f472b6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
                                                         🐾 Khám phá ngay
                                                     </a>
                                                 </td>
@@ -104,7 +102,7 @@
                                     <td align="center">
                                         <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 13px;">
                                             Cần hỗ trợ? Liên hệ chúng tôi qua 
-                                            <a href="mailto:support@pinkcharcoal.com" style="color: #ec4899; text-decoration: none;">support@pinkcharcoal.com</a>
+                                            <a href="mailto:luu.kimngan205@gmail.com" style="color: #ec4899; text-decoration: none;">luu.kimngan205@gmail.com</a>
                                         </p>
                                         <p style="color: #64748b; margin: 0; font-size: 12px;">
                                             &copy; 2026 Pink Charcoal. All rights reserved.<br>

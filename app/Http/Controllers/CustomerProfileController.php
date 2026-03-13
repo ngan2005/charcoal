@@ -24,8 +24,15 @@ class CustomerProfileController extends Controller
 
         // Load pets of current user (for "Thú cưng của tôi" in profile)
         $pets = Pet::where('OwnerID', $user->UserID)->with('images')->orderBy('PetName')->get();
+
+        // Lịch sử chăm sóc dịch vụ (appointments)
+        $appointments = \App\Models\Appointment::with(['pet', 'services'])
+            ->where('CustomerID', $user->UserID)
+            ->orderByDesc('AppointmentTime')
+            ->take(30)
+            ->get();
             
-        return view('profile.index', compact('user', 'orders', 'pets'));
+        return view('profile.index', compact('user', 'orders', 'pets', 'appointments'));
     }
 
     public function update(Request $request)

@@ -49,11 +49,8 @@ class StaffController extends Controller
             ->distinct('PetID')
             ->count('PetID');
 
-        // Tin nhắn hỗ trợ / Thông báo chưa đọc
-        $unreadNotificationsCount = DB::table('notifications')
-            ->where('notifiable_id', $userId)
-            ->whereNull('read_at')
-            ->count();
+        // Số thông báo chưa đọc (bảng notifications đã bỏ, dùng 0 hoặc có thể lấy từ support_messages nếu cần)
+        $unreadNotificationsCount = 0;
 
         // 2. Lịch làm việc hôm nay
         $todayAppointments = \App\Models\Appointment::with(['pet', 'services'])
@@ -96,14 +93,10 @@ class StaffController extends Controller
     {
         $userId = Auth::id();
         
-        // Lấy danh sách ca trực của nhân viên hiện tại
-        // Sắp xếp theo thời gian giảm dần (mới nhất lên đầu) hoặc tăng dần tùy nhu cầu
-        // Ở đây mình lấy các ca từ đầu tuần hiện tại trở đi để hiển thị lịch
-        $startOfWeek = now()->startOfWeek();
-        
+        // Lấy danh sách ca trực của nhân viên (chỉ ca chưa kết thúc)
         $shifts = \App\Models\StaffShift::with('shiftStatus')
             ->where('StaffID', $userId)
-            // ->where('StartTime', '>=', $startOfWeek) // Nếu muốn chỉ lấy từ tuần này
+            ->where('EndTime', '>', now())
             ->orderBy('StartTime', 'asc')
             ->get();
 
