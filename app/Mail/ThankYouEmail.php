@@ -2,27 +2,22 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
+use App\Models\User;
 
-class VerifyEmailMail extends Mailable
+class ThankYouEmail extends Mailable
 {
-    use Queueable, SerializesModels;
 
-    public $user;
-    public $verificationToken;
+    public User $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $verificationToken)
+    public function __construct(User $user)
     {
         $this->user = $user;
-        $this->verificationToken = $verificationToken;
     }
 
     /**
@@ -31,7 +26,7 @@ class VerifyEmailMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Xác nhận Email - Charcoal',
+            subject: '🎀 Chào mừng đến với Pink Charcoal - Cảm ơn bạn!',
         );
     }
 
@@ -41,10 +36,9 @@ class VerifyEmailMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.verify-email',
+            view: 'emails.thank-you',
             with: [
                 'user' => $this->user,
-                'verificationLink' => url('auth/verify-email/' . $this->verificationToken),
             ],
         );
     }

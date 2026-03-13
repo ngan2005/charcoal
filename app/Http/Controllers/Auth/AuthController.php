@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Exception\TransportException;
 use App\Mail\ResetPasswordMail;
 use App\Mail\StaffRequestConfirmationMail;
+use App\Mail\ThankYouEmail;
 use DB;
 
 class AuthController extends Controller
@@ -51,6 +52,13 @@ class AuthController extends Controller
             'RoleID' => 3, // Customer role
             'IsActive' => 1,
         ]);
+
+        // Gửi email cảm ơn (bắt mọi lỗi để không làm crash trang đăng ký)
+        try {
+            Mail::to($user->Email)->send(new ThankYouEmail($user));
+        } catch (\Throwable $e) {
+            \Log::warning('Không gửi được email cảm ơn: ' . $e->getMessage());
+        }
 
         return redirect()->route('login')->with('success', 'Đăng ký thành công! Bạn có thể đăng nhập ngay.');
     }
@@ -233,29 +241,6 @@ class AuthController extends Controller
         DB::table('password_resets')->where('email', $validated['Email'])->delete();
 
         return redirect()->route('login')->with('success', 'Mật khẩu đã được đặt lại thành công!');
-    }
-
-    // Verify email
-    public function verifyEmail($token)
-    {
-        if (!Schema::hasTable('email_verifications')) {
-            return redirect()->route('login')->with('error', 'Chức năng xác nhận email hiện chưa được cấu hình.');
-        }
-
-        $verification = DB::table('email_verifications')
-            ->where('token', $token)
-            ->first();
-
-        if (!$verification) {
-            return redirect()->route('login')->with('error', 'Liên kết xác nhận email không hợp lệ.');
-        }
-
-        // Mark email as verified
-        DB::table('email_verifications')
-            ->where('token', $token)
-            ->update(['verified_at' => now()]);
-
-        return redirect()->route('login')->with('success', 'Email đã được xác nhận thành công! Bạn có thể đăng nhập ngay.');
     }
 
     // Logout

@@ -108,9 +108,6 @@ Route::middleware('guest')->group(function () {
     Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 });
 
-// Email Verification
-Route::get('auth/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify-email');
-
     // Authenticated routes
     Route::middleware('auth')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout'])->name('logout');
