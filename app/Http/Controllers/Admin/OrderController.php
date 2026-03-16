@@ -163,7 +163,7 @@ class OrderController extends Controller
 
         $request->validate([
             'StaffID' => 'required|exists:users,UserID',
-            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_date' => 'required|date',
             'appointment_time' => 'required|string',
         ]);
 
@@ -200,20 +200,3 @@ class OrderController extends Controller
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -191,6 +191,7 @@ Route::middleware('guest')->group(function () {
         Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
         Route::put('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::put('orders/{id}/payment', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment');
+        Route::post('orders/{id}/assign-service-staff', [OrderController::class, 'assignServiceStaff'])->name('orders.assign-service-staff');
 
         // Appointment Routes
         Route::get('appointments', [AdminAppointmentController::class, 'index'])->name('appointments.index');
