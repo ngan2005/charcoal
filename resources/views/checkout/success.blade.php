@@ -143,11 +143,20 @@
     </div>
 
     {{-- Action Buttons --}}
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+    <div class="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
         <a href="{{ route('profile.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-slate-900 font-bold rounded-full transition-all hover:-translate-y-1">
             <span class="material-symbols-outlined text-sm">visibility</span>
             Xem đơn hàng của tôi
         </a>
+        @if(in_array($order->Status ?? '', ['pending', 'confirmed']))
+            <form action="{{ route('profile.orders.cancel', $order->OrderID) }}" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này? Tồn kho sẽ được hoàn lại.');">
+                @csrf
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 font-bold rounded-full transition-all border border-red-200 dark:border-red-800">
+                    <span class="material-symbols-outlined text-sm">cancel</span>
+                    Hủy đơn
+                </button>
+            </form>
+        @endif
         <a href="{{ route('shop') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-full transition-all">
             <span class="material-symbols-outlined text-sm">shopping_bag</span>
             Tiếp tục mua sắm

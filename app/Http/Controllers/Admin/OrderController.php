@@ -104,13 +104,34 @@ class OrderController extends Controller
             'Status' => 'required|string',
         ]);
 
+        $order = Order::with('details')->where('OrderID', $id)->first();
+        $oldStatus = $order->Status;
+        $newStatus = $request->Status;
+
+        // Hoàn lại tồn kho khi hủy đơn (từ pending/confirmed -> cancelled)
+        if (in_array($oldStatus, ['pending', 'confirmed']) && $newStatus === 'cancelled') {
+            foreach ($order->details as $detail) {
+                if ($detail->ProductID && $detail->Quantity > 0) {
+                    DB::table('products')
+                        ->where('ProductID', $detail->ProductID)
+                        ->increment('Stock', $detail->Quantity);
+
+                    // Giảm số lượng đã bán (PurchaseCount)
+                    DB::table('products')
+                        ->where('ProductID', $detail->ProductID)
+                        ->decrement('PurchaseCount', $detail->Quantity);
+                }
+            }
+        }
+
         Order::where('OrderID', $id)->update([
             'Status' => $request->Status,
         ]);
 
+        $statusText = $newStatus === 'cancelled' ? 'hủy và hoàn lại tồn kho' : 'cập nhật';
         return redirect()
             ->route('admin.orders.show', $id)
-            ->with('success', 'Cập nhật trạng thái thành công!');
+            ->with('success', 'Cập nhật trạng thái thành công! Đơn hàng đã được ' . $statusText . '.');
     }
 
     /**

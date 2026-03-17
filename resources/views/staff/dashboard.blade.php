@@ -104,12 +104,17 @@
                                         <span class="px-3 py-1 rounded-full text-xs font-bold border
                                             @if($appointment->Status == 'pending') bg-yellow-100 text-yellow-700 border-yellow-200
                                             @elseif($appointment->Status == 'confirmed') bg-blue-100 text-blue-700 border-blue-200
+                                            @elseif($appointment->Status == 'in_progress') bg-purple-100 text-purple-700 border-purple-200
                                             @elseif($appointment->Status == 'completed') bg-green-100 text-green-700 border-green-200
+                                            @elseif($appointment->Status == 'cancelled') bg-red-100 text-red-700 border-red-200
+                                            @elseif($appointment->Status == 'no_show') bg-gray-100 text-gray-700 border-gray-200
                                             @else bg-gray-100 text-gray-700 border-gray-200 @endif">
                                             @if($appointment->Status == 'pending') Chờ xác nhận
                                             @elseif($appointment->Status == 'confirmed') Đã xác nhận
                                             @elseif($appointment->Status == 'in_progress') Đang thực hiện
                                             @elseif($appointment->Status == 'completed') Hoàn thành
+                                            @elseif($appointment->Status == 'cancelled') Đã hủy
+                                            @elseif($appointment->Status == 'no_show') Vắng mặt
                                             @else {{ $appointment->Status }} @endif
                                         </span>
                                         @if(in_array($appointment->Status, ['pending', 'confirmed']))

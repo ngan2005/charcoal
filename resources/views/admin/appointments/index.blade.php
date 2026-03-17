@@ -155,7 +155,7 @@
                                         <span class="badge bg-secondary status-badge">Vắng mặt</span>
                                         @break
                                     @default
-                                        <span class="badge bg-secondary status-badge">{{ $appointment->Status }}</span>
+                                        <span class="badge bg-secondary status-badge">Khác</span>
                                 @endswitch
                             </td>
                             <td class="px-4 py-3 text-end">

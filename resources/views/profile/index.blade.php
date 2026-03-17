@@ -251,19 +251,40 @@
                 @if(count($orders) > 0)
                     <div class="flex flex-col gap-3 max-w-xl">
                         @foreach($orders as $order)
-                            <a href="{{ route('checkout.success', $order->OrderID) }}" class="block bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 hover:border-primary/50 hover:shadow-md transition-all group">
-                                <div class="flex items-center gap-3 min-w-0">
+                            <div class="bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 hover:border-primary/50 hover:shadow-md transition-all group">
+                                <a href="{{ route('checkout.success', $order->OrderID) }}" class="flex items-center gap-3 min-w-0 flex-1">
                                     <div class="w-2 h-2 rounded-full bg-primary shrink-0"></div>
                                     <span class="font-bold text-slate-800 dark:text-white text-sm">#{{ str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) }}</span>
                                     <span class="text-[11px] text-slate-400">{{ isset($order->CreatedAt) ? \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y') : '--' }}</span>
-                                </div>
+                                </a>
                                 <div class="flex items-center gap-3 shrink-0">
+                                    @php
+                                        $orderStatusLabel = match($order->Status ?? '') {
+                                            'pending' => 'Chờ xác nhận',
+                                            'confirmed' => 'Đã xác nhận',
+                                            'processing' => 'Đang xử lý',
+                                            'shipping' => 'Đang giao hàng',
+                                            'delivered' => 'Đã giao hàng',
+                                            'completed' => 'Hoàn thành',
+                                            'cancelled' => 'Đã hủy',
+                                            'refunded' => 'Đã hoàn tiền',
+                                            default => $order->Status ?? '—',
+                                        };
+                                    @endphp
                                     <span class="text-[10px] uppercase font-semibold bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full text-slate-500 dark:text-slate-300">
-                                        {{ $order->Status }}
+                                        {{ $orderStatusLabel }}
                                     </span>
                                     <span class="font-bold text-primary text-base whitespace-nowrap">{{ number_format($order->TotalAmount, 0, ',', '.') }}<span class="text-xs ml-0.5">đ</span></span>
+                                    @if(in_array($order->Status, ['pending', 'confirmed']))
+                                    <form action="{{ route('profile.orders.cancel', $order->OrderID) }}" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                                        @csrf
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium px-2 py-1 border border-red-200 dark:border-red-800 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                            Hủy
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
-                            </a>
+                            </div>
                         @endforeach
                         
                         <a href="{{ route('shop') }}" class="mt-1 text-center text-primary font-semibold hover:text-primary-dark transition-colors py-1.5 text-xs flex items-center justify-center gap-1 group">
@@ -303,7 +324,18 @@
                                         @elseif($apt->Status === 'cancelled') bg-slate-100 dark:bg-slate-700 text-slate-500
                                         @else bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
                                         @endif">
-                                        {{ $apt->Status === 'completed' ? 'Hoàn thành' : ($apt->Status === 'cancelled' ? 'Đã hủy' : ($apt->Status === 'confirmed' ? 'Đã xác nhận' : $apt->Status)) }}
+                                        @php
+                                        $aptStatusLabel = match($apt->Status ?? '') {
+                                            'pending' => 'Chờ xác nhận',
+                                            'confirmed' => 'Đã xác nhận',
+                                            'in_progress' => 'Đang thực hiện',
+                                            'completed' => 'Hoàn thành',
+                                            'cancelled' => 'Đã hủy',
+                                            'no_show' => 'Vắng mặt',
+                                            default => $apt->Status ?? '—',
+                                        };
+                                    @endphp
+                                    {{ $aptStatusLabel }}
                                     </span>
                                 </div>
                                 @if($apt->pet)
@@ -323,6 +355,12 @@
                                             <span class="material-symbols-outlined text-[14px]">payments</span>
                                             Thanh toán tại quầy
                                         </div>
+                                        <form action="{{ route('profile.appointments.cancel', $apt->AppointmentID) }}" method="POST" class="mt-2 inline" onsubmit="return confirm('Bạn có chắc muốn hủy lịch hẹn này?');">
+                                            @csrf
+                                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium px-2 py-1 border border-red-200 dark:border-red-800 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                Hủy lịch hẹn
+                                            </button>
+                                        </form>
                                     @elseif($apt->Status === 'completed')
                                         <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded-full">
                                             <span class="material-symbols-outlined text-[14px]">check_circle</span>

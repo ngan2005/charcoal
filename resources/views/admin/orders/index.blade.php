@@ -131,7 +131,7 @@
                                         <span class="badge bg-dark status-badge">Hoàn tiền</span>
                                         @break
                                     @default
-                                        <span class="badge bg-secondary status-badge">{{ $order->Status }}</span>
+                                        <span class="badge bg-secondary status-badge">Khác</span>
                                 @endswitch
                             </td>
                             <td class="px-4 py-3">

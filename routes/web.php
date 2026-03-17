@@ -114,6 +114,8 @@ Route::middleware('guest')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\CustomerProfileController::class, 'index'])->name('profile.index');
         Route::put('/profile/update', [\App\Http\Controllers\CustomerProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [\App\Http\Controllers\CustomerProfileController::class, 'changePassword'])->name('profile.password');
+        Route::post('/profile/orders/{id}/cancel', [\App\Http\Controllers\CustomerProfileController::class, 'cancelOrder'])->name('profile.orders.cancel');
+        Route::post('/profile/appointments/{id}/cancel', [\App\Http\Controllers\CustomerProfileController::class, 'cancelAppointment'])->name('profile.appointments.cancel');
 
     // Staff routes (for authenticated staff members)
     Route::prefix('staff')->name('staff.')->group(function () {

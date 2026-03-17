@@ -74,13 +74,38 @@ class AppointmentController extends Controller
             'Status' => 'required|string',
         ]);
 
+        $appointment = Appointment::with(['order.details'])->where('AppointmentID', $id)->first();
+        $oldStatus = $appointment->Status;
+        $newStatus = $request->Status;
+
+        // Hoàn lại tồn kho khi hủy lịch hẹn (từ pending/confirmed -> cancelled)
+        // Chỉ hoàn lại nếu lịch hẹn có đơn hàng gốc
+        if (in_array($oldStatus, ['pending', 'confirmed']) && $newStatus === 'cancelled' && $appointment->OrderID) {
+            $order = $appointment->order;
+            if ($order && $order->details) {
+                foreach ($order->details as $detail) {
+                    if ($detail->ProductID && $detail->Quantity > 0) {
+                        DB::table('products')
+                            ->where('ProductID', $detail->ProductID)
+                            ->increment('Stock', $detail->Quantity);
+
+                        // Giảm số lượng đã bán (PurchaseCount)
+                        DB::table('products')
+                            ->where('ProductID', $detail->ProductID)
+                            ->decrement('PurchaseCount', $detail->Quantity);
+                    }
+                }
+            }
+        }
+
         Appointment::where('AppointmentID', $id)->update([
             'Status' => $request->Status,
         ]);
 
+        $statusText = $newStatus === 'cancelled' ? 'hủy và hoàn lại tồn kho' : 'cập nhật';
         return redirect()
             ->route('admin.appointments.show', $id)
-            ->with('success', 'Cập nhật trạng thái thành công!');
+            ->with('success', 'Cập nhật trạng thái thành công! Lịch hẹn đã được ' . $statusText . '.');
     }
 
     /**

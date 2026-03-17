@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Pet;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Order;
+use App\Models\Appointment;
 use Illuminate\Support\Facades\DB;
 
 class CustomerProfileController extends Controller
@@ -108,5 +110,121 @@ class CustomerProfileController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Đổi mật khẩu thành công!');
+    }
+
+    /**
+     * Hủy đơn hàng (chỉ đơn hàng ở trạng thái pending hoặc confirmed)
+     */
+    public function cancelOrder(Request $request, $id)
+    {
+        $user = auth()->user();
+        
+        $order = Order::with('details')
+            ->where('OrderID', $id)
+            ->where('UserID', $user->UserID)
+            ->first();
+
+        if (!$order) {
+            return redirect()->route('profile.index')->with('error', 'Không tìm thấy đơn hàng.');
+        }
+
+        // Chỉ cho phép hủy đơn hàng ở trạng thái pending hoặc confirmed
+        if (!in_array($order->Status, ['pending', 'confirmed'])) {
+            return redirect()->route('profile.index')->with('error', 'Không thể hủy đơn hàng ở trạng thái "' . $this->getOrderStatusText($order->Status) . '".');
+        }
+
+        // Hoàn lại tồn kho cho các sản phẩm trong đơn
+        foreach ($order->details as $detail) {
+            if ($detail->ProductID && $detail->Quantity > 0) {
+                DB::table('products')
+                    ->where('ProductID', $detail->ProductID)
+                    ->increment('Stock', $detail->Quantity);
+
+                // Giảm số lượng đã bán (PurchaseCount)
+                DB::table('products')
+                    ->where('ProductID', $detail->ProductID)
+                    ->decrement('PurchaseCount', $detail->Quantity);
+            }
+        }
+
+        $order->update(['Status' => 'cancelled']);
+
+        return redirect()->route('profile.index')->with('success', 'Đơn hàng #' . str_pad($order->OrderID, 5, '0', STR_PAD_LEFT) . ' đã được hủy thành công. Tồn kho đã được hoàn lại.');
+    }
+
+    /**
+     * Hủy lịch hẹn (chỉ lịch hẹn ở trạng thái pending hoặc confirmed)
+     */
+    public function cancelAppointment(Request $request, $id)
+    {
+        $user = auth()->user();
+        
+        $appointment = Appointment::with(['order.details'])
+            ->where('AppointmentID', $id)
+            ->where('CustomerID', $user->UserID)
+            ->first();
+
+        if (!$appointment) {
+            return redirect()->route('profile.index')->with('error', 'Không tìm thấy lịch hẹn.');
+        }
+
+        // Chỉ cho phép hủy lịch hẹn ở trạng thái pending hoặc confirmed
+        if (!in_array($appointment->Status, ['pending', 'confirmed'])) {
+            return redirect()->route('profile.index')->with('error', 'Không thể hủy lịch hẹn ở trạng thái "' . $this->getAppointmentStatusText($appointment->Status) . '".');
+        }
+
+        // Hoàn lại tồn kho khi hủy lịch hẹn (nếu có đơn hàng gốc)
+        if ($appointment->OrderID && $appointment->order && $appointment->order->details) {
+            foreach ($appointment->order->details as $detail) {
+                if ($detail->ProductID && $detail->Quantity > 0) {
+                    DB::table('products')
+                        ->where('ProductID', $detail->ProductID)
+                        ->increment('Stock', $detail->Quantity);
+
+                    // Giảm số lượng đã bán (PurchaseCount)
+                    DB::table('products')
+                        ->where('ProductID', $detail->ProductID)
+                        ->decrement('PurchaseCount', $detail->Quantity);
+                }
+            }
+        }
+
+        $appointment->update(['Status' => 'cancelled']);
+
+        return redirect()->route('profile.index')->with('success', 'Lịch hẹn ngày ' . $appointment->AppointmentTime->format('d/m/Y H:i') . ' đã được hủy thành công. Tồn kho đã được hoàn lại.');
+    }
+
+    /**
+     * Chuyển đổi trạng thái đơn hàng sang tiếng Việt
+     */
+    private function getOrderStatusText($status)
+    {
+        return match($status) {
+            'pending' => 'chờ xác nhận',
+            'confirmed' => 'đã xác nhận',
+            'processing' => 'đang xử lý',
+            'shipping' => 'đang giao hàng',
+            'delivered' => 'đã giao hàng',
+            'completed' => 'hoàn thành',
+            'cancelled' => 'đã hủy',
+            'refunded' => 'đã hoàn tiền',
+            default => $status,
+        };
+    }
+
+    /**
+     * Chuyển đổi trạng thái lịch hẹn sang tiếng Việt
+     */
+    private function getAppointmentStatusText($status)
+    {
+        return match($status) {
+            'pending' => 'chờ xác nhận',
+            'confirmed' => 'đã xác nhận',
+            'in_progress' => 'đang thực hiện',
+            'completed' => 'hoàn thành',
+            'cancelled' => 'đã hủy',
+            'no_show' => 'vắng mặt',
+            default => $status,
+        };
     }
 }

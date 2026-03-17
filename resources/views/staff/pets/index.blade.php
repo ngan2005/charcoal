@@ -130,8 +130,16 @@
                                 @elseif($appointment->Status == 'confirmed') bg-info-subtle text-info-emphasis
                                 @elseif($appointment->Status == 'in_progress') bg-primary-subtle text-primary-emphasis
                                 @elseif($appointment->Status == 'completed') bg-success-subtle text-success-emphasis
+                                @elseif($appointment->Status == 'cancelled') bg-danger-subtle text-danger-emphasis
+                                @elseif($appointment->Status == 'no_show') bg-secondary-subtle text-secondary-emphasis
                                 @else bg-secondary-subtle text-secondary-emphasis @endif border">
-                                {{ $appointment->Status == 'pending' ? 'Đang chờ' : ($appointment->Status == 'confirmed' ? 'Đã xác nhận' : ($appointment->Status == 'in_progress' ? 'Đang làm' : ($appointment->Status == 'completed' ? 'Hoàn thành' : $appointment->Status))) }}
+                                @if($appointment->Status == 'pending') Chờ xác nhận
+                                @elseif($appointment->Status == 'confirmed') Đã xác nhận
+                                @elseif($appointment->Status == 'in_progress') Đang thực hiện
+                                @elseif($appointment->Status == 'completed') Hoàn thành
+                                @elseif($appointment->Status == 'cancelled') Đã hủy
+                                @elseif($appointment->Status == 'no_show') Vắng mặt
+                                @else {{ $appointment->Status }} @endif
                             </span>
                         </div>
 
