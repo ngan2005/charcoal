@@ -51,7 +51,7 @@
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
                                 <span class="text-muted">Ngày hết hạn:</span>
-                                <span class="fw-bold">{{ $voucher->ExpiredAt->format('d/m/Y H:i') }}</span>
+                                <span class="fw-bold">{{ \Carbon\Carbon::parse($voucher->ExpiredAt)->format('d/m/Y H:i') }}</span>
                             </div>
                             <div class="d-flex justify-content-between py-2 border-bottom">
                                 <span class="text-muted">Trạng thái:</span>

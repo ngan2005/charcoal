@@ -17,7 +17,11 @@
                                 <tr>
                                     <td align="center">
                                         <!-- Logo Pink Charcoal -->
-                                        <img src="{{ config('app.url') }}/images/logo-pink-charcoal.png" alt="Pink Charcoal" width="120" height="120" style="display: block; margin: 0 auto 16px auto; max-width: 120px; height: auto; border-radius: 50%; background-color: #ffffff; padding: 8px; box-sizing: border-box;">
+                                        @if($logoBase64)
+                                        <img src="{{ $logoBase64 }}" alt="Pink Charcoal" width="120" height="120" style="display: block; margin: 0 auto 16px auto; max-width: 120px; height: auto; border-radius: 50%; background-color: #ffffff; padding: 8px; box-sizing: border-box;">
+                                        @else
+                                        <div style="display: block; margin: 0 auto 16px auto; width: 120px; height: 120px; background-color: #ffffff; border-radius: 50%; text-align: center; line-height: 120px; font-size: 48px;">🐾</div>
+                                        @endif
                                         <!-- Brand Name -->
                                         <h1 style="color: #1e293b; margin: 0; font-size: 28px; font-weight: 700;">Pink Charcoal</h1>
                                         <p style="color: #475569; margin: 8px 0 0 0; font-size: 14px;">Nơi thú cưng được yêu thương</p>
@@ -67,7 +71,7 @@
                                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
                                             <tr>
                                                 <td align="center">
-                                                    <a href="{{ route('shop') }}" style="display: inline-block; background: linear-gradient(135deg, #e197bc 0%, #f472b6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+                                                    <a href="{{ url('/') }}" style="display: inline-block; background: linear-gradient(135deg, #e197bc 0%, #f472b6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
                                                         🐾 Khám phá ngay
                                                     </a>
                                                 </td>

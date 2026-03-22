@@ -252,9 +252,12 @@ class StaffController extends Controller
             'PetID' => 'required|exists:pets,PetID',
             'services' => 'required|array|min:1',
             'services.*' => 'exists:services,ServiceID',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'required|date_format:H:i',
             'notes' => 'nullable|string',
+        ], [
+            'appointment_date.after_or_equal' => 'Ngày hẹn không được là ngày trong quá khứ.',
+            'appointment_time.date_format' => 'Giờ hẹn không hợp lệ (định dạng HH:mm).',
         ]);
 
         // Kết hợp ngày và giờ

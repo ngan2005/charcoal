@@ -19,7 +19,7 @@
                 </a>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Chi tiết đánh giá</h1>
-                    <p class="text-sm text-gray-500">Ngày đánh giá: {{ $review->CreatedAt->format('d/m/Y H:i') }}</p>
+                    <p class="text-sm text-gray-500">Ngày đánh giá: {{ \Carbon\Carbon::parse($review->CreatedAt)->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
             <div class="d-flex gap-2">
@@ -141,7 +141,7 @@
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="fw-bold">{{ $reply->customer?->FullName ?? 'Admin' }}</span>
-                                <small class="text-muted">{{ $reply->CreatedAt->format('d/m/Y H:i') }}</small>
+                                <small class="text-muted">{{ \Carbon\Carbon::parse($reply->CreatedAt)->format('d/m/Y H:i') }}</small>
                             </div>
                             <p class="mb-0 text-muted">{{ $reply->Comment }}</p>
                         </div>

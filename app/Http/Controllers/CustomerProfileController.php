@@ -191,7 +191,7 @@ class CustomerProfileController extends Controller
 
         $appointment->update(['Status' => 'cancelled']);
 
-        return redirect()->route('profile.index')->with('success', 'Lịch hẹn ngày ' . $appointment->AppointmentTime->format('d/m/Y H:i') . ' đã được hủy thành công. Tồn kho đã được hoàn lại.');
+        return redirect()->route('profile.index')->with('success', 'Lịch hẹn ngày ' . \Carbon\Carbon::parse($appointment->AppointmentTime)->format('d/m/Y H:i') . ' đã được hủy thành công. Tồn kho đã được hoàn lại.');
     }
 
     /**

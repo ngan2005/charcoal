@@ -98,7 +98,7 @@
                             <td class="px-4 py-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="material-symbols-outlined text-secondary" style="font-size: 18px;">calendar_today</span>
-                                    <span>{{ $order->CreatedAt->format('d/m/Y H:i') }}</span>
+                                    <span>{{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y H:i') }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3">

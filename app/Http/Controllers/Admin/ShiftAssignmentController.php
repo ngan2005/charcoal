@@ -212,9 +212,11 @@ class ShiftAssignmentController extends Controller
 
     /**
      * Xuất Excel danh sách phân công ca
+     * scope: all = xuất tất cả | week = xuất tuần gần nhất (theo week_start)
      */
     public function export(Request $request)
     {
+        $scope = $request->input('scope', 'week');
         $weekStart = $request->input('week_start', date('Y-m-d', strtotime('monday this week')));
         $staffId = $request->input('staff_id');
 
@@ -232,9 +234,13 @@ class ShiftAssignmentController extends Controller
             ])
             ->leftJoin('users', 'staff_shifts.StaffID', '=', 'users.UserID')
             ->leftJoin('shift_status', 'staff_shifts.ShiftStatusID', '=', 'shift_status.ShiftStatusID')
-            ->where('users.RoleID', 2)
-            ->whereDate('staff_shifts.StartTime', '>=', $weekStart)
-            ->whereDate('staff_shifts.StartTime', '<=', $weekEnd);
+            ->where('users.RoleID', 2);
+
+        // Chỉ lọc theo tuần khi scope = week
+        if ($scope === 'week') {
+            $shiftsQuery->whereDate('staff_shifts.StartTime', '>=', $weekStart)
+                ->whereDate('staff_shifts.StartTime', '<=', $weekEnd);
+        }
 
         if ($staffId) {
             $shiftsQuery->where('staff_shifts.StaffID', $staffId);
@@ -245,9 +251,12 @@ class ShiftAssignmentController extends Controller
             ->get();
 
         // Tạo tên file
-        $filename = 'phan-cong-ca-' . $weekStart . '-' . $weekEnd . '.csv';
+        if ($scope === 'all') {
+            $filename = 'phan-cong-ca-tat-ca-' . date('Y-m-d-His') . '.csv';
+        } else {
+            $filename = 'phan-cong-ca-tuan-' . $weekStart . '-' . $weekEnd . '.csv';
+        }
 
-        // Tạo header cho CSV
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -256,20 +265,20 @@ class ShiftAssignmentController extends Controller
             'Expires' => '0',
         ];
 
-        // Tạo nội dung CSV
-        $callback = function() use ($shifts, $weekStart, $weekEnd) {
+        $callback = function() use ($shifts, $scope, $weekStart, $weekEnd) {
             $file = fopen('php://output', 'w');
 
-            // BOM for Excel UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Header
             fputcsv($file, ['PHÂN CÔNG CA LÀM VIỆC']);
-            fputcsv($file, ['Tuần: ' . date('d/m/Y', strtotime($weekStart)) . ' - ' . date('d/m/Y', strtotime($weekEnd))]);
+            if ($scope === 'week') {
+                fputcsv($file, ['Tuần: ' . date('d/m/Y', strtotime($weekStart)) . ' - ' . date('d/m/Y', strtotime($weekEnd))]);
+            } else {
+                fputcsv($file, ['Phạm vi: Tất cả ca làm việc']);
+            }
             fputcsv($file, []);
             fputcsv($file, ['STT', 'Nhân viên', 'SĐT', 'Ngày', 'Giờ bắt đầu', 'Giờ kết thúc', 'Trạng thái']);
 
-            // Data
             $index = 1;
             foreach ($shifts as $shift) {
                 fputcsv($file, [
@@ -283,7 +292,6 @@ class ShiftAssignmentController extends Controller
                 ]);
             }
 
-            // Footer
             fputcsv($file, []);
             fputcsv($file, ['Tổng số ca: ' . count($shifts)]);
             fputcsv($file, ['Ngày xuất: ' . date('d/m/Y H:i:s')]);

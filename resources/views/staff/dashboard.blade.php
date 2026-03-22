@@ -82,7 +82,7 @@
                     <div class="grid grid-cols-[80px_1fr] gap-x-4">
                         @foreach($todayAppointments as $appointment)
                             <div class="flex flex-col items-center pt-1">
-                                <span class="text-sm font-bold text-[#111318] dark:text-white">{{ $appointment->AppointmentTime->format('H:i') }}</span>
+                                <span class="text-sm font-bold text-[#111318] dark:text-white">{{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('H:i') }}</span>
                                 <div class="w-[2px] bg-[#f3e8ea] dark:bg-gray-800 h-full my-2 relative">
                                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full {{ $loop->first ? 'bg-primary' : 'bg-blue-500' }} border-2 border-white dark:border-[#111827]"></div>
                                 </div>

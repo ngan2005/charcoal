@@ -316,8 +316,8 @@
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <div class="flex items-center gap-2">
                                         <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
-                                        <span class="font-bold text-slate-800 dark:text-white text-sm">{{ $apt->AppointmentTime ? $apt->AppointmentTime->format('d/m/Y') : '—' }}</span>
-                                        <span class="text-slate-400 text-xs">{{ $apt->AppointmentTime ? $apt->AppointmentTime->format('H:i') : '' }}</span>
+                                        <span class="font-bold text-slate-800 dark:text-white text-sm">{{ $apt->AppointmentTime ? \Carbon\Carbon::parse($apt->AppointmentTime)->format('d/m/Y') : '—' }}</span>
+                                        <span class="text-slate-400 text-xs">{{ $apt->AppointmentTime ? \Carbon\Carbon::parse($apt->AppointmentTime)->format('H:i') : '' }}</span>
                                     </div>
                                     <span class="text-[10px] uppercase font-semibold px-2.5 py-1 rounded-full
                                         @if($apt->Status === 'completed') bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400

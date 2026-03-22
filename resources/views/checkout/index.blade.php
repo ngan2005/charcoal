@@ -186,17 +186,39 @@
                         Phương thức thanh toán
                     </h2>
 
-                    <input type="hidden" name="payment_method" value="cash">
-                    <div class="flex items-center gap-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
+                    {{-- Thanh toán khi nhận hàng --}}
+                    <label class="payment-card block mb-3 {{ old('payment_method', 'cash') === 'cash' ? 'selected' : '' }}">
+                        <input type="radio" name="payment_method" value="cash" class="hidden" {{ old('payment_method', 'cash') === 'cash' ? 'checked' : '' }}>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
+                            </div>
+                            <span class="material-symbols-outlined text-emerald-500 payment-check">check_circle</span>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
+                    </label>
+
+                    {{-- MoMo (disabled for now) --}}
+                    <label class="payment-card block opacity-50 cursor-not-allowed">
+                        <input type="radio" name="payment_method" value="momo" class="hidden" disabled>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center shrink-0">
+                                <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="24" height="24" rx="4" fill="#FF0080"/>
+                                    <circle cx="12" cy="12" r="6" fill="white"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-slate-900 dark:text-white">MoMo</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Sắp có mặt</p>
+                            </div>
+                            <span class="material-symbols-outlined text-slate-400">lock</span>
                         </div>
-                        <span class="material-symbols-outlined text-emerald-500">check_circle</span>
-                    </div>
+                    </label>
+
                     @error('payment_method')
                         <div class="text-danger small mt-2">{{ $message }}</div>
                     @enderror
@@ -322,7 +344,33 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Chỉ dùng thanh toán khi nhận hàng - không cần chọn phương thức
+    // Payment method selection
+    const paymentCards = document.querySelectorAll('.payment-card input[type="radio"]');
+    paymentCards.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Remove selected from all cards
+            document.querySelectorAll('.payment-card').forEach(card => {
+                card.classList.remove('selected');
+                const check = card.querySelector('.payment-check');
+                if (check) check.classList.add('hidden');
+            });
+            
+            // Add selected to current card
+            if (this.checked) {
+                this.closest('.payment-card').classList.add('selected');
+                const check = this.closest('.payment-card').querySelector('.payment-check');
+                if (check) check.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Initialize first payment method as selected
+    const checkedPayment = document.querySelector('.payment-card input[type="radio"]:checked');
+    if (checkedPayment) {
+        checkedPayment.closest('.payment-card').classList.add('selected');
+        const check = checkedPayment.closest('.payment-card').querySelector('.payment-check');
+        if (check) check.classList.remove('hidden');
+    }
 
     // Voucher handling
     const subtotal = {{ $subtotal }};
@@ -442,7 +490,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // payment_method luôn là "cash" (hidden input)
+        // Validate payment method is selected
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        
+        if (!paymentMethod) {
+            valid = false;
+            alert('Vui lòng chọn phương thức thanh toán.');
+        }
 
         if (!valid) {
             e.preventDefault();

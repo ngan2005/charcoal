@@ -15,7 +15,7 @@
                 </a>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Lịch hẹn #{{ $appointment->AppointmentID }}</h1>
-                    <p class="text-sm text-gray-500">Ngày hẹn: {{ $appointment->AppointmentTime->format('d/m/Y H:i') }} — Chỉ xem, nhân viên thao tác xác nhận</p>
+                    <p class="text-sm text-gray-500">Ngày hẹn: {{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('d/m/Y H:i') }} — Chỉ xem, nhân viên thao tác xác nhận</p>
                 </div>
             </div>
         </div>
@@ -42,11 +42,11 @@
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Ngày hẹn</span>
-                            <span>{{ $appointment->AppointmentTime->format('d/m/Y') }}</span>
+                            <span>{{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('d/m/Y') }}</span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Giờ hẹn</span>
-                            <span>{{ $appointment->AppointmentTime->format('H:i') }}</span>
+                            <span>{{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('H:i') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Trạng thái</span>

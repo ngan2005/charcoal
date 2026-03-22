@@ -129,7 +129,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-gray-600">
-                                {{ optional($user->CreatedAt ?? $user->created_at)->format('d/m/Y H:i') }}
+                                {{ $user && ($user->CreatedAt ?? $user->created_at) ? \Carbon\Carbon::parse($user->CreatedAt ?? $user->created_at)->format('d/m/Y H:i') : '--' }}
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="inline-flex gap-2">
@@ -142,7 +142,7 @@
                                         data-email="{{ $user->Email }}"
                                         data-role="{{ $user->role?->RoleName ?? 'N/A' }}"
                                         data-status="{{ $user->IsActive ? 'Hoạt động' : 'Bị khóa' }}"
-                                        data-created="{{ optional($user->CreatedAt ?? $user->created_at)->format('d/m/Y H:i') }}">
+                                        data-created="{{ $user && ($user->CreatedAt ?? $user->created_at) ? \Carbon\Carbon::parse($user->CreatedAt ?? $user->created_at)->format('d/m/Y H:i') : '--' }}">
                                         Xem
                                     </button>
                                     <form method="POST" action="{{ route('admin.users.reset-password', $user->UserID) }}" class="inline-block reset-password-form" data-user="{{ $user->FullName }}">
@@ -478,6 +478,16 @@
                     showConfirmButton: false,
                     timer: 3000,
                     timerProgressBar: true,
+                });
+            }
+
+            const errorMessage = @json(session('error'));
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Không thể xóa',
+                    text: errorMessage,
+                    confirmButtonText: 'Đã hiểu',
                 });
             }
         });

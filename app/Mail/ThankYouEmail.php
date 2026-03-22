@@ -11,6 +11,7 @@ class ThankYouEmail extends Mailable
 {
 
     public User $user;
+    public string $logoBase64;
 
     /**
      * Create a new message instance.
@@ -18,6 +19,16 @@ class ThankYouEmail extends Mailable
     public function __construct(User $user)
     {
         $this->user = $user;
+        $this->logoBase64 = $this->getLogoBase64();
+    }
+
+    private function getLogoBase64(): string
+    {
+        $logoPath = public_path('images/logo-pink-charcoal.png');
+        if (file_exists($logoPath)) {
+            return 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+        return '';
     }
 
     /**
@@ -39,6 +50,7 @@ class ThankYouEmail extends Mailable
             view: 'emails.thank-you',
             with: [
                 'user' => $this->user,
+                'logoBase64' => $this->logoBase64,
             ],
         );
     }

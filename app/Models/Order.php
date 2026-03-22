@@ -18,13 +18,25 @@ class Order extends Model
 
     protected $fillable = [
         'UserID',
+        'OrderCode',
         'TotalAmount',
+        'ShippingName',
+        'ShippingPhone',
+        'ShippingAddress',
+        'PaymentMethod',
+        'PaymentStatus',
+        'VoucherID',
+        'DiscountAmount',
         'Status',
-        'CreatedAt'
+        'CreatedAt',
+        'UpdatedAt',
     ];
 
     protected $casts = [
+        'TotalAmount' => 'decimal:2',
+        'DiscountAmount' => 'decimal:2',
         'CreatedAt' => 'datetime',
+        'UpdatedAt' => 'datetime',
     ];
 
     public function user()

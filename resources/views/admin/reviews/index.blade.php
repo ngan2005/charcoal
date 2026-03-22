@@ -187,7 +187,7 @@
                             <td class="px-4 py-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="material-symbols-outlined text-secondary" style="font-size: 18px;">calendar_today</span>
-                                    <span>{{ $review->CreatedAt->format('d/m/Y') }}</span>
+                                    <span>{{ \Carbon\Carbon::parse($review->CreatedAt)->format('d/m/Y') }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-end">

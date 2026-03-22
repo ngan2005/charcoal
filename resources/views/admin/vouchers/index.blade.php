@@ -138,7 +138,7 @@
                                         <td class="px-4 py-3">
                                             <div class="d-flex align-items-center">
                                                 <span class="material-symbols-outlined me-1 text-muted" style="font-size: 18px;">schedule</span>
-                                                {{ $voucher->ExpiredAt->format('d/m/Y H:i') }}
+                                                {{ \Carbon\Carbon::parse($voucher->ExpiredAt)->format('d/m/Y H:i') }}
                                             </div>
                                             @if ($isExpired)
                                                 <span class="text-danger small">

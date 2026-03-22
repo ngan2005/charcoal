@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -82,14 +83,54 @@ class DashboardController extends Controller
 
     /**
      * Xuất báo cáo doanh thu ra file CSV (Excel)
+     * Gồm: doanh thu đơn hàng + doanh thu dịch vụ (lịch hẹn đã hoàn thành).
+     *
+     * @param string $period  7days | 1month | all
      */
-    public function export()
+    public function export(Request $request)
     {
-        // Chỉ lấy đơn đã giao / hoàn thành để báo cáo doanh thu
-        $orders = Order::with('user')
-            ->whereIn('Status', ['delivered', 'completed'])
-            ->orderByDesc('CreatedAt')
+        $period = $request->query('period', 'all');
+        $endDate = Carbon::now()->endOfDay();
+        $startDate = null;
+        if ($period === '7days') {
+            $startDate = Carbon::now()->subDays(6)->startOfDay();
+        } elseif ($period === '1month') {
+            $startDate = Carbon::now()->subDays(29)->startOfDay();
+        }
+
+        // Doanh thu đơn hàng
+        $orderQuery = Order::with('user')
+            ->whereIn('Status', ['delivered', 'completed']);
+        if ($startDate !== null) {
+            $orderQuery->where('CreatedAt', '>=', $startDate);
+        }
+        $orders = $orderQuery->orderByDesc('CreatedAt')->get();
+
+        // Doanh thu dịch vụ (lịch hẹn đã hoàn thành)
+        $serviceRows = DB::table('appointments')
+            ->join('appointment_services', 'appointments.AppointmentID', '=', 'appointment_services.AppointmentID')
+            ->join('services', 'appointment_services.ServiceID', '=', 'services.ServiceID')
+            ->leftJoin('users as customer', 'appointments.CustomerID', '=', 'customer.UserID')
+            ->leftJoin('pets', 'appointments.PetID', '=', 'pets.PetID')
+            ->where('appointments.Status', 'completed')
+            ->when($startDate !== null, fn ($q) => $q->where('appointments.AppointmentTime', '>=', $startDate))
+            ->select(
+                'appointments.AppointmentID',
+                'appointments.AppointmentTime',
+                'customer.FullName as CustomerName',
+                'pets.PetName',
+                'services.ServiceName',
+                'services.BasePrice'
+            )
+            ->orderByDesc('appointments.AppointmentTime')
             ->get();
+
+        $periodLabels = [
+            '7days'  => '7 ngày gần nhất',
+            '1month' => '1 tháng gần nhất',
+            'all'    => 'Toàn bộ',
+        ];
+        $periodLabel = $periodLabels[$period] ?? 'Toàn bộ';
 
         $filename = 'bao-cao-doanh-thu-' . date('Y-m-d-His') . '.csv';
 
@@ -101,22 +142,22 @@ class DashboardController extends Controller
             'Expires' => '0',
         ];
 
-        $callback = function() use ($orders) {
+        $callback = function () use ($orders, $serviceRows, $periodLabel) {
             $file = fopen('php://output', 'w');
 
-            // BOM cho Excel có thể đọc UTF-8
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Tiêu đề báo cáo
             fputcsv($file, ['BÁO CÁO DOANH THU']);
             fputcsv($file, ['Ngày xuất:', date('d/m/Y H:i:s')]);
+            fputcsv($file, ['Kỳ báo cáo:', $periodLabel]);
             fputcsv($file, []);
 
-            // Header bảng
+            // ---- Phần 1: Doanh thu đơn hàng ----
+            fputcsv($file, ['DOANH THU ĐƠN HÀNG']);
             fputcsv($file, ['STT', 'Mã đơn hàng', 'Khách hàng', 'Tổng tiền', 'Trạng thái', 'Ngày tạo']);
 
+            $orderTotal = 0;
             $index = 1;
-            $totalAll = 0;
             foreach ($orders as $order) {
                 fputcsv($file, [
                     $index++,
@@ -126,12 +167,38 @@ class DashboardController extends Controller
                     $order->Status,
                     $order->CreatedAt->format('d/m/Y H:i'),
                 ]);
-                $totalAll += $order->TotalAmount;
+                $orderTotal += $order->TotalAmount;
             }
-
-            // Chân trang báo cáo
             fputcsv($file, []);
-            fputcsv($file, ['', '', 'TỔNG CỘNG:', number_format($totalAll, 0, ',', '.') . ' đ']);
+            fputcsv($file, ['', '', 'Tổng đơn hàng:', number_format($orderTotal, 0, ',', '.') . ' đ']);
+            fputcsv($file, []);
+
+            // ---- Phần 2: Doanh thu dịch vụ (lịch hẹn) ----
+            fputcsv($file, ['DOANH THU DỊCH VỤ (LỊCH HẸN ĐÃ HOÀN THÀNH)']);
+            fputcsv($file, ['STT', 'Mã lịch hẹn', 'Khách hàng', 'Thú cưng', 'Dịch vụ', 'Thành tiền', 'Ngày hoàn thành']);
+
+            $serviceTotal = 0;
+            $index = 1;
+            foreach ($serviceRows as $row) {
+                $price = (float) $row->BasePrice;
+                $serviceTotal += $price;
+                fputcsv($file, [
+                    $index++,
+                    '#' . $row->AppointmentID,
+                    $row->CustomerName ?? '—',
+                    $row->PetName ?? '—',
+                    $row->ServiceName ?? '—',
+                    number_format($price, 0, ',', '.') . ' đ',
+                    $row->AppointmentTime ? Carbon::parse($row->AppointmentTime)->format('d/m/Y H:i') : '—',
+                ]);
+            }
+            fputcsv($file, []);
+            fputcsv($file, ['', '', '', '', 'Tổng dịch vụ:', number_format($serviceTotal, 0, ',', '.') . ' đ']);
+            fputcsv($file, []);
+
+            // ---- Tổng cộng ----
+            $grandTotal = $orderTotal + $serviceTotal;
+            fputcsv($file, ['TỔNG DOANH THU:', number_format($grandTotal, 0, ',', '.') . ' đ']);
 
             fclose($file);
         };

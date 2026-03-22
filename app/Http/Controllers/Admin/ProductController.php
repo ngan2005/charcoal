@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -179,11 +180,13 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Xóa các bản ghi liên quan trước để tránh lỗi foreign key
-        $product->images()->delete();
-        $product->orderDetails()->delete();
-
-        $product->delete();
+        DB::transaction(function () use ($product) {
+            // Xóa các bản ghi liên quan trước để tránh lỗi foreign key
+            $product->images()->delete();
+            $product->orderDetails()->delete();
+            CartItem::where('ProductID', $product->ProductID)->delete();
+            $product->delete();
+        });
 
         return redirect()
             ->route('admin.products.index')

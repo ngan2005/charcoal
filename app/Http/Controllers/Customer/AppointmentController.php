@@ -24,7 +24,7 @@ class AppointmentController extends Controller
             'PetID' => 'required|exists:pets,PetID',
             'ServiceID' => 'required|exists:services,ServiceID',
             'AppointmentDate' => 'required|date|after:today',
-            'AppointmentTime' => 'required',
+            'AppointmentTime' => 'required|regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/',
             'Notes' => 'nullable|string|max:255',
         ]);
 

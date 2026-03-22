@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -140,7 +141,16 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
+        try {
+            $user->delete();
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'foreign key constraint')) {
+                return redirect()
+                    ->route('admin.users.index')
+                    ->with('error', 'Không thể xóa người dùng này vì còn dữ liệu liên quan (lịch hẹn, đơn hàng, thú cưng, v.v.). Vui lòng vô hiệu hóa tài khoản thay vì xóa.');
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('admin.users.index')
@@ -154,7 +164,16 @@ class UserController extends Controller
             'ids.*' => ['integer', 'exists:users,UserID'],
         ]);
 
-        User::whereIn('UserID', $validated['ids'])->delete();
+        try {
+            User::whereIn('UserID', $validated['ids'])->delete();
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'foreign key constraint')) {
+                return redirect()
+                    ->route('admin.users.index')
+                    ->with('error', 'Không thể xóa một số người dùng vì còn dữ liệu liên quan (lịch hẹn, đơn hàng, thú cưng, v.v.). Vui lòng vô hiệu hóa tài khoản thay vì xóa.');
+            }
+            throw $e;
+        }
 
         return redirect()
             ->route('admin.users.index')

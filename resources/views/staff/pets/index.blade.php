@@ -154,7 +154,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-2 text-dark">
                                 <span class="material-symbols-outlined fs-6 text-muted">schedule</span>
-                                <span class="small">Thời gian: {{ $appointment->AppointmentTime->format('H:i') }}</span>
+                                <span class="small">Thời gian: {{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('H:i') }}</span>
                             </div>
                         </div>
 

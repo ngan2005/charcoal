@@ -119,8 +119,8 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="material-symbols-outlined text-secondary" style="font-size: 18px;">calendar_today</span>
                                     <div>
-                                        <div>{{ $appointment->AppointmentTime->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $appointment->AppointmentTime->format('H:i') }}</small>
+                                        <div>{{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('d/m/Y') }}</div>
+                                        <small class="text-muted">{{ \Carbon\Carbon::parse($appointment->AppointmentTime)->format('H:i') }}</small>
                                     </div>
                                 </div>
                             </td>

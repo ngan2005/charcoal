@@ -63,7 +63,12 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">Doanh thu 7 ngày gần nhất</h3>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('admin.dashboard.export') }}" class="btn btn-sm btn-success d-flex align-items-center gap-2">
+                    <select id="exportPeriod" class="form-select form-select-sm border-gray-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-indigo-200">
+                        <option value="7days">7 ngày gần nhất</option>
+                        <option value="1month">1 tháng gần nhất</option>
+                        <option value="all">Toàn bộ</option>
+                    </select>
+                    <a href="#" id="btnExport" class="btn btn-sm btn-success d-flex align-items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size: 18px;">download</span>
                         Xuất Excel
                     </a>
@@ -113,6 +118,18 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Cập nhật link xuất Excel khi chọn kỳ báo cáo
+        const periodSelect = document.getElementById('exportPeriod');
+        const btnExport = document.getElementById('btnExport');
+        if (periodSelect && btnExport) {
+            function updateExportUrl() {
+                const period = periodSelect.value;
+                btnExport.href = '{{ route('admin.dashboard.export') }}?period=' + period;
+            }
+            periodSelect.addEventListener('change', updateExportUrl);
+            updateExportUrl(); // set ban đầu đúng
+        }
+
         const ctx = document.getElementById('revenueChart');
         const revenueChart = new Chart(ctx, {
             type: 'line',

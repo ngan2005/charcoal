@@ -14,10 +14,26 @@
                 <p class="text-sm text-gray-500">Quản lý lịch làm việc của nhân viên</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.shifts.export', ['week_start' => $filters['week_start'] ?? date('Y-m-d', strtotime('monday this week'))]) }}" class="btn btn-success d-flex align-items-center gap-2" target="_blank">
-                    <span class="material-symbols-outlined">download</span>
-                    Xuất Excel
-                </a>
+                <div class="dropdown">
+                    <button class="btn btn-success d-flex align-items-center gap-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="material-symbols-outlined">download</span>
+                        Xuất Excel
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.shifts.export', ['scope' => 'all'] + (($filters['staff_id'] ?? null) ? ['staff_id' => $filters['staff_id']] : [])) }}" target="_blank">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">list</span>
+                                Xuất tất cả
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.shifts.export', ['scope' => 'week', 'week_start' => date('Y-m-d', strtotime('monday this week'))] + (($filters['staff_id'] ?? null) ? ['staff_id' => $filters['staff_id']] : [])) }}" target="_blank">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">calendar_month</span>
+                                Xuất tuần gần nhất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#createShiftModal">
                     <span class="material-symbols-outlined">add</span>
                     Thêm ca làm

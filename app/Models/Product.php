@@ -28,6 +28,10 @@ class Product extends Model
     const CREATED_AT = 'CreatedAt';
     const UPDATED_AT = null;
 
+    protected $casts = [
+        'CreatedAt' => 'datetime',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'CategoryID', 'CategoryID');
@@ -46,5 +50,10 @@ class Product extends Model
     public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class, 'ProductID', 'ProductID');
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class, 'ProductID', 'ProductID');
     }
 }

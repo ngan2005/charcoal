@@ -151,7 +151,7 @@ class CheckoutController extends Controller
             'shipping_name' => 'required|string|max:255',
             'shipping_phone' => 'required|string|max:20',
             'shipping_address' => 'required|string|max:500',
-            'payment_method' => 'required|in:cash,vnpay,momo',
+            'payment_method' => 'required|in:cash,momo',
         ], [
             'shipping_name.required' => 'Vui lòng nhập họ tên.',
             'shipping_phone.required' => 'Vui lòng nhập số điện thoại.',
@@ -284,9 +284,7 @@ class CheckoutController extends Controller
         DB::table('cart_items')->where('CartID', $cart->CartID)->delete();
 
         // Redirect based on payment method
-        if ($request->payment_method === 'vnpay') {
-            return $this->processVNPay($orderId, $total, $orderCode);
-        } elseif ($request->payment_method === 'momo') {
+        if ($request->payment_method === 'momo') {
             return $this->processMoMo($orderId, $total, $orderCode);
         }
 
@@ -331,21 +329,10 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Process VNPay payment
-     */
-    private function processVNPay($orderId, $amount, $orderCode)
-    {
-        // For demo purposes - in production, integrate with VNPay API
-        // For now, just redirect to success
-        return redirect()->route('checkout.success', $orderId)->with('info', 'Tính năng thanh toán VNPay đang được tích hợp. Đơn hàng của bạn đã được tạo.');
-    }
-
-    /**
-     * Process MoMo payment
+     * Process MoMo payment (placeholder for future)
      */
     private function processMoMo($orderId, $amount, $orderCode)
     {
-        // For demo purposes - in production, integrate with MoMo API
         return redirect()->route('checkout.success', $orderId)->with('info', 'Tính năng thanh toán MoMo đang được tích hợp. Đơn hàng của bạn đã được tạo.');
     }
 }

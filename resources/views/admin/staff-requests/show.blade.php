@@ -128,7 +128,7 @@
                     </p>
                     @if($request->ApprovedAt)
                         <p class="text-gray-600 text-sm mt-2">
-                            Xử lý lúc: {{ $request->ApprovedAt->format('d/m/Y H:i') }}
+                            Xử lý lúc: {{ $request->ApprovedAt ? \Carbon\Carbon::parse($request->ApprovedAt)->format('d/m/Y H:i') : '—' }}
                         </p>
                     @endif
                 </div>

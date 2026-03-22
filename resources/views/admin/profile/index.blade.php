@@ -182,7 +182,7 @@
                                         <span class="input-group-text bg-light border-0 rounded-start-4">
                                             <span class="material-symbols-outlined text-secondary">calendar_today</span>
                                         </span>
-                                        <input type="text" class="form-control border-0 bg-light rounded-end-4" value="{{ $user->CreatedAt ? $user->CreatedAt->format('d/m/Y H:i') : '--' }}" disabled>
+                                        <input type="text" class="form-control border-0 bg-light rounded-end-4" value="{{ $user->CreatedAt ? \Carbon\Carbon::parse($user->CreatedAt)->format('d/m/Y H:i') : '--' }}" disabled>
                                     </div>
                                 </div>
                                 <div class="mb-0">
@@ -191,7 +191,7 @@
                                         <span class="input-group-text bg-light border-0 rounded-start-4">
                                             <span class="material-symbols-outlined text-secondary">schedule</span>
                                         </span>
-                                        <input type="text" class="form-control border-0 bg-light rounded-end-4" value="{{ $user->LastLogin ? $user->LastLogin->format('d/m/Y H:i') : 'Chưa đăng nhập' }}" disabled>
+                                        <input type="text" class="form-control border-0 bg-light rounded-end-4" value="{{ $user->LastLogin ? \Carbon\Carbon::parse($user->LastLogin)->format('d/m/Y H:i') : 'Chưa đăng nhập' }}" disabled>
                                     </div>
                                 </div>
                             </div>

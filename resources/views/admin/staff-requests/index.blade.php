@@ -65,7 +65,7 @@
                                 <td class="px-6 py-4 text-gray-700">{{ $request->Email }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $request->Position }}</td>
                                 <td class="px-6 py-4 text-gray-600 text-sm">
-                                    {{ $request->created_at->format('d/m/Y H:i') }}
+                                    {{ \Carbon\Carbon::parse($request->created_at)->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <a href="{{ route('admin.staff-request.show', $request->RequestID) }}" 

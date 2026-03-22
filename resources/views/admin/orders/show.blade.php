@@ -15,7 +15,7 @@
                 </a>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Đơn hàng #{{ $order->OrderID }}</h1>
-                    <p class="text-sm text-gray-500">Ngày đặt: {{ $order->CreatedAt->format('d/m/Y H:i') }}</p>
+                    <p class="text-sm text-gray-500">Ngày đặt: {{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
             <div class="d-flex gap-2 flex-wrap">
@@ -118,7 +118,7 @@
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Ngày đặt</span>
-                            <span>{{ $order->CreatedAt->format('d/m/Y H:i') }}</span>
+                            <span>{{ \Carbon\Carbon::parse($order->CreatedAt)->format('d/m/Y H:i') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Trạng thái</span>
@@ -265,7 +265,7 @@
                         <span class="material-symbols-outlined fs-4">check_circle</span>
                         <div>
                             <strong>Đã phân công:</strong> {{ $orderAppointment->staff->FullName ?? 'N/A' }}
-                            — Lịch hẹn: {{ $orderAppointment->AppointmentTime?->format('d/m/Y H:i') }}, trạng thái: {{ $orderAppointment->Status }}
+                            — Lịch hẹn: {{ $orderAppointment->AppointmentTime ? \Carbon\Carbon::parse($orderAppointment->AppointmentTime)->format('d/m/Y H:i') : '—' }}, trạng thái: {{ $orderAppointment->Status }}
                         </div>
                         <a href="{{ route('admin.appointments.show', $orderAppointment->AppointmentID) }}" class="btn btn-sm btn-outline-primary">Xem lịch hẹn</a>
                     </div>
