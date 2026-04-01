@@ -31,15 +31,6 @@
     .checkout-step.pending .checkout-step-label {
         @apply text-slate-400;
     }
-    .payment-card {
-        @apply relative cursor-pointer border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 hover:border-primary dark:hover:border-primary transition-all;
-    }
-    .payment-card.selected {
-        @apply border-primary bg-primary/5;
-    }
-    .payment-card input:checked + div {
-        @apply border-primary bg-primary/5;
-    }
 </style>
 @endpush
 
@@ -186,42 +177,30 @@
                         Phương thức thanh toán
                     </h2>
 
-                    {{-- Thanh toán khi nhận hàng --}}
-                    <label class="payment-card block mb-3 {{ old('payment_method', 'cash') === 'cash' ? 'selected' : '' }}">
-                        <input type="radio" name="payment_method" value="cash" class="hidden" {{ old('payment_method', 'cash') === 'cash' ? 'checked' : '' }}>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
-                            </div>
-                            <span class="material-symbols-outlined text-emerald-500 payment-check">check_circle</span>
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
                         </div>
-                    </label>
-
-                    {{-- MoMo (disabled for now) --}}
-                    <label class="payment-card block opacity-50 cursor-not-allowed">
-                        <input type="radio" name="payment_method" value="momo" class="hidden" disabled>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center shrink-0">
-                                <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="24" height="24" rx="4" fill="#FF0080"/>
-                                    <circle cx="12" cy="12" r="6" fill="white"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-slate-900 dark:text-white">MoMo</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">Sắp có mặt</p>
-                            </div>
-                            <span class="material-symbols-outlined text-slate-400">lock</span>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán khi nhận hàng (COD)</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Trả tiền mặt khi nhận được sản phẩm</p>
                         </div>
-                    </label>
+                        <input type="radio" name="payment_method" value="cod" id="payment_cod" checked
+                               class="w-5 h-5 accent-primary cursor-pointer">
+                    </div>
 
-                    @error('payment_method')
-                        <div class="text-danger small mt-2">{{ $message }}</div>
-                    @enderror
+                    <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-colors"
+                         onclick="document.getElementById('payment_vnpay').click()">
+                        <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-red-600 dark:text-red-400">account_balance</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-900 dark:text-white">Thanh toán qua VNPay</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Thanh toán trực tuyến qua ATM, Visa, VietQR</p>
+                        </div>
+                        <input type="radio" name="payment_method" value="vnpay" id="payment_vnpay"
+                               class="w-5 h-5 accent-red-500 cursor-pointer">
+                    </div>
                 </div>
             </div>
 
@@ -344,34 +323,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Payment method selection
-    const paymentCards = document.querySelectorAll('.payment-card input[type="radio"]');
-    paymentCards.forEach(radio => {
-        radio.addEventListener('change', function() {
-            // Remove selected from all cards
-            document.querySelectorAll('.payment-card').forEach(card => {
-                card.classList.remove('selected');
-                const check = card.querySelector('.payment-check');
-                if (check) check.classList.add('hidden');
-            });
-            
-            // Add selected to current card
-            if (this.checked) {
-                this.closest('.payment-card').classList.add('selected');
-                const check = this.closest('.payment-card').querySelector('.payment-check');
-                if (check) check.classList.remove('hidden');
-            }
-        });
-    });
-
-    // Initialize first payment method as selected
-    const checkedPayment = document.querySelector('.payment-card input[type="radio"]:checked');
-    if (checkedPayment) {
-        checkedPayment.closest('.payment-card').classList.add('selected');
-        const check = checkedPayment.closest('.payment-card').querySelector('.payment-check');
-        if (check) check.classList.remove('hidden');
-    }
-
     // Voucher handling
     const subtotal = {{ $subtotal }};
     let currentDiscount = 0;
@@ -476,10 +427,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form validation
     const form = document.getElementById('checkout-form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
     form.addEventListener('submit', function(e) {
         let valid = true;
         const required = ['shipping_name', 'shipping_phone', 'shipping_address'];
-        
+
         required.forEach(id => {
             const el = document.getElementById(id);
             if (!el.value.trim()) {
@@ -490,16 +443,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Validate payment method is selected
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        
-        if (!paymentMethod) {
-            valid = false;
-            alert('Vui lòng chọn phương thức thanh toán.');
-        }
-
         if (!valid) {
             e.preventDefault();
+            return;
+        }
+
+        // Show loading state for VNPay
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        if (paymentMethod === 'vnpay') {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Đang chuyển sang VNPay...';
         }
     });
 

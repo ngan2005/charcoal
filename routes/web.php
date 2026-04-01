@@ -66,6 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
 });
 
+// Payment Routes
+Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+// VNPay Payment Routes
+Route::get('/checkout/vnpay/return', [CheckoutController::class, 'vnpayReturn'])->name('checkout.vnpay.return');
+
 Route::get('/home', function () {
     return redirect()->route('dashboard');
 });

@@ -72,4 +72,45 @@ class Order extends Model
     {
         return $this->hasOne(Appointment::class, 'OrderID', 'OrderID');
     }
+
+    /**
+     * Nhãn phương thức thanh toán (cột orders.PaymentMethod hoặc payments.Method).
+     */
+    public function paymentMethodLabel(): string
+    {
+        $key = $this->PaymentMethod ?? $this->payment?->Method;
+
+        return match ($key) {
+            'cod' => 'Thanh toán khi nhận hàng (COD)',
+            'vnpay' => 'VNPay',
+            null, '' => '--',
+            default => (string) $key,
+        };
+    }
+
+    /**
+     * Badge thanh toán cho admin: [class bootstrap không tiền tố bg-, text hiển thị].
+     */
+    public function adminPaymentStatusDisplay(): array
+    {
+        if ($this->payment) {
+            return match ((int) $this->payment->StatusID) {
+                1 => ['warning', 'Chưa thanh toán'],
+                2 => ['info', 'Đang xử lý'],
+                3 => ['success', 'Đã thanh toán'],
+                4 => ['danger', 'Thất bại'],
+                5 => ['dark', 'Đã hoàn tiền'],
+                6 => ['secondary', 'Bị hủy'],
+                7 => ['secondary', 'Hết hạn'],
+                default => ['secondary', 'Không xác định'],
+            };
+        }
+
+        return match ($this->PaymentStatus ?? '') {
+            'paid' => ['success', 'Đã thanh toán'],
+            'failed' => ['danger', 'Thất bại'],
+            'unpaid' => ['warning', 'Chưa thanh toán'],
+            default => ['secondary', 'Chưa có'],
+        };
+    }
 }

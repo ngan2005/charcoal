@@ -78,6 +78,28 @@
                             {{ $order->PaymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
                         </span>
                     </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 dark:text-slate-400">Phương thức</span>
+                        <span class="font-medium">
+                            @if(($order->PaymentMethod ?? 'cod') === 'vnpay')
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-red-500">account_balance</span>
+                                    VNPay
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-emerald-500">payments</span>
+                                    COD
+                                </span>
+                            @endif
+                        </span>
+                    </div>
+                    @if($order->PaymentTransactionRef)
+                        <div class="flex justify-between">
+                            <span class="text-slate-500 dark:text-slate-400">Mã giao dịch</span>
+                            <span class="font-mono text-xs text-slate-600 dark:text-slate-300">{{ $order->PaymentTransactionRef }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 

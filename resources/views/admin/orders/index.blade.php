@@ -135,33 +135,11 @@
                                 @endswitch
                             </td>
                             <td class="px-4 py-3">
-                                @if($order->payment)
-                                    @switch($order->payment->StatusID)
-                                        @case(1)
-                                            <span class="badge bg-warning status-badge">Chưa thanh toán</span>
-                                            @break
-                                        @case(2)
-                                            <span class="badge bg-info status-badge">Đang xử lý</span>
-                                            @break
-                                        @case(3)
-                                            <span class="badge bg-success status-badge">Đã thanh toán</span>
-                                            @break
-                                        @case(4)
-                                            <span class="badge bg-danger status-badge">Thất bại</span>
-                                            @break
-                                        @case(5)
-                                            <span class="badge bg-dark status-badge">Đã hoàn tiền</span>
-                                            @break
-                                        @case(6)
-                                            <span class="badge bg-secondary status-badge">Bị hủy</span>
-                                            @break
-                                        @case(7)
-                                            <span class="badge bg-secondary status-badge">Hết hạn</span>
-                                            @break
-                                    @endswitch
-                                @else
-                                    <span class="badge bg-secondary status-badge">Chưa có</span>
-                                @endif
+                                @php
+                                    [$idxPayClass, $idxPayText] = $order->adminPaymentStatusDisplay();
+                                @endphp
+                                <span class="badge bg-{{ $idxPayClass }} status-badge">{{ $idxPayText }}</span>
+                                <div class="text-muted small mt-1">{{ $order->paymentMethodLabel() }}</div>
                             </td>
                             <td class="px-4 py-3 text-end">
                                 <a href="{{ route('admin.orders.show', $order->OrderID) }}" class="btn btn-outline-primary btn-sm">

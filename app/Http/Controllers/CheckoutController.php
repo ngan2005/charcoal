@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Order;
+use App\Services\VNPayService;
 
 class CheckoutController extends Controller
 {
@@ -151,12 +153,10 @@ class CheckoutController extends Controller
             'shipping_name' => 'required|string|max:255',
             'shipping_phone' => 'required|string|max:20',
             'shipping_address' => 'required|string|max:500',
-            'payment_method' => 'required|in:cash,momo',
         ], [
             'shipping_name.required' => 'Vui lòng nhập họ tên.',
             'shipping_phone.required' => 'Vui lòng nhập số điện thoại.',
             'shipping_address.required' => 'Vui lòng nhập địa chỉ giao hàng.',
-            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
         ]);
 
         $userId = auth()->id();
@@ -283,12 +283,19 @@ class CheckoutController extends Controller
         // Clear cart
         DB::table('cart_items')->where('CartID', $cart->CartID)->delete();
 
-        // Redirect based on payment method
-        if ($request->payment_method === 'momo') {
-            return $this->processMoMo($orderId, $total, $orderCode);
+        // Cash on delivery - redirect to success page
+        if ($request->payment_method === 'vnpay') {
+            $vnpay = new VNPayService();
+            $order = DB::table('orders')->where('OrderID', $orderId)->first();
+            $vnpUrl = $vnpay->createPaymentUrl(
+                $orderId,
+                $finalTotal,
+                'Thanh toan don hang ' . $order->OrderCode,
+                $request
+            );
+            return redirect($vnpUrl);
         }
 
-        // Cash on delivery - redirect to success page
         return redirect()->route('checkout.success', $orderId);
     }
 
@@ -329,10 +336,42 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Process MoMo payment (placeholder for future)
+     * Handle VNPay return
      */
-    private function processMoMo($orderId, $amount, $orderCode)
+    public function vnpayReturn(Request $request)
     {
-        return redirect()->route('checkout.success', $orderId)->with('info', 'Tính năng thanh toán MoMo đang được tích hợp. Đơn hàng của bạn đã được tạo.');
+        $vnpay = new VNPayService();
+        $result = $vnpay->handleReturn($request);
+
+        $orderId = $result['order_id'];
+        $responseCode = $result['vnp_ResponseCode'];
+        $transactionStatus = $result['vnp_TransactionStatus'];
+        $bankCode = $result['vnp_BankCode'];
+        $txnRef = $result['vnp_TxnRef'];
+
+        if (!$result['success']) {
+            return redirect()->route('shop')->with('error', 'Xác minh chữ ký thất bại. Giao dịch không hợp lệ.');
+        }
+
+        if (!$orderId) {
+            return redirect()->route('shop')->with('error', 'Không tìm thấy đơn hàng.');
+        }
+
+        // Update order payment status
+        $vnpay->updateOrderPayment($orderId, $responseCode, $transactionStatus, $bankCode, $txnRef);
+
+        // Check if payment was successful
+        if ($responseCode == '00' && $transactionStatus == '00') {
+            return redirect()->route('checkout.success', $orderId);
+        } else {
+            // Payment failed - set order to cancelled
+            DB::table('orders')
+                ->where('OrderID', $orderId)
+                ->update([
+                    'Status' => 'cancelled',
+                    'UpdatedAt' => now(),
+                ]);
+            return redirect()->route('shop')->with('error', 'Thanh toán VNPay thất bại (Mã lỗi: ' . $responseCode . '). Vui lòng thử lại.');
+        }
     }
 }

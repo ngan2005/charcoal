@@ -149,39 +149,16 @@
                                     @break
                             @endswitch
                         </div>
+                        @php
+                            [$payBadgeClass, $payBadgeText] = $order->adminPaymentStatusDisplay();
+                        @endphp
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Thanh toán</span>
-                            @if($order->payment)
-                                @switch($order->payment->StatusID)
-                                    @case(1)
-                                        <span class="badge bg-warning">Chưa thanh toán</span>
-                                        @break
-                                    @case(2)
-                                        <span class="badge bg-info">Đang xử lý</span>
-                                        @break
-                                    @case(3)
-                                        <span class="badge bg-success">Đã thanh toán</span>
-                                        @break
-                                    @case(4)
-                                        <span class="badge bg-danger">Thất bại</span>
-                                        @break
-                                    @case(5)
-                                        <span class="badge bg-dark">Đã hoàn tiền</span>
-                                        @break
-                                    @case(6)
-                                        <span class="badge bg-secondary">Bị hủy</span>
-                                        @break
-                                    @case(7)
-                                        <span class="badge bg-secondary">Hết hạn</span>
-                                        @break
-                                @endswitch
-                            @else
-                                <span class="badge bg-secondary">Chưa có</span>
-                            @endif
+                            <span class="badge bg-{{ $payBadgeClass }}">{{ $payBadgeText }}</span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Phương thức</span>
-                            <span>{{ $order->payment?->Method ?? '--' }}</span>
+                            <span class="fw-medium">{{ $order->paymentMethodLabel() }}</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
