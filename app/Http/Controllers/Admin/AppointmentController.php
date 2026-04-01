@@ -179,23 +179,12 @@ class AppointmentController extends Controller
             return response()->json(['error' => 'Lịch hẹn không tồn tại'], 404);
         }
 
-        // Lấy nhân viên phù hợp (cùng dịch vụ hoặc gần đây nhất)
-        $staffQuery = User::where('RoleID', 2)
+        // Lấy tất cả nhân viên đang hoạt động
+        $staff = User::where('RoleID', 2)
             ->where('IsActive', 1)
-            ->with('staffProfile');
-
-        // Nếu có dịch vụ, tìm nhân viên có thể làm dịch vụ đó
-        if ($appointment->services->isNotEmpty()) {
-            $serviceIds = $appointment->services->pluck('ServiceID');
-            $staffIds = DB::table('staff_services')
-                ->whereIn('ServiceID', $serviceIds)
-                ->pluck('StaffID')
-                ->unique();
-
-            $staffQuery->whereIn('UserID', $staffIds);
-        }
-
-        $staff = $staffQuery->get()->map(function($s) {
+            ->with('staffProfile')
+            ->get()
+            ->map(function($s) {
             return [
                 'UserID' => $s->UserID,
                 'FullName' => $s->FullName,

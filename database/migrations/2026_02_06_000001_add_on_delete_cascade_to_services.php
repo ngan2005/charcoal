@@ -20,15 +20,6 @@ return new class extends Migration
                   ->onDelete('cascade');
         });
 
-        // Cập nhật staff_services với ON DELETE CASCADE
-        Schema::table('staff_services', function (Blueprint $table) {
-            $table->dropForeign(['ServiceID']);
-            $table->foreign('ServiceID')
-                  ->references('ServiceID')
-                  ->on('services')
-                  ->onDelete('cascade');
-        });
-
         // Cập nhật appointment_services với ON DELETE CASCADE
         Schema::table('appointment_services', function (Blueprint $table) {
             $table->dropForeign(['ServiceID']);
@@ -55,14 +46,6 @@ return new class extends Migration
     {
         // Rollback service_images
         Schema::table('service_images', function (Blueprint $table) {
-            $table->dropForeign(['ServiceID']);
-            $table->foreign('ServiceID')
-                  ->references('ServiceID')
-                  ->on('services');
-        });
-
-        // Rollback staff_services
-        Schema::table('staff_services', function (Blueprint $table) {
             $table->dropForeign(['ServiceID']);
             $table->foreign('ServiceID')
                   ->references('ServiceID')

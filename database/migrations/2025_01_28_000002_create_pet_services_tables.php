@@ -30,16 +30,6 @@ return new class extends Migration
             $table->foreign('ServiceID')->references('ServiceID')->on('services');
         });
 
-        // StaffServices
-        Schema::create('staff_services', function (Blueprint $table) {
-            $table->unsignedBigInteger('StaffID');
-            $table->unsignedBigInteger('ServiceID');
-
-            $table->primary(['StaffID', 'ServiceID']);
-            $table->foreign('StaffID')->references('UserID')->on('users');
-            $table->foreign('ServiceID')->references('ServiceID')->on('services');
-        });
-
         // Pets
         Schema::create('pets', function (Blueprint $table) {
             $table->id('PetID');
@@ -103,7 +93,6 @@ return new class extends Migration
         Schema::dropIfExists('appointment_services');
         Schema::dropIfExists('appointments');
         Schema::dropIfExists('pets');
-        Schema::dropIfExists('staff_services');
         Schema::dropIfExists('service_images');
         Schema::dropIfExists('services');
     }

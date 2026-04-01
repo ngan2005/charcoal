@@ -85,14 +85,26 @@ class ProductSeeder extends Seeder
             ],
         ]);
 
-        // Insert Images (Using the same dummy image/url for now)
+        // Insert Images
         $products = DB::table('products')->get();
+        $placeholderImages = [
+            'https://placehold.co/400x300/orange/white?text=Product+1',
+            'https://placehold.co/400x300/blue/white?text=Product+2',
+            'https://placehold.co/400x300/green/white?text=Product+3',
+            'https://placehold.co/400x300/purple/white?text=Product+4',
+            'https://placehold.co/400x300/red/white?text=Product+5',
+            'https://placehold.co/400x300/yellow/black?text=Product+6',
+            'https://placehold.co/400x300/teal/white?text=Product+7',
+            'https://placehold.co/400x300/pink/white?text=Product+8',
+        ];
+        $i = 0;
         foreach ($products as $p) {
              DB::table('product_images')->insert([
                 'ProductID' => $p->ProductID,
-                'ImageUrl' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBTJcXM2rNNiE5eHdgsmEdzMq_PYYBbzdT3KcWFTsiY-sziPtkeoG9qtB1heoe5VuN_XVG4zmlleoK4UNhNyZjWd6U_wHzF-cWN_H6YhwrptzhxB23IwQdwuOkrOUXPwFVGcj7V0T-jGU1KL4KNqSaM-Q2kjxxr8wg4Ub4vndfIxZ91UXVrTdcz4vvIc4UuBUlDemAx6EsFlK9mj1Wck-g6KHl8PxpSxAXM9XpsXuBxHD7-bF68JSzBJh595vAHbrsAmy3BW1wSRO4',
+                'ImageUrl' => $placeholderImages[$i % count($placeholderImages)],
                 'IsMain' => 1
             ]);
+            $i++;
         }
     }
 }
