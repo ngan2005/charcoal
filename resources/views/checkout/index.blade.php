@@ -244,12 +244,36 @@
                             <span class="material-symbols-outlined text-sm align-middle mr-1">redeem</span>
                             Mã giảm giá
                         </label>
+                        @if(isset($suggestedVouchers) && $suggestedVouchers->isNotEmpty())
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Chọn nhanh — không cần gõ hay copy mã:</p>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                @foreach($suggestedVouchers as $sv)
+                                    <button type="button"
+                                            class="voucher-suggest-btn text-left px-3 py-2 rounded-xl border text-sm transition-all
+                                                {{ $sv->suggest_eligible
+                                                    ? 'border-primary/40 bg-primary/5 hover:bg-primary/15 dark:bg-primary/10 dark:hover:bg-primary/20 text-slate-800 dark:text-slate-100'
+                                                    : 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80' }}"
+                                            data-voucher-code="{{ e($sv->Code) }}"
+                                            data-eligible="{{ $sv->suggest_eligible ? '1' : '0' }}"
+                                            data-ineligible-msg="{{ $sv->suggest_eligible ? '' : e('Giỏ hàng chưa đủ điều kiện: '.($sv->min_order_label ?? 'đơn tối thiểu')) }}">
+                                        <span class="font-mono font-bold text-primary dark:text-primary block leading-tight">{{ $sv->Code }}</span>
+                                        <span class="text-[11px] text-slate-600 dark:text-slate-300 block mt-0.5">{{ $sv->discount_label }}</span>
+                                        @if($sv->Description)
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">{{ $sv->Description }}</span>
+                                        @endif
+                                        @if(!$sv->suggest_eligible && $sv->min_order_label)
+                                            <span class="text-[10px] text-amber-600 dark:text-amber-400 block mt-1">{{ $sv->min_order_label }}</span>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
                         <div class="flex gap-2">
                             <input type="text" 
                                    name="voucher_code" 
                                    id="voucher_code"
                                    class="form-control rounded-xl flex-1 @error('voucher_code') is-invalid @enderror"
-                                   placeholder="Nhập mã...">
+                                   placeholder="Hoặc nhập mã thủ công...">
                             <button type="button" 
                                     id="apply_voucher_btn"
                                     class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition-colors whitespace-nowrap">
@@ -338,10 +362,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const discountEl = document.getElementById('discount_amount');
     const totalEl = document.getElementById('order_total');
 
-    applyBtn.addEventListener('click', function() {
-        const code = voucherInput.value.trim();
-        if (!code) {
-            showMessage('Vui lòng nhập mã giảm giá.', 'error');
+    function applyVoucherCode(code) {
+        const trimmed = (code || '').trim();
+        if (!trimmed) {
+            showMessage('Vui lòng nhập hoặc chọn mã giảm giá.', 'error');
             return;
         }
 
@@ -355,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                code: code,
+                code: trimmed,
                 subtotal: subtotal
             })
         })
@@ -368,14 +392,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 appliedVoucher = data.voucher;
                 currentDiscount = data.voucher.discount;
                 appliedVoucherId.value = data.voucher.id;
+                voucherInput.value = data.voucher.code;
 
-                // Show discount info
-                let discountText = data.voucher.discount_percent 
-                    ? `Giảm ${data.voucher.discount_percent}%` 
+                let discountText = data.voucher.discount_percent
+                    ? `Giảm ${data.voucher.discount_percent}%`
                     : `Giảm ${data.voucher.discount_display}đ`;
                 voucherDesc.textContent = `${data.voucher.code} - ${discountText}`;
 
-                // Update UI
                 discountEl.textContent = `- ${data.voucher.discount_display}đ`;
                 const newTotal = Math.max(0, subtotal - currentDiscount);
                 totalEl.textContent = new Intl.NumberFormat('vi-VN').format(newTotal) + 'đ';
@@ -390,6 +413,22 @@ document.addEventListener('DOMContentLoaded', function() {
             applyBtn.disabled = false;
             applyBtn.innerHTML = 'Áp dụng';
             showMessage('Đã xảy ra lỗi. Vui lòng thử lại.', 'error');
+        });
+    }
+
+    applyBtn.addEventListener('click', function() {
+        applyVoucherCode(voucherInput.value);
+    });
+
+    document.querySelectorAll('.voucher-suggest-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (this.dataset.eligible !== '1') {
+                showMessage(this.dataset.ineligibleMsg || 'Giỏ hàng chưa đủ điều kiện áp dụng mã này.', 'error');
+                return;
+            }
+            const code = this.dataset.voucherCode || '';
+            voucherInput.value = code;
+            applyVoucherCode(code);
         });
     });
 

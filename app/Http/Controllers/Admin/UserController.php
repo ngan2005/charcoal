@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,6 +15,19 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    /**
+     * Trang danh sách cần quay lại sau tạo / xóa / reset mật khẩu (từ hidden _redirect).
+     */
+    protected function intendedUserListRoute(Request $request): string
+    {
+        $target = (string) $request->input('_redirect', '');
+
+        return match ($target) {
+            'admin.users.admins', 'admin.users.staff', 'admin.users.customers' => $target,
+            default => 'admin.users.index',
+        };
+    }
+
     public function index(Request $request)
     {
         $search = $request->string('search')->trim();
@@ -85,7 +99,7 @@ class UserController extends Controller
         User::create($data);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route($this->intendedUserListRoute($request))
             ->with('success', 'Tạo người dùng thành công.');
     }
 
@@ -135,25 +149,31 @@ class UserController extends Controller
         $user->update($data);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route($this->intendedUserListRoute($request))
             ->with('success', 'Cập nhật người dùng thành công.');
     }
 
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
+        if ((int) $user->UserID === (int) Auth::id()) {
+            return redirect()
+                ->route($this->intendedUserListRoute($request))
+                ->with('error', 'Không thể xóa tài khoản của chính bạn.');
+        }
+
         try {
             $user->delete();
         } catch (QueryException $e) {
             if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'foreign key constraint')) {
                 return redirect()
-                    ->route('admin.users.index')
+                    ->route($this->intendedUserListRoute($request))
                     ->with('error', 'Không thể xóa người dùng này vì còn dữ liệu liên quan (lịch hẹn, đơn hàng, thú cưng, v.v.). Vui lòng vô hiệu hóa tài khoản thay vì xóa.');
             }
             throw $e;
         }
 
         return redirect()
-            ->route('admin.users.index')
+            ->route($this->intendedUserListRoute($request))
             ->with('success', 'Xóa người dùng thành công.');
     }
 
@@ -180,7 +200,7 @@ class UserController extends Controller
             ->with('success', 'Đã xóa các người dùng đã chọn.');
     }
 
-    public function resetPassword(User $user)
+    public function resetPassword(Request $request, User $user)
     {
         $newPassword = '123456';
 
@@ -189,7 +209,7 @@ class UserController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route($this->intendedUserListRoute($request))
             ->with('success', 'Đã đặt lại mật khẩu cho người dùng.')
             ->with('reset_password', [
                 'name' => $user->FullName,

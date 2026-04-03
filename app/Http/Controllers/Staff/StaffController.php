@@ -232,14 +232,19 @@ class StaffController extends Controller
             ->get();
 
 
-        // Lấy danh sách thú cưng
-        $pets = \App\Models\Pet::with('owner')->get();
+        // Thú cưng theo OwnerID — dropdown chỉ hiển thị thú của khách đang chọn (xử lý ở view + JS)
+        $petsByOwner = \App\Models\Pet::orderBy('PetName')
+            ->get()
+            ->groupBy('OwnerID')
+            ->map(fn ($pets) => $pets->map(fn ($pet) => [
+                'id' => $pet->PetID,
+                'label' => $pet->PetName.' ('.$pet->Species.')',
+            ])->values());
 
         // Lấy danh sách dịch vụ
         $services = \App\Models\Service::all();
 
-
-        return view('staff.appointments.create', compact('customers', 'pets', 'services'));
+        return view('staff.appointments.create', compact('customers', 'petsByOwner', 'services'));
     }
 
     /**
@@ -259,6 +264,15 @@ class StaffController extends Controller
             'appointment_date.after_or_equal' => 'Ngày hẹn không được là ngày trong quá khứ.',
             'appointment_time.date_format' => 'Giờ hẹn không hợp lệ (định dạng HH:mm).',
         ]);
+
+        $petBelongsToCustomer = \App\Models\Pet::where('PetID', $validated['PetID'])
+            ->where('OwnerID', $validated['CustomerID'])
+            ->exists();
+        if (! $petBelongsToCustomer) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['PetID' => 'Thú cưng phải thuộc khách hàng đã chọn.']);
+        }
 
         // Kết hợp ngày và giờ
         $appointmentDateTime = $validated['appointment_date'] . ' ' . $validated['appointment_time'];
@@ -317,6 +331,72 @@ class StaffController extends Controller
         ];
 
         return redirect()->back()->with('success', $messages[$request->Status] ?? 'Đã cập nhật trạng thái.');
+    }
+
+    /**
+     * Nhật ký chăm sóc á - Hiển thị danh sách dịch vụ giặt ủi đã được nhân viên chăm sóc.
+     */
+    public function clothJournal(Request $request)
+    {
+        $userId = Auth::id();
+        $statusFilter = $request->input('status');
+        $dateFilter = $request->input('date_range', '7days');
+
+        $query = \App\Models\ClothCareLog::with(['staff', 'order'])
+            ->orderBy('created_at', 'desc');
+
+        // Chỉ hiển thị nhật ký của nhân viên đang đăng nhập
+        $query->where('StaffID', $userId);
+
+        // Lọc theo trạng thái
+        if ($statusFilter) {
+            $query->where('Status', $statusFilter);
+        }
+
+        // Lọc theo khoảng thời gian
+        if ($dateFilter == 'today') {
+            $query->whereDate('created_at', now()->toDateString());
+        } elseif ($dateFilter == '7days') {
+            $query->where('created_at', '>=', now()->subDays(7));
+        } elseif ($dateFilter == '30days') {
+            $query->where('created_at', '>=', now()->subDays(30));
+        }
+
+        $careLogs = $query->get();
+
+        // Thống kê
+        $stats = [
+            'total' => \App\Models\ClothCareLog::where('StaffID', $userId)->count(),
+            'pending' => \App\Models\ClothCareLog::where('StaffID', $userId)->where('Status', 'pending')->count(),
+            'in_progress' => \App\Models\ClothCareLog::where('StaffID', $userId)->where('Status', 'in_progress')->count(),
+            'completed' => \App\Models\ClothCareLog::where('StaffID', $userId)->where('Status', 'completed')->count(),
+        ];
+
+        return view('staff.cloth-journal.index', compact('careLogs', 'stats'));
+    }
+
+    /**
+     * Store a new cloth care log entry.
+     */
+    public function storeClothJournal(Request $request)
+    {
+        $validated = $request->validate([
+            'OrderID' => 'nullable|exists:orders,OrderID',
+            'ItemName' => 'required|string|max:200',
+            'ItemType' => 'nullable|string|max:100',
+            'Condition' => 'nullable|string|max:100',
+            'ServiceName' => 'nullable|string|max:200',
+            'Status' => 'nullable|string|max:50',
+            'BeforeNotes' => 'nullable|string',
+            'AfterNotes' => 'nullable|string',
+            'StaffNotes' => 'nullable|string',
+        ]);
+
+        $validated['StaffID'] = Auth::id();
+
+        \App\Models\ClothCareLog::create($validated);
+
+        return redirect()->route('staff.cloth-journal')->with('success', 'Đã thêm nhật ký chăm sóc á thành công!');
     }
 
     /**

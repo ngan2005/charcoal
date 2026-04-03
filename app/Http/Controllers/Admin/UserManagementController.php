@@ -182,4 +182,58 @@ class UserManagementController extends Controller
             'recent_services' => $recentServices,
         ]);
     }
+
+    /**
+     * Danh sách tài khoản quản trị (RoleID = 1).
+     */
+    public function admins(Request $request)
+    {
+        $search = trim((string) $request->input('search', ''));
+
+        $users = User::query()
+            ->select('users.*')
+            ->where('RoleID', 1)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('FullName', 'like', '%' . $search . '%')
+                        ->orWhere('Email', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderByDesc('CreatedAt')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.users.admins', [
+            'users' => $users,
+            'roles' => Role::orderBy('RoleName')->get(),
+            'defaultRoleId' => 1,
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
+    }
+
+    /**
+     * Chi tiết admin (AJAX) — dùng cho modal xem nhanh.
+     */
+    public function getAdminDetails($userId)
+    {
+        $user = User::where('RoleID', 1)
+            ->where('UserID', $userId)
+            ->firstOrFail();
+
+        return response()->json([
+            'user' => [
+                'UserID' => $user->UserID,
+                'FullName' => $user->FullName,
+                'Email' => $user->Email,
+                'Phone' => $user->Phone,
+                'Address' => $user->Address,
+                'Avatar' => $user->Avatar,
+                'IsActive' => $user->IsActive,
+                'CreatedAt' => $user->CreatedAt,
+                'LastLogin' => $user->LastLogin,
+            ],
+        ]);
+    }
 }

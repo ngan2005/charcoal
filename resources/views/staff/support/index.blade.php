@@ -137,14 +137,14 @@ function selectConversation(userId, name, email) {
     refreshInterval = setInterval(() => loadMessages(userId), 5000);
 }
 
-// Load messages for user
+// Load messages for user (server đánh dấu tin khách đã đọc → cần refresh danh sách để mất badge)
 function loadMessages(userId) {
     fetch(`/staff/support/user/${userId}/messages`)
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('chatMessages');
             container.innerHTML = data.map(msg => {
-                const isFromAdmin = msg.IsFromAdmin;
+                const isFromAdmin = msg.IsFromAdmin == 1 || msg.IsFromAdmin === true;
                 const align = isFromAdmin ? 'justify-end' : 'justify-start';
                 const bgClass = isFromAdmin ? 'chat-staff' : 'chat-customer';
                 const time = new Date(msg.created_at).toLocaleString('vi-VN');
@@ -159,6 +159,7 @@ function loadMessages(userId) {
                 `;
             }).join('');
             container.scrollTop = container.scrollHeight;
+            loadConversations();
         });
 }
 

@@ -34,10 +34,10 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Khách hàng <span class="text-danger">*</span></label>
-                        <select name="CustomerID" class="form-select @error('CustomerID') is-invalid @enderror" required>
+                        <select name="CustomerID" id="appointment_customer_id" class="form-select @error('CustomerID') is-invalid @enderror" required>
                             <option value="">-- Chọn khách hàng --</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->UserID }}" {{ old('CustomerID') == $customer->UserID ? 'selected' : '' }}>
+                                <option value="{{ $customer->UserID }}" {{ (string) old('CustomerID') === (string) $customer->UserID ? 'selected' : '' }}>
                                     {{ $customer->FullName }} - {{ $customer->Phone }}
                                 </option>
                             @endforeach
@@ -48,14 +48,10 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Thú cưng <span class="text-danger">*</span></label>
-                        <select name="PetID" class="form-select @error('PetID') is-invalid @enderror" required>
-                            <option value="">-- Chọn thú cưng --</option>
-                            @foreach($pets as $pet)
-                                <option value="{{ $pet->PetID }}" {{ old('PetID') == $pet->PetID ? 'selected' : '' }}>
-                                    {{ $pet->PetName }} ({{ $pet->Species }}) - Chủ: {{ $pet->owner->FullName }}
-                                </option>
-                            @endforeach
+                        <select name="PetID" id="appointment_pet_id" class="form-select @error('PetID') is-invalid @enderror" required>
+                            <option value="">-- Chọn khách trước, sau đó chọn thú cưng --</option>
                         </select>
+                        <p class="form-text text-muted small mb-0" id="appointment_pet_hint">Chỉ hiển thị thú cưng của khách đang chọn.</p>
                         @error('PetID')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -133,6 +129,63 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const petsByOwner = @json($petsByOwner);
+            const customerSelect = document.getElementById('appointment_customer_id');
+            const petSelect = document.getElementById('appointment_pet_id');
+            const hint = document.getElementById('appointment_pet_hint');
+            const oldPetId = @json(old('PetID'));
+            const oldCustomerId = @json(old('CustomerID'));
+
+            function buildPetOptions(ownerId) {
+                petSelect.innerHTML = '';
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                if (!ownerId) {
+                    placeholder.textContent = '-- Chọn khách trước, sau đó chọn thú cưng --';
+                    petSelect.appendChild(placeholder);
+                    petSelect.disabled = true;
+                    if (hint) hint.textContent = 'Chỉ hiển thị thú cưng của khách đang chọn.';
+                    return;
+                }
+                petSelect.disabled = false;
+                const key = String(ownerId);
+                const list = petsByOwner[key] || [];
+                placeholder.textContent = list.length ? '-- Chọn thú cưng --' : '-- Khách chưa có thú cưng trong hệ thống --';
+                petSelect.appendChild(placeholder);
+                if (!list.length) {
+                    if (hint) hint.textContent = 'Khách này chưa có hồ sơ thú cưng. Vui lòng yêu cầu khách thêm thú trước.';
+                    petSelect.required = false;
+                    return;
+                }
+                petSelect.required = true;
+                if (hint) hint.textContent = 'Chỉ hiển thị thú cưng của khách đang chọn.';
+                list.forEach(function (p) {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.label;
+                    const sameCustomer = oldCustomerId != null && String(oldCustomerId) === String(ownerId);
+                    if (sameCustomer && oldPetId != null && String(oldPetId) === String(p.id)) {
+                        opt.selected = true;
+                    }
+                    petSelect.appendChild(opt);
+                });
+            }
+
+            customerSelect.addEventListener('change', function () {
+                buildPetOptions(this.value);
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const initial = customerSelect.value || oldCustomerId;
+                if (initial) {
+                    customerSelect.value = String(initial);
+                }
+                buildPetOptions(customerSelect.value);
+            });
+        })();
+    </script>
 @endpush
 
 

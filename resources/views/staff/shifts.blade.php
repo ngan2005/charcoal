@@ -197,31 +197,45 @@
                                 $hasShift = $shiftsByDate->has($dateString);
                                 $dayShifts = $hasShift ? $shiftsByDate[$dateString] : collect();
                                 $isToday = $currentDate->isToday();
+                                $hasWorkingShift = $hasShift && $dayShifts->contains(fn ($s) => (int) $s->ShiftStatusID === 1);
+                                $hasOffOnly = $hasShift && ! $hasWorkingShift;
                             @endphp
-                            
-                            <div class="aspect-square rounded-xl border {{ $isToday ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-gray-700' }} p-1 cursor-pointer hover:border-primary transition-colors relative group">
-                                <span class="text-sm font-medium {{ $isToday ? 'text-primary font-bold' : 'text-gray-800 dark:text-white' }}">{{ $day }}</span>
-                                
-                                @if($hasShift)
-                                    <div class="absolute bottom-1 left-1 right-1 flex gap-0.5 justify-center flex-wrap">
-                                        @foreach($dayShifts as $s)
-                                            <div class="h-1.5 w-1.5 rounded-full {{ $s->ShiftStatusID == 1 ? 'bg-green-500' : 'bg-gray-400' }}" title="{{ $s->ShiftStatusID == 1 ? 'Đang làm' : 'Nghỉ' }}"></div>
-                                        @endforeach
-                                    </div>
+                            @php
+                                $cellClass = 'aspect-square rounded-xl p-1.5 cursor-pointer transition-all relative flex flex-col';
+                                if ($hasWorkingShift) {
+                                    $cellClass .= ' bg-blue-500 border-2 border-blue-600 text-white shadow-md shadow-blue-500/25 dark:shadow-blue-900/40 hover:bg-blue-600 hover:border-blue-700';
+                                } elseif ($hasOffOnly) {
+                                    $cellClass .= ' bg-sky-100 dark:bg-sky-950/50 border-2 border-sky-400 dark:border-sky-600 hover:bg-sky-200 dark:hover:bg-sky-900/40';
+                                } elseif ($isToday) {
+                                    $cellClass .= ' border-2 border-primary bg-primary/10 dark:bg-primary/15 ring-2 ring-primary/30';
+                                } else {
+                                    $cellClass .= ' border border-gray-200 dark:border-gray-700 hover:border-primary/50';
+                                }
+                            @endphp
+                            <div class="{{ $cellClass }} group" title="{{ $hasShift ? $dayShifts->map(fn ($s) => ($s->ShiftStatusID == 1 ? 'Ca làm' : 'Nghỉ') . ' ' . \Carbon\Carbon::parse($s->StartTime)->format('H:i'))->join(', ') : '' }}">
+                                <span class="text-sm font-semibold {{ $hasWorkingShift ? 'text-white' : ($hasOffOnly ? 'text-sky-900 dark:text-sky-100' : ($isToday ? 'text-primary' : 'text-gray-800 dark:text-white')) }}">{{ $day }}</span>
+                                @if($hasWorkingShift)
+                                    <span class="mt-auto text-[10px] font-bold uppercase tracking-wide text-white/90 leading-tight">Có ca</span>
+                                @elseif($hasOffOnly)
+                                    <span class="mt-auto text-[10px] font-semibold text-sky-800 dark:text-sky-200 leading-tight">Nghỉ</span>
                                 @endif
                             </div>
                         @endfor
                     </div>
                     
                     <!-- Legend -->
-                    <div class="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <div class="flex flex-wrap items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            <span class="text-xs text-gray-500">Ca làm</span>
+                            <div class="w-6 h-6 rounded-lg bg-blue-500 border-2 border-blue-600 shadow-sm"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Ngày có ca làm (xanh đậm)</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-gray-400"></div>
-                            <span class="text-xs text-gray-500">Nghỉ</span>
+                            <div class="w-6 h-6 rounded-lg bg-sky-100 border-2 border-sky-400 dark:bg-sky-950/50 dark:border-sky-600"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Ca nghỉ (xanh nhạt)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg border-2 border-primary bg-primary/10"></div>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Hôm nay</span>
                         </div>
                     </div>
                 </div>

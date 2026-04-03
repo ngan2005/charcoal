@@ -66,19 +66,39 @@
     .bg-primary { background-color: #F4C2C3 !important; }
 
     /* Fix Dropdown visibility conflict */
-    .nav-item-holder { position: relative !important; }
+    .nav-item-holder {
+        position: relative !important;
+        /* Giữ vùng hover liền mạch từ nút xuống menu (tránh menu tắt khi rê chuột qua khe hở) */
+        padding-bottom: 0.5rem;
+        margin-bottom: -0.5rem;
+    }
     .nav-item-dropdown {
         display: none !important;
         position: absolute !important;
         top: 100% !important;
         left: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0.25rem !important;
         z-index: 9999 !important;
         background: white !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
         opacity: 0 !important;
         visibility: hidden !important;
-        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        transition: opacity 0.15s ease, visibility 0.15s ease !important;
+    }
+    /* Cầu nối vô hình: vùng này vẫn thuộc menu → :hover không bị mất khi di chuột xuống */
+    .nav-item-dropdown::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -10px;
+        height: 10px;
+    }
+    .dark .nav-item-dropdown {
+        background: rgb(15 23 42) !important;
+        border-color: rgb(51 65 85) !important;
     }
     .nav-item-holder:hover > .nav-item-dropdown {
         display: flex !important;

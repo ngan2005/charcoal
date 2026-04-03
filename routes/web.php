@@ -129,6 +129,8 @@ Route::middleware('guest')->group(function () {
         Route::get('/pets', [StaffController::class, 'pets'])->name('pets');
         Route::get('/journal', [StaffController::class, 'journal'])->name('journal');
         Route::post('/journal', [StaffController::class, 'storeJournal'])->name('journal.store');
+        Route::get('/cloth-journal', [StaffController::class, 'clothJournal'])->name('cloth-journal');
+        Route::post('/cloth-journal', [StaffController::class, 'storeClothJournal'])->name('cloth-journal.store');
         Route::get('/timekeeping', [StaffController::class, 'timekeeping'])->name('timekeeping');
 
         Route::get('/leaves', [StaffController::class, 'leaves'])->name('leaves');
@@ -176,6 +178,8 @@ Route::middleware('guest')->group(function () {
 
         Route::get('users/customers', [UserManagementController::class, 'customers'])->name('users.customers');
         Route::get('users/customer/{id}/details', [UserManagementController::class, 'getCustomerDetails'])->name('users.customer.details');
+        Route::get('users/admins', [UserManagementController::class, 'admins'])->name('users.admins');
+        Route::get('users/admin/{id}/details', [UserManagementController::class, 'getAdminDetails'])->name('users.admin.details');
         Route::get('users/staff', [UserManagementController::class, 'staff'])->name('users.staff');
         Route::get('users/staff/{id}/details', [UserManagementController::class, 'getStaffDetails'])->name('users.staff.details');
         Route::get('users', [UserController::class, 'index'])->name('users.index');

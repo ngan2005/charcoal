@@ -20,7 +20,7 @@
                 </button>
                 
                 {{-- Dropdown Menu --}}
-                <div class="nav-item-dropdown mt-2 w-56 rounded-2xl py-2 flex-col">
+                <div class="nav-item-dropdown w-56 rounded-2xl py-2 flex-col">
                     <a href="{{ route('shop') }}" class="px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary transition-colors font-medium border-b border-slate-50 dark:border-slate-800/50">
                         Tất cả sản phẩm
                     </a>
@@ -40,7 +40,7 @@
                 </button>
                 
                 {{-- Dropdown Menu --}}
-                <div class="nav-item-dropdown mt-2 w-64 rounded-2xl py-2 flex-col">
+                <div class="nav-item-dropdown w-64 rounded-2xl py-2 flex-col">
                     <a href="{{ route('services.index') }}" class="px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary dark:hover:text-primary transition-colors font-medium border-b border-slate-50 dark:border-slate-800/50">
                         Top Dịch vụ
                     </a>

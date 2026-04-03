@@ -192,7 +192,15 @@
                                 <span>{{ $order->user->Phone ?? '--' }}</span>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span class="text-muted">Địa chỉ</span>
+                                <span class="text-muted">Điện thoại</span>
+                                <span>{{ $order->ShippingPhone ?? $order->user->Phone ?? '--' }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Giao đến</span>
+                                <span class="text-end" style="max-width: 200px;">{{ $order->ShippingAddress ?? '--' }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Địa chỉ hồ sơ</span>
                                 <span class="text-end" style="max-width: 200px;">{{ $order->user->Address ?? '--' }}</span>
                             </div>
                         </div>

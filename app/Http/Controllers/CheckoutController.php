@@ -137,7 +137,40 @@ class CheckoutController extends Controller
             $subtotal += ($price * $item->Quantity);
         }
 
-        return view('checkout.index', compact('cartItems', 'subtotal', 'user'));
+        // Mã gợi ý trên checkout: đang bật, chưa hết hạn, còn lượt (không cần copy từ cửa hàng)
+        $suggestedVouchers = DB::table('vouchers')
+            ->where('IsActive', true)
+            ->where(function ($q) {
+                $q->whereNull('ExpiredAt')->orWhere('ExpiredAt', '>', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('Quantity')->orWhere('Quantity', '>', 0);
+            })
+            ->orderByDesc('CreatedAt')
+            ->orderBy('Code')
+            ->get()
+            ->map(function ($v) use ($subtotal) {
+                $min = (float) ($v->MinOrderAmount ?? 0);
+                $v->suggest_eligible = $min <= 0 || $subtotal >= $min;
+                if ($v->DiscountPercent) {
+                    $v->discount_label = (int) $v->DiscountPercent === 100
+                        ? 'Miễn phí ship'
+                        : 'Giảm '.$v->DiscountPercent.'%';
+                } elseif ($v->DiscountAmount) {
+                    $v->discount_label = 'Giảm '.number_format((float) $v->DiscountAmount, 0, ',', '.').'đ';
+                } else {
+                    $v->discount_label = 'Ưu đãi';
+                }
+                if ($min > 0) {
+                    $v->min_order_label = 'Đơn tối thiểu '.number_format($min, 0, ',', '.').'đ';
+                } else {
+                    $v->min_order_label = null;
+                }
+
+                return $v;
+            });
+
+        return view('checkout.index', compact('cartItems', 'subtotal', 'user', 'suggestedVouchers'));
     }
 
     /**

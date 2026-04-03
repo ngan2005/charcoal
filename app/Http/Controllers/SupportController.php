@@ -73,7 +73,7 @@ class SupportController extends Controller
                 'u.FullName',
                 'u.Email',
                 DB::raw('MAX(sm.created_at) as last_message_time'),
-                DB::raw('(SELECT COUNT(*) FROM support_messages sm2 WHERE sm2.UserID = sm.UserID AND (sm2.ReadAt IS NULL OR sm2.IsFromAdmin = 0)) as unread_count')
+                DB::raw('(SELECT COUNT(*) FROM support_messages sm2 WHERE sm2.UserID = sm.UserID AND sm2.IsFromAdmin = 0 AND sm2.ReadAt IS NULL) as unread_count')
             )
             ->leftJoin('users as u', 'sm.UserID', '=', 'u.UserID')
             ->groupBy('sm.UserID', 'u.FullName', 'u.Email')

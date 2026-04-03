@@ -42,7 +42,7 @@
                 <span class="material-symbols-outlined shrink-0">rate_review</span>
                 <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý đánh giá</p>
             </a>
-            @php($isUserMenuOpen = request()->routeIs('admin.users.*'))
+            @php($isUserMenuOpen = request()->routeIs('admin.users.*', 'admin.shifts.*'))
             <details class="group" {{ $isUserMenuOpen ? 'open' : '' }}>
                 <summary class="flex items-center gap-3 px-3 py-2.5 rounded-lg nav-item cursor-pointer list-none {{ $isUserMenuOpen ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}">
                     <span class="material-symbols-outlined shrink-0">manage_accounts</span>
@@ -57,6 +57,10 @@
                     <a class="flex items-center gap-2 px-3 py-2 rounded-lg nav-item {{ request()->routeIs('admin.users.staff') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.users.staff') }}">
                         <span class="material-symbols-outlined text-base shrink-0">badge</span>
                         <p class="text-sm font-medium nav-text whitespace-nowrap">Nhân viên</p>
+                    </a>
+                    <a class="flex items-center gap-2 px-3 py-2 rounded-lg nav-item {{ request()->routeIs('admin.users.admins') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.users.admins') }}">
+                        <span class="material-symbols-outlined text-base shrink-0">admin_panel_settings</span>
+                        <p class="text-sm font-medium nav-text whitespace-nowrap">Quản lý admin</p>
                     </a>
                     <a class="flex items-center gap-2 px-3 py-2 rounded-lg nav-item {{ request()->routeIs('admin.shifts.*') ? 'active-nav text-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-[#616f89] dark:text-gray-300' }}" href="{{ route('admin.shifts.index') }}">
                         <span class="material-symbols-outlined text-base shrink-0">schedule</span>
